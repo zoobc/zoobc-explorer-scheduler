@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+enum SignatureType {
+    // in bytes: []byte{0,0,0,0}, using Ed25519 signature algorithm 
+    DefaultSignature = 0;
+    // in bytes: []byte{1,0,0,0}, bitcoin uses a specific Koblitz curve secp256k1
+    // Koblitz curves are a type of Elliptic Curve Digital Signature Algorithm
+    BitcoinSignature = 1;
+    // in bytes: []byte{2,0,0,0} for multisig validation purpose only
+    MultisigSignature = 2;
+}
+
+// BitcoinPrivateKeyBytesLength represent the length of private key that can use
+enum PrivateKeyBytesLength {
+    PrivateKeyInvalid = 0;
+    PrivateKey256Bits =32;
+    PrivateKey384Bits = 48;
+    PrivateKey512Bits = 64;
+}
+
+// BitcoinPublicKeyFormat represent the option of the Bitcoin public key format that can use
+//  public key format : https://bitcoin.org/en/wallets-guide#public-key-formats
+enum BitcoinPublicKeyFormat {
+    PublicKeyFormatUncompressed = 0;
+    PublicKeyFormatCompressed = 1;
+}

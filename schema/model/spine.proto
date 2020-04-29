@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+// Block represent the block data structure stored in the database
+message SpinePublicKey {
+  bytes NodePublicKey = 1;
+  uint32 MainBlockHeight = 2;
+  SpinePublicKeyAction PublicKeyAction = 3;
+  bool Latest = 4;
+  uint32 Height = 5;
+}
+
+// RequestType used to sign a node administration request
+enum SpinePublicKeyAction {
+  AddKey = 0;
+  RemoveKey = 1;
+}

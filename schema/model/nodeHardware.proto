@@ -1,0 +1,63 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+message GetNodeHardwareResponse {
+    NodeHardware NodeHardware = 1;
+}
+
+message GetNodeHardwareRequest {
+}
+
+message NodeHardware {
+    repeated CPUInformation CPUInformation = 1;
+    MemoryInformation MemoryInformation = 2;
+    StorageInformation StorageInformation = 3;
+    HostInformation HostInformation = 4;
+}
+
+message CPUInformation {
+   string Family = 1;
+   int32 CPUIndex = 2;
+   string Model = 3;
+   string ModelName = 4;
+   string VendorId = 5;
+   double Mhz = 6;
+   int32 CacheSize = 7;
+   double UsedPercent = 8;
+   string CoreID = 9;
+   int32 Cores = 10;
+}
+
+message HostInformation {
+    uint64 Uptime = 1;
+    string OS = 2;
+    string Platform = 3;
+    string PlatformFamily = 4;
+    string PlatformVersion = 5;
+    uint64 NumberOfRunningProcess = 6;
+    string HostID = 7;
+    string HostName = 8;
+}
+
+message MemoryInformation {
+    uint64 Total = 1;
+    // This is the kernel's notion of free memory; RAM chips whose bits nobody
+    // cares about the value of right now. For a human consumable number,
+    // Available is what you really want.
+    uint64 Free = 2;
+    // RAM available for programs to allocate
+    uint64 Available = 3;
+    uint64 Used = 4;
+    double UsedPercent = 5;
+}
+
+message StorageInformation {
+    string FsType = 1;
+    uint64 Total = 2;
+    uint64 Free = 3;
+    uint64 Used = 4;
+    double UsedPercent = 5;
+}

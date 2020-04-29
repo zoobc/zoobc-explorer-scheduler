@@ -1,0 +1,25 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+// NodeInfo represent the node information data structure
+message Node {
+	int64 ID = 1;
+	string SharedAddress = 2;
+	string Address       = 3;
+	uint32 Port          = 4;
+}
+
+message NodeKey {
+	int64 ID             = 1;
+	bytes PublicKey     = 2;
+	string Seed          = 3;
+}
+
+message GenerateNodeKeyRequest {}
+
+message GenerateNodeKeyResponse {
+    bytes NodePublicKey = 1;
+}

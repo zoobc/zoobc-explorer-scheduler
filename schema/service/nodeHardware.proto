@@ -1,0 +1,13 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/nodeHardware.proto";
+import "google/api/annotations.proto";
+
+// NodeHardwareService represent request on get node hardware information
+service NodeHardwareService {
+    rpc GetNodeHardware(stream model.GetNodeHardwareRequest) returns (stream model.GetNodeHardwareResponse) {}
+}

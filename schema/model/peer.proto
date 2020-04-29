@@ -1,0 +1,41 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/node.proto";
+
+message Peer {
+    Node Info     = 1;
+    uint32  LastInboundRequest = 2;
+    string BlacklistingCause  = 3;
+     // BlacklistingTime is timestamp when a peer start in list of blacklist peers
+    uint64 BlacklistingTime   = 4 [jstype = JS_STRING];
+    // ResolvingTime is timestamp when a peer start in list of resolved peers 
+    int64 ResolvingTime = 5 [jstype = JS_STRING];
+    int32 connectionAttempted = 6;
+    // UnresolvingTime is timestamp when a peer start in list of unresolved peers 
+    int64 UnresolvingTime = 7 [jstype = JS_STRING];
+}
+
+message PeerBasicResponse {
+    bool Success = 1;
+    string Error = 2;
+}
+
+message GetPeerInfoRequest {
+    string Version =1;
+}
+
+message GetPeerInfoResponse {
+    Node HostInfo = 1;
+}
+
+message GetMorePeersResponse {
+    repeated Node Peers = 1;
+}
+  
+message SendPeersRequest {
+    repeated Node Peers = 1;
+}

@@ -1,0 +1,13 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+
+message ParticipationScore {
+    int64   NodeID = 1 [jstype = JS_STRING];
+    int64   Score = 2 [jstype = JS_STRING];
+    bool Latest = 3;
+    uint32 Height = 4;
+}

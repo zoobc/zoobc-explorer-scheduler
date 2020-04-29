@@ -1,0 +1,213 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/proofOfOwnership.proto";
+import "model/pagination.proto";
+import "model/batchReceipt.proto";
+import "model/nodeRegistration.proto";
+import "model/escrow.proto";
+import "model/multiSignature.proto";
+
+// Transaction represent the transaction data structure stored in the database
+message Transaction {
+    uint32 Version = 1;
+    int64 ID = 2 [ jstype = JS_STRING ];
+    int64 BlockID = 3 [ jstype = JS_STRING ];
+    uint32 Height = 4;
+    string SenderAccountAddress = 5;
+    string RecipientAccountAddress = 6;
+    uint32 TransactionType = 7;
+    int64 Fee = 8 [ jstype = JS_STRING ];
+    int64 Timestamp = 9 [ jstype = JS_STRING ];
+    bytes TransactionHash = 10;
+    uint32 TransactionBodyLength = 11;
+    bytes TransactionBodyBytes = 12;
+    uint32 TransactionIndex = 13;
+    bool MultisigChild = 14;
+    // transactionbody
+    oneof TransactionBody {
+        EmptyTransactionBody emptyTransactionBody = 15;
+        SendMoneyTransactionBody sendMoneyTransactionBody = 16;
+        NodeRegistrationTransactionBody nodeRegistrationTransactionBody = 17;
+        UpdateNodeRegistrationTransactionBody updateNodeRegistrationTransactionBody = 18;
+        RemoveNodeRegistrationTransactionBody removeNodeRegistrationTransactionBody = 19;
+        ClaimNodeRegistrationTransactionBody claimNodeRegistrationTransactionBody = 20;
+        SetupAccountDatasetTransactionBody setupAccountDatasetTransactionBody = 21;
+        RemoveAccountDatasetTransactionBody removeAccountDatasetTransactionBody = 22;
+        ApprovalEscrowTransactionBody approvalEscrowTransactionBody = 23;
+        MultiSignatureTransactionBody multiSignatureTransactionBody = 24;
+    }
+    bytes Signature = 25;
+    // nullable
+    Escrow Escrow = 26;
+}
+
+enum TransactionType {
+    // in bytes: []byte{0,0,0,0}
+    EmptyTransaction = 0;
+    // in bytes: []byte{1,0,0,0}
+    SendMoneyTransaction = 1;
+    // in bytes: []byte{2,0,0,0}
+    NodeRegistrationTransaction = 2;
+    // in bytes: []byte{2,1,0,0}
+    UpdateNodeRegistrationTransaction = 258;
+    // in bytes: []byte{2,2,0,0}
+    RemoveNodeRegistrationTransaction = 514;
+    // in bytes: []byte{2,3,0,0}
+    ClaimNodeRegistrationTransaction = 770;
+    // in bytes: []byte{3,0,0,0}
+    SetupAccountDatasetTransaction = 3;
+    // in bytes: []byte{3,1,0,0}
+    RemoveAccountDatasetTransaction = 259;
+    // in bytes: []byte{4,0,0,0}
+    ApprovalEscrowTransaction = 4;
+    // in bytes: []byte{5,0,0,0}
+    MultiSignatureTransaction = 5;
+}
+
+
+message EmptyTransactionBody {}
+
+message SendMoneyTransactionBody {
+    int64 Amount = 1 [ jstype = JS_STRING ];
+}
+
+message NodeRegistrationTransactionBody {
+    bytes NodePublicKey = 1;
+    string AccountAddress = 2;
+    // Funds to be locked to register the node
+    NodeAddress NodeAddress = 3;
+    int64 LockedBalance = 4 [ jstype = JS_STRING ];
+    // Proof of ownership (message + signature)
+    ProofOfOwnership Poown = 5;
+}
+
+message UpdateNodeRegistrationTransactionBody {
+    bytes NodePublicKey = 1;
+    NodeAddress NodeAddress = 2;
+    // Funds to be locked to register the node
+    int64 LockedBalance = 3 [ jstype = JS_STRING ];
+    // Proof of ownership (message + signature)
+    ProofOfOwnership Poown = 4;
+}
+
+message RemoveNodeRegistrationTransactionBody { bytes NodePublicKey = 1; }
+
+message ClaimNodeRegistrationTransactionBody {
+    bytes NodePublicKey = 1;
+    // Proof of ownership (message + signature)
+    ProofOfOwnership Poown = 2;
+}
+
+message SetupAccountDatasetTransactionBody {
+    // Account Address that set Dataset
+    string SetterAccountAddress = 1;
+    // Account Address that got property of Dataset
+    string RecipientAccountAddress = 2;
+    // Property name
+    string Property = 3;
+    // Value of property
+    string Value = 4;
+    // How long Dataset will active in second
+}
+
+message RemoveAccountDatasetTransactionBody {
+    // Account Address that set Dataset
+    string SetterAccountAddress = 1;
+    // Account Address that got property of Dataset
+    string RecipientAccountAddress = 2;
+    // Property name
+    string Property = 3;
+    // Value of property
+    string Value = 4;
+}
+
+message ApprovalEscrowTransactionBody {
+    EscrowApproval Approval = 1;
+    int64 TransactionID = 2 [ jstype = JS_STRING ];
+}
+
+message MultiSignatureTransactionBody {
+    // MultiSignatureInfo represent the information of the multisig-address
+    MultiSignatureInfo MultiSignatureInfo = 1;
+    // Unsigned transaction bytes that will be executed once the transaction is valid
+    bytes UnsignedTransactionBytes = 2;
+    // List of participantAddress-participantSignature with its tx hash
+    SignatureInfo SignatureInfo = 3;
+}
+
+//------------
+// P2P Content
+//------------
+
+// GetTransactionRequest return model.Transaction
+message GetTransactionRequest {
+    // Fetch Transaction by its ID
+    int64 ID = 1 [ jstype = JS_STRING ];
+}
+
+// GetTransactions return GetTransactionsResponse
+message GetTransactionsRequest {
+    string AccountAddress = 1;
+    uint32 Height = 2;
+    int64 TimestampStart = 3 [ jstype = JS_STRING ];
+    int64 TimestampEnd = 4 [ jstype = JS_STRING ];
+    uint32 TransactionType = 5;
+    Pagination Pagination = 6;
+}
+
+message GetTransactionsResponse {
+    // Number of transactions in total
+    uint64 Total = 1 [ jstype = JS_STRING ];
+    // Transaction transactions returned
+    repeated Transaction Transactions = 2;
+}
+
+// PostTransactionRequest return PostTransactionResponse
+message PostTransactionRequest {
+    // Signed transaction bytes
+    bytes TransactionBytes = 1;
+}
+message PostTransactionResponse { Transaction Transaction = 1; }
+
+// SendTransactionRequest a model request of send a transaction in p2pCommunication service
+message SendTransactionRequest {
+    bytes TransactionBytes = 1;
+    int32 ChainType = 2;
+    bytes SenderPublicKey = 3;
+}
+// SendTransactionResponse a model response of send a transaction in p2pCommunication service
+message SendTransactionResponse { BatchReceipt BatchReceipt = 1; }
+
+
+
+// RequestBlockTransactionsRequest a model request of requesting transaction based on ID transactions
+message RequestBlockTransactionsRequest {
+    repeated int64 TransactionIDs = 1;
+    int32 ChainType = 2;
+    int64 BlockID = 3 [ jstype = JS_STRING ];
+}
+
+// SendBlockTransactionsRequest a model request for sending block's transactions
+message SendBlockTransactionsRequest {
+    int32 ChainType = 1;
+    repeated bytes TransactionsBytes = 2;
+    bytes SenderPublicKey = 3;
+}
+
+// SendBlockTransactionsResponse a model response of a process sending block's transactions
+message SendBlockTransactionsResponse {
+    repeated BatchReceipt BatchReceipts = 1;
+}
+
+// GetTransactionMinimumFeeRequest a model request for getting minimum fee required to post the transaction
+message GetTransactionMinimumFeeRequest {
+    bytes TransactionBytes = 1;
+}
+
+// GetTransactionMinimumFeeResponse a model response for GetTransactionMinimumFeeRequest, indicates the minimum fee for provided tx
+message GetTransactionMinimumFeeResponse {
+    int64 Fee = 1 [ jstype = JS_STRING ];
+}

@@ -1,0 +1,43 @@
+syntax="proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/pagination.proto";
+
+
+// AccountDataset represent the account dataset structure stored in the database
+message AccountDataset {
+    string SetterAccountAddress = 1;
+    string RecipientAccountAddress = 2;
+    string Property = 3;
+    string Value = 4;
+    bool IsActive = 5;
+    bool Latest = 6;
+    uint32 Height = 7;
+}
+
+// AccountDatasetProperty represent enum values for AccountDataset Property
+enum AccountDatasetProperty {
+    AccountDatasetEscrowApproval = 0;
+}
+
+// GetAccountDatasetsRequest represent request fields to get account dataset
+message GetAccountDatasetsRequest {
+    string Property = 1;
+    string Value = 2;
+    string RecipientAccountAddress = 3;
+    string SetterAccountAddress = 4;
+    uint32 Height = 5;
+    Pagination Pagination = 6;
+}
+
+message GetAccountDatasetsResponse {
+    uint64 Total = 1 [ jstype = JS_STRING ];
+    repeated AccountDataset AccountDatasets = 2;
+}
+
+message GetAccountDatasetRequest {
+    string Property = 1;
+    string RecipientAccountAddress = 2;
+}

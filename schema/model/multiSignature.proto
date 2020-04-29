@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/pagination.proto";
+
+message MultiSignatureInfo {
+    uint32 MinimumSignatures = 1;
+    int64 Nonce = 2 [ jstype = JS_STRING ];
+    repeated string Addresses = 3;
+    string MultisigAddress = 4;
+    uint32 BlockHeight = 5;
+    bool Latest = 6;
+}
+
+// represent the signature posted by account
+message SignatureInfo {
+    bytes TransactionHash = 1;
+    map<string, bytes> Signatures = 2; 
+}
+
+// represent the pending signature counter stored by node for multi-signature transaction
+message PendingSignature {
+    bytes TransactionHash = 1;
+    string AccountAddress = 2;
+    bytes Signature = 3;
+    uint32 BlockHeight = 4;
+    bool Latest = 5;
+}
+
+// represent transaction inside multisig body
+message PendingTransaction {
+    string SenderAddress = 1;
+    bytes TransactionHash = 2;
+    bytes TransactionBytes = 3;
+    PendingTransactionStatus Status = 4;
+    uint32 BlockHeight = 5;
+    bool Latest = 6;
+}
+
+enum PendingTransactionStatus {
+    PendingTransactionPending = 0;
+    PendingTransactionExecuted = 1;
+    PendingTransactionNoOp = 2;
+    PendingTransactionExpired = 3;
+}
+
+// API model
+
+message GetPendingTransactionsRequest {
+    string SenderAddress = 1;
+    PendingTransactionStatus Status = 2;
+    Pagination Pagination = 3;
+}
+
+message GetPendingTransactionsResponse {
+    // Number of item in current page
+    uint32 Count = 1;
+    // Starting page
+    uint32 Page = 2;
+    // content of the request
+    repeated PendingTransaction PendingTransactions = 3;
+}
+
+message GetPendingTransactionDetailByTransactionHashRequest {
+    // hex of transaction hash
+    string TransactionHashHex = 1;
+}
+
+message GetPendingTransactionDetailByTransactionHashResponse {
+    PendingTransaction PendingTransaction = 1;
+    repeated PendingSignature PendingSignatures = 2;
+    MultiSignatureInfo MultiSignatureInfo = 3;
+}
+
+message GetMultisignatureInfoRequest {
+    string MultisigAddress = 1;
+    Pagination Pagination = 2; 
+}
+
+message GetMultisignatureInfoResponse {
+    // Number of item in current page
+    uint32 Count = 1;
+    // Starting page
+    uint32 Page = 2;
+    // content of the request
+    repeated MultiSignatureInfo MultisignatureInfo = 3;
+}

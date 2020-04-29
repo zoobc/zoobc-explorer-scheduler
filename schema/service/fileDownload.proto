@@ -1,0 +1,17 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/fileDownload.proto";
+import "google/api/annotations.proto";
+
+// FileDownloadService represent request on db Transaction
+service FileDownloadService {
+    rpc FileDownload(model.FileDownloadRequest) returns (model.FileDownloadResponse) {
+        option (google.api.http) = {
+            get: "/v1/file/FileDownload"
+        };
+    }
+}

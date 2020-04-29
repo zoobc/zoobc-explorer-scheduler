@@ -1,0 +1,11 @@
+syntax="proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+import "model/batchReceipt.proto";
+
+message Receipt {
+    BatchReceipt BatchReceipt = 1;
+    bytes RMR = 2;
+    uint32 RMRIndex = 3;
+}

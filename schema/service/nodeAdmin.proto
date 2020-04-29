@@ -1,0 +1,23 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/proofOfOwnership.proto";
+import "model/node.proto";
+import "google/api/annotations.proto";
+
+// Generate ProofOfOwnership
+service NodeAdminService {
+    rpc GetProofOfOwnership(model.GetProofOfOwnershipRequest) returns (model.ProofOfOwnership) {
+        option (google.api.http) = {
+            get: "/v1/nodeadmin/getProofOfOwnership"
+        };
+    } 
+    rpc GenerateNodeKey(model.GenerateNodeKeyRequest) returns (model.GenerateNodeKeyResponse) {
+        option (google.api.http) = {
+            get: "/v1/nodeadmin/generateNodeKey"
+        };
+    } 
+}

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/event.proto";
+import "model/pagination.proto";
+
+message AccountLedger {
+    string AccountAddress = 1;
+    int64 BalanceChange = 2;
+    uint32 BlockHeight = 3;
+    int64 TransactionID = 4 [ jstype = JS_STRING ];
+    uint64 Timestamp = 5;
+    EventType EventType = 6;
+}
+
+message GetAccountLedgersRequest {
+    string AccountAddress = 1;
+    EventType EventType = 2;
+    int64 TransactionID = 3 [ jstype = JS_STRING ];
+    uint64 TimestampStart = 4;
+    uint32 TimestampEnd = 5;
+    Pagination Pagination = 6;
+}
+message GetAccountLedgersResponse {
+    // Number of transactions in total
+    uint64 Total = 1 [ jstype = JS_STRING ];
+    // Transaction transactions returned
+    repeated AccountLedger AccountLedgers = 2;
+
+}

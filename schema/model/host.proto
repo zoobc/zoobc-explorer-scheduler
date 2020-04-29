@@ -1,0 +1,32 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/node.proto";
+import "model/peer.proto";
+import "model/blockchain.proto";
+
+// Host represent data sructure node and listed peers in node it's self 
+message Host {
+	Node Info = 1;
+	map<string, Peer> ResolvedPeers = 2;
+	map<string, Peer> UnresolvedPeers = 3;
+	map<string, Peer> KnownPeers = 4;
+	map<string, Peer> BlacklistedPeers = 5;
+	bool Stopped = 6;
+}
+
+message HostInfo{
+	Host Host = 1;
+	repeated ChainStatus ChainStatuses = 2;
+	repeated Peer ScrambledNodes = 3;
+	uint32 ScrambledNodesHeight = 4;
+	map<string, Peer> PriorityPeers = 5;
+}
+
+message GetHostPeersResponse {
+	map<string, Peer> ResolvedPeers = 1;
+	map<string, Peer> UnresolvedPeers = 2;
+}

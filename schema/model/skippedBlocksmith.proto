@@ -1,0 +1,12 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+message SkippedBlocksmith {
+    bytes BlocksmithPublicKey = 1;
+    int64 POPChange = 2 [jstype = JS_STRING];
+    uint32 BlockHeight = 3;
+    int32 BlocksmithIndex = 4;
+}

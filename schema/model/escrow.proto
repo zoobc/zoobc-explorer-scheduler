@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/pagination.proto";
+
+message Escrow {
+    int64 ID = 1 [ jstype = JS_STRING ];
+    string SenderAddress = 2;
+    string RecipientAddress = 3;
+    string ApproverAddress = 4;
+    int64 Amount = 5 [ jstype = JS_STRING ];
+    int64 Commission = 6 [ jstype = JS_STRING ];
+    // Timeout is BlockHeight gap 
+    uint64 Timeout = 7 [ jstype = JS_STRING ];
+    EscrowStatus Status = 8;
+    uint32 BlockHeight = 9;
+    bool Latest = 10;
+    string Instruction = 11;
+}
+enum EscrowStatus {
+    Pending = 0;
+    Approved = 1;
+    Rejected = 2;
+    Expired = 3;
+}
+
+enum EscrowApproval {
+    Approve = 0;
+    Reject = 1;
+}
+
+// GetEscrowTransactionsRequest message for get escrow transactions
+message GetEscrowTransactionsRequest {
+    string ApproverAddress = 1;
+    int64 ID = 2 [jstype = JS_STRING];
+    repeated EscrowStatus  Statuses = 3;
+    uint32 BlockHeightStart = 4;
+    uint32 BlockHeightEnd = 5; 
+    Pagination Pagination = 6;
+}
+// GetEscrowTransactionsResponse returns fields of GetEscrowTransactionsRequest
+message GetEscrowTransactionsResponse {
+    // Number of transactions in total
+    uint64 Total = 1 [ jstype = JS_STRING ];
+    // Transaction transactions returned
+    repeated Escrow Escrows = 2;
+}
+
+// GetEscrowTransactionRequest represents GetEscrowTransaction parameter
+message GetEscrowTransactionRequest {
+    int64 ID = 1 [jstype = JS_STRING];
+}

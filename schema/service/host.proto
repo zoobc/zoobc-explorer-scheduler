@@ -1,0 +1,24 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/empty.proto";
+import "model/host.proto";
+import "google/api/annotations.proto";
+
+// HostService represent request on Blockchain's Block
+service HostService {
+    rpc GetHostInfo(model.Empty) returns (model.HostInfo) {
+        option (google.api.http) = {
+            get: "/v1/host/GetHostInfo"
+        };
+    }
+
+    rpc GetHostPeers(model.Empty) returns (model.GetHostPeersResponse){
+        option (google.api.http) = {
+            get: "/v1/host/GetHostPeers"
+        };
+    }
+}

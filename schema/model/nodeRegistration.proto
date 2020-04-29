@@ -1,0 +1,65 @@
+syntax="proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/pagination.proto";
+
+message NodeAddress {
+    string Address = 1;
+    uint32 Port = 2;
+}
+message NodeRegistration {
+    int64   NodeID = 1 [jstype = JS_STRING];
+    bytes   NodePublicKey = 2;
+    string  AccountAddress = 3;
+    uint32  RegistrationHeight = 4;
+    NodeAddress  NodeAddress = 5;
+    int64   LockedBalance = 6 [jstype = JS_STRING];
+    uint32  RegistrationStatus = 7;
+    bool Latest = 8;
+    uint32 Height = 9;
+}
+
+// GetNodeRegisterRequest create request to get a list of node registry
+message GetNodeRegistrationsRequest {
+    /* Fetch Node Registries based on queue status 
+        2 : will retrieve node registries that have been deleted
+        1 : will retrieve node registries that still pending
+        0: will retrieve node registries that already registered*/
+    uint32 RegistrationStatus = 1;
+    // Fetch Node Registries when registration height is greater than or equal to
+    uint32 MinRegistrationHeight = 2;
+    // Fetch Node Registries when registration height is less than or equal to
+    uint32 MaxRegistrationHeight = 3;
+    // Fetch Node Registries based on Pagination field
+    Pagination Pagination = 4;
+}
+
+message GetNodeRegistrationsResponse {
+    // Number of node registry in total
+    uint64 Total = 1 [jstype = JS_STRING];
+    // NodeRegistrations list of NodeRegistration
+    repeated NodeRegistration NodeRegistrations = 2;
+}
+
+// GetNodeRegistrationRequest create request for single node register
+message GetNodeRegistrationRequest {
+    bytes   NodePublicKey = 1;
+    string AccountAddress = 2;
+    uint32  RegistrationHeight = 3;
+    NodeAddress  NodeAddress = 4;
+}
+
+message GetNodeRegistrationResponse {
+    NodeRegistration NodeRegistration = 1;
+}
+
+enum NodeRegistrationState {
+    // NodeRegistered 'registred' node status (= 0): a node in node registry with this status is registered
+    NodeRegistered = 0;
+    // NodeQueued 'queued' node status (= 1): a node in node registry with this status is queued, or 'pending registered'
+    NodeQueued = 1;
+    // NodeDeleted 'deleted' node status (= 2): a node in node registry with this status is marked as deleted
+    NodeDeleted = 2;
+}

@@ -1,0 +1,24 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/block.proto";
+import "google/api/annotations.proto";
+
+// BlockService represent request on Blockchain's Block
+service BlockService {
+    rpc GetBlocks(model.GetBlocksRequest) returns (model.GetBlocksResponse) {
+        option (google.api.http) = {
+            get: "/v1/block/GetBlocks"
+        };
+    }
+
+    rpc GetBlock(model.GetBlockRequest) returns (model.BlockExtendedInfo) {
+        option (google.api.http) = {
+            get: "/v1/block/GetBlock"
+        };
+    }
+
+}
