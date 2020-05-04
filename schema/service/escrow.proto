@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package service;
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/escrow.proto";
+import "google/api/annotations.proto";
+
+service EscrowTransactionService {
+    rpc GetEscrowTransactions(model.GetEscrowTransactionsRequest) returns (model.GetEscrowTransactionsResponse) {
+        option (google.api.http) = {
+            post: "/v1/escrow/GetEscrowTransactionsRequest"
+        };
+    }
+    rpc GetEscrowTransaction(model.GetEscrowTransactionRequest) returns (model.Escrow) {
+        option(google.api.http) = {
+            get: "/v1/escrow/GetEscrowTransactionRequest"
+        };
+    }
+}

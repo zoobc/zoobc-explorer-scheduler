@@ -1,0 +1,15 @@
+syntax="proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+message BatchReceipt {
+    bytes SenderPublicKey = 1;
+    bytes RecipientPublicKey = 2;
+    uint32 DatumType = 3;
+    bytes DatumHash = 4;
+    uint32 ReferenceBlockHeight = 5;
+    bytes ReferenceBlockHash = 6;
+    bytes RMRLinked = 7;
+    bytes RecipientSignature = 8;
+}

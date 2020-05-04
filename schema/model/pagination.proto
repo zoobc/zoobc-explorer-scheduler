@@ -1,0 +1,16 @@
+syntax="proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+enum OrderBy {
+    DESC = 0;
+    ASC = 1;
+}
+
+message Pagination {
+    string OrderField = 1;
+    OrderBy OrderBy = 2;
+    uint32 Page = 3;
+    uint32 Limit = 4;
+}

@@ -1,0 +1,30 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/multiSignature.proto";
+import "google/api/annotations.proto";
+
+// MultisigService represent request on Blockchain's multisig component such as pending_transaction, pending_signatures, and multisig_info 
+service MultisigService {
+    rpc GetPendingTransactions(model.GetPendingTransactionsRequest) returns (model.GetPendingTransactionsResponse) {
+        option (google.api.http) = {
+            get: "/v1/multisig/GetPendingTransactions"
+        };
+    }
+
+    rpc GetPendingTransactionDetailByTransactionHash(model.GetPendingTransactionDetailByTransactionHashRequest) returns (model.GetPendingTransactionDetailByTransactionHashResponse) {
+        option (google.api.http) = {
+            get: "/v1/multisig/GetPendingTransactionDetailByTransactionHash"
+        };
+    }
+    rpc GetMultisignatureInfo(model.GetMultisignatureInfoRequest) returns (model.GetMultisignatureInfoResponse) {
+        option (google.api.http) = {
+            get: "/v1/multisig/GetMultisignatureInfo"
+        };
+    } 
+    
+
+}

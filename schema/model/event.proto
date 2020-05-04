@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+enum EventType {
+    EventAny = 0; // For Request filter purposes
+    EventSendMoneyTransaction = 1;
+    EventNodeRegistrationTransaction = 2;
+    EventUpdateNodeRegistrationTransaction = 3;
+    EventRemoveNodeRegistrationTransaction = 4;
+    EventClaimNodeRegistrationTransaction = 5;
+    EventSetupAccountDatasetTransaction = 6;
+    EventRemoveAccountDatasetTransaction = 7;
+    EventReward = 8;
+    EventApprovalEscrowTransaction = 9;
+    EventMultiSignatureTransaction = 10;
+}

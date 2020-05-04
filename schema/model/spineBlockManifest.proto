@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+// SpineBlockManifest represent the spineBlockManifest data structure stored in the database
+message SpineBlockManifest { 
+  // ID computed as the little endian of the spineBlockManifest hash (hash of all spineBlockManifest fields but the ID)
+  int64 ID = 1 [ jstype = JS_STRING ];
+  // FullFileHash hash of the full - completed (snapshot) file
+  bytes FullFileHash = 2;
+  // FileChunkHashes sequence of hashes (sha256 = 32 byte) of file chunks (sorted) referenced by the spineBlockManifest
+  bytes FileChunkHashes = 3;
+  // ManifestReferenceHeight height (on the mainchain) at which the (snapshot) file started been computed
+  // Note: this is not the last mainchain height contained in the snapshot file (that one should be = SpineBlockManifestHeight - MinRollbackBlocks)
+  uint32 ManifestReferenceHeight = 4;
+  // ManifestSpineBlockHeight (on spinechain) at which the (manifest) got included in the block, this data
+  // is tightly coupled to the spine block.
+  uint32 ManifestSpineBlockHeight = 5;
+  // Number indicating chaintype (at the moment it can only be mainchain, but in future could be others)
+  int32 ChainType = 6;
+  // SpineBlockManifestType type of spineBlockManifest
+  SpineBlockManifestType SpineBlockManifestType = 7;
+  // ExpirationTimestamp timestamp that marks the end of spineBlockManifest processing
+  int64 ExpirationTimestamp = 8;
+}
+
+// SpineBlockManifestType type of spineBlockManifest (as of now only snapshot)
+enum SpineBlockManifestType {
+    Snapshot = 0;
+    //TODO: example of other mb type
+//    BlockBackup = 1;
+}

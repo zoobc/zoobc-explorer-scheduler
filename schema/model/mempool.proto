@@ -1,0 +1,42 @@
+syntax="proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/pagination.proto";
+import "model/escrow.proto";
+// Mempool represent the mempool data structure stored in the database
+message MempoolTransaction {
+    int64 ID = 1 [jstype = JS_STRING];
+    uint32 BlockHeight = 2;
+    int64 FeePerByte = 3 [jstype = JS_STRING];
+    int64 ArrivalTimestamp = 4 [jstype = JS_STRING];
+    bytes TransactionBytes = 5;
+    string SenderAccountAddress = 6;
+    string RecipientAccountAddress = 7;
+    Escrow Escrow = 8;
+    
+}
+
+message GetMempoolTransactionRequest {
+    // Fetch Mempool Transaction by its TransactionBytes
+    int64 ID = 1 [jstype = JS_STRING];
+}
+message GetMempoolTransactionResponse {
+    MempoolTransaction transaction = 1;
+}
+
+message GetMempoolTransactionsRequest {
+    // Fetch Mempool transactions from arrival timestamp start from n
+    int64 timestampStart = 1 [jstype = JS_STRING];
+    // Fetch Mempool transactions to arrival timestamp end until n
+    int64 timestampEnd = 2 [jstype = JS_STRING];
+    // SenderAddress and RecipientAddress
+    string address = 3;
+    Pagination Pagination = 4;
+}
+
+message GetMempoolTransactionsResponse {
+    uint64 Total = 1;
+    repeated MempoolTransaction MempoolTransactions = 2;
+}

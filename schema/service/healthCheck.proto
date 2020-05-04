@@ -1,0 +1,19 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/empty.proto";
+import "model/healthCheck.proto";
+import "google/api/annotations.proto";
+
+
+// HealthCheckService service for health checking
+service HealthCheckService {
+    rpc HealthCheck(model.Empty) returns (model.HealthCheckResponse) {
+        option (google.api.http) = {
+            get: "/v1/health/check"
+        };
+    }
+}

@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/peer.proto";
+import "model/empty.proto";
+import "model/block.proto";
+import "model/blockchain.proto";
+import "model/transaction.proto";
+import "model/fileDownload.proto";
+
+service P2PCommunication {
+  rpc GetPeerInfo(model.GetPeerInfoRequest) returns (model.GetPeerInfoResponse) {}
+  rpc GetMorePeers(model.Empty) returns (model.GetMorePeersResponse) {}
+  rpc SendPeers(model.SendPeersRequest) returns (model.Empty) {}
+  rpc SendBlock(model.SendBlockRequest) returns (model.SendBlockResponse) {}
+  rpc SendTransaction(model.SendTransactionRequest)
+      returns (model.SendTransactionResponse) {}
+  rpc SendBlockTransactions(model.SendBlockTransactionsRequest)
+      returns (model.SendBlockTransactionsResponse) {}
+  rpc RequestBlockTransactions(model.RequestBlockTransactionsRequest)
+      returns (model.Empty) {}
+
+  rpc GetCumulativeDifficulty(model.GetCumulativeDifficultyRequest)
+      returns (model.GetCumulativeDifficultyResponse) {}
+  rpc GetCommonMilestoneBlockIDs(model.GetCommonMilestoneBlockIdsRequest)
+      returns (model.GetCommonMilestoneBlockIdsResponse) {}
+  rpc GetNextBlockIDs(model.GetNextBlockIdsRequest)
+      returns (model.BlockIdsResponse) {}
+  rpc GetNextBlocks(model.GetNextBlocksRequest) returns (model.BlocksData) {}
+
+  rpc RequestFileDownload(model.FileDownloadRequest)
+      returns (model.FileDownloadResponse) {}
+}

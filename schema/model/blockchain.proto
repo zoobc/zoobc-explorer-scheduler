@@ -1,0 +1,36 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+import "model/block.proto";
+
+message ChainStatus{
+    // Integer indicating chaintype
+    int32 ChainType = 1;
+    uint32 Height = 2;
+    Block LastBlock = 3;
+}
+
+message GetCumulativeDifficultyResponse {
+    string CumulativeDifficulty = 1;
+	uint32 Height = 2;
+}
+
+message GetCumulativeDifficultyRequest {
+    // Integer indicating chaintype
+    int32 ChainType = 1;
+}
+
+message GetCommonMilestoneBlockIdsRequest {
+    // Integer indicating chaintype
+    int32 ChainType = 1;
+	int64 LastBlockID = 2 [jstype = JS_STRING];
+	int64 LastMilestoneBlockID = 3 [jstype = JS_STRING];
+}
+
+message GetCommonMilestoneBlockIdsResponse {
+	repeated int64 BlockIds = 1 [jstype = JS_STRING];
+	bool Last = 2;
+}

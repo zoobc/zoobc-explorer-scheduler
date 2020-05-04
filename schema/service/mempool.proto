@@ -1,0 +1,23 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/mempool.proto";
+import "google/api/annotations.proto";
+
+// MempoolService represent request on db Mempool
+service MempoolService {
+    rpc GetMempoolTransactions(model.GetMempoolTransactionsRequest) returns (model.GetMempoolTransactionsResponse) {
+        option (google.api.http) = {
+            get: "/v1/mempool/GetMempoolTransactions"
+        };
+    }
+
+    rpc GetMempoolTransaction(model.GetMempoolTransactionRequest) returns (model.GetMempoolTransactionResponse) {
+        option (google.api.http) = {
+            get: "/v1/mempool/GetMempoolTransaction"
+        };
+    }    
+}

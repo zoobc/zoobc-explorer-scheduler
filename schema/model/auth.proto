@@ -1,0 +1,12 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+// RequestType used to sign a node administration request
+enum RequestType {
+    GetNodeHardware = 0;
+    GetProofOfOwnership = 1;
+    GeneratetNodeKey = 2;
+}
