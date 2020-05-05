@@ -24,25 +24,13 @@ message GetAccountBalanceResponse {
 }
 
 message GetAccountBalancesRequest {
-    // Fetch AccountBalance by its balance (account balance <  BalanceLowerThan)
-    uint32 BalanceLowerThan = 1;
-    // Fetch AccountBalance by its balance (account balance >  BalanceHigherThan)
-    uint32 BalanceHigherThan = 2;
-    // Fetch AccountBalance by its spendablebalance (account spendablebalance <  BalanceLowerThan)
-    uint32 SpendableBalanceLowerThan = 3;
-    // Fetch AccountBalance by its spendablebalance (account spendablebalance >  BalanceHigherThan)
-    uint32 SpendableBalanceHigherThan = 4;
-    // Fetch AccountBalance by its spendablebalance (account spendablebalance <  BalanceLowerThan)
-    uint32 PopRevenueBalanceLowerThan = 5;
-    // Fetch AccountBalance by its popRevenuebalance (account popRevenuebalance >  BalanceHigherThan)
-    uint32 PopRevenueBalanceHigherThan = 6;
-    // Fetch AccountBalance by its Block height
-    uint32 BlockHeight = 7;
+    // Fetch AccountBalances by type/addresses
+    repeated string AccountAddresses = 1;
 }
 
 message GetAccountBalancesResponse {
     // Number of accounts returned
     uint32 AccountBalanceSize = 1;
     // AccountBalances returned
-    repeated AccountBalance AccountBalance = 2;
+    repeated AccountBalance AccountBalances = 2;
 }

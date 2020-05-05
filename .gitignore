@@ -3,5 +3,8 @@
 package-lock.json
 yarn.lock
 
+# env
+.env
+
 # zoobc schema
 /zoobc-schema

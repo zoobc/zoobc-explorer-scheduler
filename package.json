@@ -1,10 +1,18 @@
 {
   "name": "zoobc-explorer-scheduler",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Scheduler ZooBC Explorer",
+  "license": "ISC",
+  "author": "ZooBC Team",
   "private": true,
-  "bin": "app.js",
   "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KevinH2810/zoobc-explorer-scheduler.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KevinH2810/zoobc-explorer-scheduler/issues"
+  },
   "keywords": [
     "blockchainzoo",
     "zoobc",
@@ -13,29 +21,21 @@
   ],
   "scripts": {
     "start": "nodemon app.js",
-    "schema": "./schema.sh",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/KevinH2810/zoobc-explorer-scheduler.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/KevinH2810/zoobc-explorer-scheduler/issues"
+    "schema": "./schema.sh"
   },
   "dependencies": {
-    "cron": "^1.7.2",
-    "crypto-js": "^3.1.9-1",
+    "chalk": "^4.0.0",
+    "cron": "^1.8.2",
+    "crypto-js": "^4.0.0",
     "grpc-pack": "^0.2.3",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
-    "mongoose": "^5.7.0"
+    "moment": "^2.25.3",
+    "mongoose": "^5.9.12",
+    "saslprep": "^1.0.3",
+    "uuid": "^8.0.0"
   },
   "devDependencies": {
-    "dotenv": "^8.1.0",
-    "nodemon": "^1.19.1"
-  },
-  "homepage": "https://github.com/KevinH2810/zoobc-explorer-scheduler#readme"
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.3"
+  }
 }
