@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { upsertMany } = require('../utils');
+const mongoose = require('mongoose')
+const { upserts } = require('../utils')
 
 const schema = new mongoose.Schema(
   {
@@ -13,13 +13,12 @@ const schema = new mongoose.Schema(
     Timestamp: { type: Date },
     TransactionID: { type: String },
     Transaction: { type: mongoose.Schema.Types.Object },
-    // Transaction: { type: mongoose.Schema.Types.ObjectId, ref: 'Transactions' },
   },
   {
     toJSON: { virtuals: true },
   }
-);
+)
 
-schema.plugin(upsertMany);
+schema.plugin(upserts)
 
-module.exports = mongoose.model('Account_Transactions', schema);
+module.exports = mongoose.model('Account_Transactions', schema)

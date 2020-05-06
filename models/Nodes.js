@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { upsertMany } = require('../utils');
+const mongoose = require('mongoose')
+const { upserts } = require('../utils')
 
 const schema = new mongoose.Schema(
   {
@@ -21,8 +21,8 @@ const schema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
   }
-);
+)
 
-schema.plugin(upsertMany);
+schema.plugin(upserts)
 
-module.exports = mongoose.model('Nodes', schema);
+module.exports = mongoose.model('Nodes', schema)
