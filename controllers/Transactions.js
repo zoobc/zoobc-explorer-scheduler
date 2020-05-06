@@ -56,6 +56,7 @@ module.exports = class Transactions extends BaseController {
     }
 
     let transactions = []
+    if (heightEnd - heightStart > 201) heightEnd = 200
     for (let height = heightStart; height < heightEnd; height++) {
       const transaction = new Promise((resolve, reject) => {
         this.upsertTransactions(height, (err, result) => {
@@ -81,6 +82,7 @@ module.exports = class Transactions extends BaseController {
 
   upsertTransactions(height, callback) {
     const params = { Height: height, Pagination: { OrderField: 'block_height', OrderBy: 'ASC' } }
+
     Transaction.GetTransactions(params, (err, result) => {
       if (err) return callback(`[Transactions] Get Transactions ${err}`, null)
       if (result && result.Transactions && result.Transactions.length < 1) return callback(null, null)
