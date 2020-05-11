@@ -19,7 +19,7 @@ module.exports = class Rollback extends BaseController {
       if (err) return callback(`[Rollback] Blocks Service - Get Last Height ${err}`, { success: false, info: null })
       if (!result || !result.Height) return callback(null, { success: false, info: null })
 
-      const Limit = config.app.limitData
+      const Limit = config.app.limitData * 2
       const Height = parseInt(result.Height) - Limit < 1 ? 1 : parseInt(result.Height) - Limit
       this.recursiveBlockHeight(Limit, Height, (err, result) => {
         if (err) return callback(err, { success: false, info: null })
