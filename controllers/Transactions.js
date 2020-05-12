@@ -1,17 +1,10 @@
-/* eslint-disable indent */
-const moment = require('moment');
-const store = require('./Store');
-const BaseController = require('./BaseController');
-const {
-    Transaction
-} = require('../Protos');
-const {
-    Converter
-} = require('../../utils');
-const {
-    BlocksService,
-    TransactionsService
-} = require('../../api/services');
+const moment = require('moment')
+
+const BaseController = require('./BaseController')
+const { store, util } = require('../utils')
+const { Transaction } = require('../protos')
+const { BlocksService, TransactionsService } = require('../services')
+
 
 module.exports = class Transactions extends BaseController {
     constructor() {
