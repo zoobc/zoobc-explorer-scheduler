@@ -47,17 +47,18 @@ jobs:
     # strategy:
     #   matrix:
     #     mongo-version: [3.4.23]
-    services:
-      mongodb:
-        image: mongo:3.4.23
-        ports:
-          - 27017:27017
-    name: MongoDB
+
+    # services:
+    #   mongodb:
+    #     image: mongo:3.4.23
+    #     ports:
+    #       - 27017:27017
+    name: Connect db
 
     steps:
       - name: Start scheduler
         # uses: actions/cache@v1
-        run: npm run start
+        run: nodemon schedulers.js
         env:
           CI: true
 
