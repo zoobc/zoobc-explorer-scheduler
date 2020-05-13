@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: PRs checks
+name: Deploy actions
 
 on:
   push:
@@ -10,78 +10,17 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [8.x, 10.x, 12.x, 14.x]
-    name: Node.js ${{ matrix.node-version }}
 
     steps:
-    - name: Git checkout
-      uses: actions/checkout@v1
-    
-    - name: Cache dependencies
-      uses: actions/cache@v1
-      with:
-        path: ~/.npm/cache/files
-        key: dependencies-nodejs-${{ matrix.node-version }}-package-${{ hashFiles('package.json') }}
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    
-    - name: Install dependencies
-      run: npm i
-      env:
-        CI: true
-    
-    - name: Run tests
-      run: npm test
-      env:
-        CI: true
-
-  start:
-    runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     mongo-version: [3.4.23]
-
-    # services:
-    #   mongodb:
-    #     image: mongo:3.4.23
-    #     ports:
-    #       - 27017:27017
-    name: Connect db
-
-    steps:
-      - name: Start scheduler
-        # uses: actions/cache@v1
-        # run: nodemon schedulers.js
-        run: ls -ltr
+      - name: SSH login to server
+      - uses: actions/checkout@v1
+      - uses: easingthemes/ssh-deploy@v2.0.7
         env:
-          CI: true
-
-  # update-schema:
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Update schema
-  #     - uses: actions/checkout@v1
-  #     - run: ./schema.sh
-  
-  # build:
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: SSH login to server
-  #     - uses: actions/checkout@v1
-  #     - uses: easingthemes/ssh-deploy@v2.0.7
-  #       env:
-  #         SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-  #         REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-  #         REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
       
-  #     - name: Deploy to server
-  #     - run: pm2 deploy ecosystem.config.js scheduler update
+      - name: Deploy to server
+      - run: pm2 deploy ecosystem.config.js scheduler update
