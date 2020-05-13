@@ -8,10 +8,10 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KevinH2810/zoobc-explorer-scheduler.git"
+    "url": "git+https://github.com/zoobc/zoobc-explorer-scheduler.git"
   },
   "bugs": {
-    "url": "https://github.com/KevinH2810/zoobc-explorer-scheduler/issues"
+    "url": "https://github.com/zoobc/zoobc-explorer-scheduler/issues"
   },
   "keywords": [
     "blockchainzoo",
