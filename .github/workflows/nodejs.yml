@@ -44,15 +44,15 @@ jobs:
 
   start:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        mongo-version: [3.4.23]
+    # strategy:
+    #   matrix:
+    #     mongo-version: [3.4.23]
     services:
       mongodb:
         image: mongo:3.4.23
         ports:
           - 27017:27017
-    name: MongoDB ${{ matrix.mongo-version }}
+    name: MongoDB
 
     steps:
       - name: Start scheduler
