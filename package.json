@@ -5,7 +5,7 @@
   "license": "ISC",
   "author": "ZooBC Team",
   "private": true,
-  "main": "app.js",
+  "main": "schedulers.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobc/zoobc-explorer-scheduler.git"
@@ -20,7 +20,7 @@
     "blockchain"
   ],
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "nodemon schedulers.js",
     "schema": "./schema.sh"
   },
   "dependencies": {
