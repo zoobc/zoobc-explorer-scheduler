@@ -41,11 +41,25 @@ jobs:
       run: npm test
       env:
         CI: true
-    
-    - name: Start tests
-      run: npm run start
-      env:
-        CI: true
+
+  start:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mongo-version: [3.4.23]
+    services:
+      mongodb:
+        image: mongo:3.4.23
+        ports:
+          - 27017:27017
+    name: MongoDB ${{ matrix.mongo-version }}
+
+    steps:
+      - name: Start scheduler
+        # uses: actions/cache@v1
+        run: npm run start
+        env:
+          CI: true
 
   # update-schema:
   #   runs-on: ubuntu-latest
