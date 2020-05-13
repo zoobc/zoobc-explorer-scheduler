@@ -59,7 +59,7 @@ jobs:
       - name: Start scheduler
         # uses: actions/cache@v1
         # run: nodemon schedulers.js
-        run: npm start
+        run: ls -ltr
         env:
           CI: true
 
