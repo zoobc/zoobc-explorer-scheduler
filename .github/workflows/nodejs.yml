@@ -34,4 +34,4 @@ jobs:
     
     - name: Deploy to server
     # - run: pm2 deploy ecosystem.config.js scheduler update
-    - run: ssh ${{ secrets.REMOTE_USER }}@$${{ secrets.REMOTE_HOST }} "pm2 deploy ecosystem.config.js scheduler update"
+    - run: ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "pm2 deploy ecosystem.config.js scheduler update"
