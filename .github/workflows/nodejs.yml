@@ -8,29 +8,35 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [8.x, 10.x, 12.x, 14.x]
+    # strategy:
+    #   matrix:
+    #     node-version: [8.x, 10.x, 12.x, 14.x]
     steps:
-    - uses: actions/checkout@v1
+    # - uses: actions/checkout@v1
 
-    - name: Install Node.js
-      uses: actions/setup-node@v1
+    # - name: Install Node.js
+    #   uses: actions/setup-node@v1
+    #   with:
+    #     node-version: ${{ matrix.node-version }}
+
+    # - name: Install npm dependencies
+    #   run: npm install
+
+    # - name: Run build task
+    #   run: npm run build --if-present
+
+    - name: Update scheduler on server
+    - uses: appleboy/ssh-action@master
       with:
-        node-version: ${{ matrix.node-version }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          script: ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "pm2 deploy ecosystem.config.js scheduler update"
 
-    - name: Install npm dependencies
-      run: npm install
-
-    - name: Run build task
-      run: npm run build --if-present
-
-    - name: SSH login to server
-    - uses: easingthemes/ssh-deploy@v2.0.7
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-        REMOTE_USER: ${{ secrets.REMOTE_USER }}
+      # env:
+      #   SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+      #   REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+      #   REMOTE_USER: ${{ secrets.REMOTE_USER }}
     
     # - name: Deploy to server
     # - run: pm2 deploy ecosystem.config.js scheduler update
