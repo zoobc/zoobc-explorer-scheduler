@@ -15,34 +15,35 @@ const accountTransactions = new AccountTransactions()
 
 /** cron job */
 const event = config.app.scheduleEvent
-const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
-  try {
-    blocks.update((error, result) => {
-      if (error) msg.red(error)
-      else result ? msg.green(result.message) : msg.yellow('[Blocks] Nothing additional data')
+const cronApp = new cron.CronJob(`*/${event} * * * * *`, async() => {
+            try {
+                blocks.update((error, result) => {
+                            if (error) msg.red(error)
+                            else result ? msg.green(result.message) : msg.yellow('[Blocks] No additional data')
 
-      transactions.update((error, result) => {
-        if (error) msg.red(error)
-        else result ? msg.green(result.message) : msg.yellow('[Transactions] Nothing additional data')
+                            transactions.update((error, result) => {
+                                        if (error) msg.red(error)
+                                        else result ? msg.green(result.message) : msg.yellow('[Transactions] No additional data')
 
-        nodes.update((error, result) => {
-          if (error) msg.red(error)
-          else result ? msg.green(result.message) : msg.yellow('[Nodes] Nothing additional data')
+                                        nodes.update((error, result) => {
+                                                    if (error) msg.red(error)
+                                                    else result ? msg.green(result.message) : msg.yellow('[Nodes] No additional data')
 
-          accounts.update((error, result) => {
-            if (error) msg.red(error)
-            else result ? msg.green(result.message) : msg.yellow('[Accounts] Nothing additional data')
+                                                    accounts.update((error, result) => {
+                                                                if (error) msg.red(error)
+                                                                else result ? msg.green(result.message) : msg.yellow('[Accounts] No additional data')
 
-            accountTransactions.update((error, result) => {
-              if (error) msg.red(error)
-              else result ? msg.green(result.message) : msg.yellow('[Account Transactions] Nothing additional data')
+                                                                // accountTransactions.update((error, result) => {
+                                                                //   if (error) msg.red(error)
+                                                                //   else result ? msg.green(result.message) : msg.yellow('[Account Transactions] Nothing additional data')
 
-              rollback.checking((error, { success, info } = result) => {
-                if (error) msg.red(error)
-                else success ? msg.green(info) : msg.yellow(`${info ? `[Rollback - ${info}]` : `[Rollback]`} No data rollback`)
-              })
+                                                                // })
+
+                                                                rollback.checking((error, { success, info } = result) => {
+                                                                            if (error) msg.red(error)
+                                                                            else success ? msg.green(info) : msg.yellow(`${info ? `[Rollback - ${info}]` : `[Rollback]`} No data rollback`)
             })
-          })
+          }) 
         })
       })
     })
