@@ -4,4 +4,6 @@ module.exports = {
     accountTransactions: [],
     nodePublicKeys: [],
     transactionFees: [],
+    accountAddList: [],
+    accBalances: [],
 };
