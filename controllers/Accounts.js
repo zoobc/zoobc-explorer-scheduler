@@ -20,7 +20,8 @@ module.exports = class Accounts extends BaseController {
                 const aa = util.bufferStr(i.AccountAddress)
                 if (typeof aa == 'string' && aa !== 'null') {
                     return new Promise((resolve, reject) => {
-                        // const params = { AccountAddress: i.AccountAddress }
+                        console.log('i ======>', i)
+                            // const params = { AccountAddress: i.AccountAddress }
                         this.service.upserts(i, match, (err, result) => {
                             if (err) return reject(`[Accounts] Accounts Service - Created Only New ${err}`)
                             if (!result) return resolve(0)
@@ -36,7 +37,8 @@ module.exports = class Accounts extends BaseController {
                 const aa = util.bufferStr(i.AccountAddress)
                 if (typeof aa == 'string' && aa !== 'null') {
                     return new Promise((resolve, reject) => {
-                        // const params = { AccountAddress: i.AccountAddress }
+                        console.log('i ======>', i)
+                            // const params = { AccountAddress: i.AccountAddress }
                         this.service.upserts(i, match, (err, result) => {
                             if (err) return reject(`[Accounts] Accounts Service - Created Only New ${err}`)
                             if (!result) return resolve(0)
