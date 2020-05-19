@@ -13,15 +13,19 @@ const accounts = new Accounts()
 const rollback = new Rollback()
 const transactions = new Transactions()
 
+const resetter = false
+
 /** cron job */
 const event = config.app.scheduleEvent
 const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
   try {
     /** WARNING: DON'T USING RESET DATA FOR PRODUCTIONS */
-    // reset.resetByHeight(14146, (error, { success, message } = result) => {
-    //   if (error) msg.red(error)
-    //   else success ? msg.green(message) : msg.yellow(message)
-    // })
+    if (resetter) {
+      reset.resetByHeight(14146, (error, { success, message } = result) => {
+        if (error) msg.red(error)
+        else success ? msg.green(message) : msg.yellow(message)
+      })
+    }
 
     blocks.update((error, { success, message } = result) => {
       if (error) msg.red(error)
@@ -39,9 +43,9 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
             if (error) msg.red(error)
             else success ? msg.green(message) : msg.yellow(message)
 
-            rollback.checking((error, { success, info } = result) => {
+            rollback.checking((error, { success, message } = result) => {
               if (error) msg.red(error)
-              else success ? msg.green(info) : msg.yellow(`${info ? `[Rollback - ${info}]` : `[Rollback]`} No data rollback`)
+              else success ? msg.green(message) : msg.yellow(message)
             })
           })
         })
