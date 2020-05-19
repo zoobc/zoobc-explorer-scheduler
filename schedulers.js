@@ -13,6 +13,7 @@ const accounts = new Accounts()
 const rollback = new Rollback()
 const transactions = new Transactions()
 
+/** WARNING: DON'T SET TRUE FOR RESET DATA ON PRODUCTIONS */
 const resetter = false
 
 /** cron job */
@@ -21,7 +22,7 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
   try {
     /** WARNING: DON'T USING RESET DATA FOR PRODUCTIONS */
     if (resetter) {
-      reset.resetByHeight(14146, (error, { success, message } = result) => {
+      reset.resetByHeight(0, (error, { success, message } = result) => {
         if (error) msg.red(error)
         else success ? msg.green(message) : msg.yellow(message)
       })
