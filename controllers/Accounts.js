@@ -10,7 +10,7 @@ module.exports = class Accounts extends BaseController {
   update(callback) {
     if (store.accountBalances.length < 1) return callback(null, { success: false, message: '[Accounts] No additional data' })
 
-    const matchs = ['AccountAddress', 'BlockHeight']
+    const matchs = ['AccountAddress', 'Balance']
     this.service.upserts(store.accountBalances, matchs, (err, result) => {
       if (err) return callback(`[Accounts] Upsert ${err}`, { success: false, message: null })
       if (result && result.result.ok !== 1) return callback('[Accounts] Upsert data failed', { success: false, message: null })

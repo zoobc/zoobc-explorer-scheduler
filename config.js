@@ -5,6 +5,7 @@ module.exports = {
   app: {
     limitData: 200,
     scheduleEvent: 30 /** seconds */,
+    resetData: process.env.RESET_DATA || false,
     tokenSecret: process.env.TOKEN_SECRET || '884d31c5d4766dc624e1225888babeb7',
   },
   mongodb: {
