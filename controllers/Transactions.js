@@ -97,7 +97,6 @@ module.exports = class Transactions extends BaseController {
                         const index = store.accountBalances.findIndex(x => x.AccountAddress === result.AccountBalance.AccountAddress)
                         if (err) return callback(err, null)
                         const latestFee = findResult ? findResult.TotalFeesPaid : parseInt('0')
-
                         if (result && result.AccountBalance) {
                             if (index !== -1) {
                                 store.accountBalances[index] = {
@@ -110,8 +109,8 @@ module.exports = class Transactions extends BaseController {
                                     LastActive: null, // TODO: completed this field
                                     TotalRewards: null, // TODO: completed this field
                                     TotalRewardsConversion: null, // TODO: completed this field
-                                    TotalFeesPaid: parseInt(store.accountBalances[index].Fee) + latestFee + parseInt(item.Fee) ? parseInt(item.Fee) : 0,
-                                    TotalFeesPaidConversion: util.zoobitConversion(parseInt(parseInt(store.accountBalances[index].Fee) + latestFee + parseInt(item.Fee) ? parseInt(item.Fee) : 0)),
+                                    TotalFeesPaid: parseInt(store.accountBalances[index].Fee) + latestFee + parseInt(item.Fee),
+                                    TotalFeesPaidConversion: util.zoobitConversion(parseInt(parseInt(store.accountBalances[index].Fee) + latestFee + parseInt(item.Fee))),
                                     BlockHeight: item.Height,
                                     Nodes: null,
                                     Transactions: item,
