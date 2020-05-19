@@ -2,42 +2,44 @@ const moment = require('moment')
 
 const BaseController = require('./BaseController')
 const { store, util } = require('../utils')
-const { Transaction } = require('../protos')
-const { BlocksService, TransactionsService } = require('../services')
+const { AccountBalance, Transaction } = require('../protos')
+const { AccountsService, BlocksService, TransactionsService } = require('../services')
 
 module.exports = class Transactions extends BaseController {
   constructor() {
     super(new TransactionsService())
     this.blocksService = new BlocksService()
+    this.accountService = new AccountsService()
   }
 
   update(callback) {
-    if (!store.blocksAddition) return callback(null, null)
+    // store.accBalances = []
     store.nodePublicKeys = []
-    store.accountTransactions = []
+    store.accountBalances = []
+    // store.accountAddList = []
+    // store.transactionFees = []
+    // store.accountTransactions = []
+
+    if (!store.blocksAddition) return callback(null, { success: false, message: null })
 
     this.service.getLastHeight((err, result) => {
-      if (err) return callback(`[Transactions] Transactions Service - Get Last Height ${err}`, null)
+      if (err) return callback(`[Transactions] Transactions Service - Get Last Height ${err}`, { success: false, message: null })
 
       if (!result) {
         const height = 0
-        this.recursiveUpsertTransactions(height, height, (err, result) => {
-          if (err) return callback(err, null)
-          if (!result) return callback(null, null)
-          return callback(null, result)
+        this.recursiveUpsertTransactions(height, height, (error, result) => {
+          return callback(error, result)
         })
       } else {
         const lastHeightTransaction = result.Height
 
-        this.blocksService.getLastHeight((err, result) => {
-          if (err) return callback(err, null)
-          if (!result) return callback(null, null)
+        this.blocksService.getLastHeight((error, result) => {
+          if (error) return callback(`[Transactions] Blocks Service - Get Last Height ${error}`, { success: false, message: null })
+          if (!result) return callback(null, { success: false, message: '[Transactions] No additional data' })
 
           const lastHeightBlock = result.Height
-          this.recursiveUpsertTransactions(lastHeightTransaction + 1, lastHeightBlock, (err, result) => {
-            if (err) return callback(err, null)
-            if (!result) return callback(null, null)
-            return callback(null, result)
+          this.recursiveUpsertTransactions(lastHeightTransaction + 1, lastHeightBlock, (error, result) => {
+            return callback(error, result)
           })
         })
       }
@@ -45,62 +47,153 @@ module.exports = class Transactions extends BaseController {
   }
 
   recursiveUpsertTransactions(heightStart, heightEnd, callback) {
-    if (heightStart > heightEnd) return callback(null, null)
+    if (heightStart > heightEnd) return callback(null, { success: false, message: null })
+
     if (heightStart === heightEnd) {
-      this.upsertTransactions(heightStart, (err, result) => {
-        if (err) return callback(err, null)
-        if (result < 1) return callback(null, null)
-        return callback(null, `[Transactions] Upsert ${result} data successfully`)
+      this.upsertTransactions(heightStart, (error, result) => {
+        return callback(error, result)
       })
-      return
-    }
-
-    let transactions = []
-    if (heightEnd - heightStart > 201) heightEnd = 200
-    for (let height = heightStart; height < heightEnd; height++) {
-      const transaction = new Promise((resolve, reject) => {
-        this.upsertTransactions(height, (err, result) => {
-          if (err) return reject(err)
-          if (result < 1) return resolve(0)
-          return resolve(result)
+    } else {
+      let transactions = []
+      for (let height = heightStart; height < heightEnd; height++) {
+        const transaction = new Promise((resolve, reject) => {
+          this.upsertTransactions(height, (err, { count } = result) => {
+            if (err) return reject(err)
+            return resolve(count)
+          })
         })
-      })
-      transactions.push(transaction)
+
+        transactions.push(transaction)
+      }
+
+      Promise.all(transactions)
+        .then(results => {
+          const count = results.reduce((prev, curr) => {
+            return parseInt(prev) + parseInt(curr)
+          }, 0)
+
+          if (count < 1) return callback(null, { success: false, message: '[Transactions] No additional data' })
+          return callback(null, { success: true, message: `[Transactions] Upsert ${count} data successfully` })
+        })
+        .catch(error => callback(`[Transactions] Upsert Transactions - Promise All ${error}`, { success: false, message: null }))
     }
-
-    Promise.all(transactions)
-      .then(results => {
-        const count = results.reduce((prev, curr) => {
-          return parseInt(prev) + parseInt(curr)
-        }, 0)
-
-        if (count < 1) return callback(null, null)
-        return callback(null, `[Transactions] Upsert ${count} data successfully`)
-      })
-      .catch(error => callback(error, null))
   }
 
   upsertTransactions(height, callback) {
     const params = { Height: height, Pagination: { OrderField: 'block_height', OrderBy: 'ASC' } }
-
     Transaction.GetTransactions(params, (err, result) => {
-      if (err) return callback(`[Transactions] Get Transactions ${err}`, null)
-      if (result && result.Transactions && result.Transactions.length < 1) return callback(null, null)
+      if (err) return callback(`[Transactions] Proto Transaction - Get Transactions ${err}`, { success: false, count: 0, message: null })
+      if (result && result.Transactions && result.Transactions.length < 1)
+        return callback(null, { success: false, count: 0, message: '[Transactions] No additional data' })
 
       let nodePublicKeys = []
 
+      /** filter data by height because result from proto transactions still showing data out of params */
       const results = result.Transactions.filter(item => item.Height === height)
+
+      // results.map(item => {
+      //   /** Get Aaddress & Fees from Sender only and Address from Sender & Recipient for Account Balances */
+      //   this.accountService.findOneAddress(item.SenderAccountAddress, (err, result) => {
+      //     if (err) return callback(`[Transactions] Account Service - Find One Address ${err}`, { success: false, count: 0, message: null })
+
+      //     /** Summarying totalFees per Account if there's multiple transation on one address */
+      //     const index = store.transactionFees.findIndex(x => x.AccountAddress === item.SenderAccountAddress)
+      //     const latestFee = result.TotalFeesPaid ? result.TotalFeesPaid : parseInt('0')
+      //     // const latestTotalFee = result.TotalFeesPaidConversion ? result.TotalFeesPaidConversion : parseInt('0')
+      //     if (index !== -1) {
+      //       store.transactionFees[index] = {
+      //         AccountAddress: item.SenderAccountAddress,
+      //         Fee: parseInt(store.transactionFees[index].Fee) + latestFee + parseInt(item.Fee) ? parseInt(item.Fee) : 0,
+      //       }
+      //     } else {
+      //       store.transactionFees.push({
+      //         AccountAddress: item.SenderAccountAddress,
+      //         Fee: result.Fee + latestFee + parseInt(item.Fee) ? parseInt(item.Fee) : 0,
+      //       })
+      //     }
+      //   })
+      // })
+
+      // results.map(item => {
+      //   if (!store.accountAddList.includes(item.SenderAccountAddress)) store.accountAddList.push(item.SenderAccountAddress)
+      // })
+
+      // results.map(item => {
+      //   if (!store.accountAddList.includes(item.RecipientAccountAddress)) store.accountAddList.push(item.RecipientAccountAddress)
+      // })
+
+      // AccountBalance.GetAccountBalances({ AccountAddresses: store.accountAddList }, (error, result) => {
+      //   console.log('==resssss', ress)
+
+      //   if (error) console.log('error = ', error)
+      //   ress.AccountBalances.map(item => {
+      //     store.accBalances.push(item)
+      //   })
+      // })
+
       const items = results.map(item => {
-        store.accountTransactions.push({
-          SenderAccountAddress: item.SenderAccountAddress,
-          RecipientAccountAddress: item.RecipientAccountAddress,
-          Fee: parseInt(item.Fee),
-          FeeConversion: util.zoobitConversion(parseInt(item.Fee)),
-          Amount: item.TransactionType === 1 ? parseInt(item.sendMoneyTransactionBody.Amount) : 0,
-          AmountConversion: item.TransactionType === 1 ? util.zoobitConversion(parseInt(item.sendMoneyTransactionBody.Amount)) : 0,
-          BlockHeight: item.Height,
-          Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
+        AccountBalance.GetAccountBalance({ AccountAddress: item.SenderAccountAddress }, (error, result) => {
+          if (error)
+            return callback(`[Transactions] Proto Account Balance - Get Sender Account Balance ${error}`, { success: false, message: null })
+
+          // console.log('==result account balance', result.AccountBalance)
+          if (result && result.AccountBalance) {
+            store.accountBalances.push({
+              AccountAddress: result.AccountBalance.AccountAddress,
+              Balance: parseInt(result.AccountBalance.Balance),
+              BalanceConversion: util.zoobitConversion(result.AccountBalance.Balance),
+              SpendableBalance: parseInt(result.AccountBalance.SpendableBalance),
+              SpendableBalanceConversion: util.zoobitConversion(result.AccountBalance.SpendableBalance),
+              FirstActive: new Date(moment.unix(item.Timestamp).valueOf()),
+              LastActive: null, // TODO: completed this field
+              TotalRewards: null, // TODO: completed this field
+              TotalRewardsConversion: null, // TODO: completed this field
+              TotalFeesPaid: parseInt(item.Fee),
+              TotalFeesPaidConversion: util.zoobitConversion(parseInt(item.Fee)),
+              BlockHeight: item.Height,
+              Nodes: null,
+              Transactions: item,
+            })
+          }
         })
+
+        AccountBalance.GetAccountBalance({ AccountAddress: item.RecipientAccountAddress }, (error, result) => {
+          if (error)
+            return callback(`[Transactions] Proto Account Balance - Get Recipient Account Balance ${error}`, {
+              success: false,
+              message: null,
+            })
+
+          if (result && result.AccountBalance) {
+            store.accountBalances.push({
+              AccountAddress: result.AccountBalance.AccountAddress,
+              Balance: parseInt(result.AccountBalance.Balance),
+              BalanceConversion: util.zoobitConversion(result.AccountBalance.Balance),
+              SpendableBalance: parseInt(result.AccountBalance.SpendableBalance),
+              SpendableBalanceConversion: util.zoobitConversion(result.AccountBalance.SpendableBalance),
+              FirstActive: new Date(moment.unix(item.Timestamp).valueOf()),
+              LastActive: null, // TODO: completed this field
+              TotalRewards: null, // TODO: completed this field
+              TotalRewardsConversion: null, // TODO: completed this field
+              TotalFeesPaid: parseInt(item.Fee),
+              TotalFeesPaidConversion: util.zoobitConversion(parseInt(item.Fee)),
+              BlockHeight: item.Height,
+              Nodes: null,
+              Transactions: item,
+            })
+          }
+        })
+
+        // store.accountTransactions.push({
+        //   SenderAccountAddress: item.SenderAccountAddress,
+        //   RecipientAccountAddress: item.RecipientAccountAddress,
+        //   Fee: parseInt(item.Fee),
+        //   FeeConversion: util.zoobitConversion(parseInt(item.Fee)),
+        //   Amount: item.TransactionType === 1 ? parseInt(item.sendMoneyTransactionBody.Amount) : 0,
+        //   AmountConversion: item.TransactionType === 1 ? util.zoobitConversion(parseInt(item.sendMoneyTransactionBody.Amount)) : 0,
+        //   BlockHeight: item.Height,
+        //   Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
+        // })
 
         let sendMoney = null
         let claimNodeRegistration = null
@@ -215,10 +308,11 @@ module.exports = class Transactions extends BaseController {
 
       const matchs = ['TransactionID', 'Height']
       this.service.upserts(items, matchs, (err, result) => {
-        if (err) return callback(`[Transactions - Height ${height}] Upsert ${err}`, null)
-        if (result && result.result.ok !== 1) return callback(`[Transactions - Height ${height}] Upsert data failed`, null)
+        if (err) return callback(`[Transactions - Height ${height}] Upsert ${err}`, { success: false, count: 0, message: null })
+        if (result && result.result.ok !== 1)
+          return callback(`[Transactions - Height ${height}] Upsert data failed`, { success: false, count: 0, message: null })
 
-        const publishTransactions = items
+        const subscribeTransactions = items
           .slice(0, 5)
           .sort((a, b) => (a.Height > b.Height ? -1 : 1))
           .map(m => {
@@ -229,7 +323,12 @@ module.exports = class Transactions extends BaseController {
             }
           })
 
-        return callback(null, { data: publishTransactions, message: `[Transactions] Upsert ${items.length} data successfully` })
+        return callback(null, {
+          success: true,
+          count: items.length,
+          data: subscribeTransactions,
+          message: `[Transactions] Upsert ${items.length} data successfully`,
+        })
       })
     })
   }

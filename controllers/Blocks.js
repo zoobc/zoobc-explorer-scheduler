@@ -3,7 +3,7 @@ const moment = require('moment')
 const BaseController = require('./BaseController')
 const config = require('../config')
 const { Block } = require('../protos')
-const { store, util } = require('../utils')
+const { store, util, msg } = require('../utils')
 const { BlocksService } = require('../services')
 
 module.exports = class Blocks extends BaseController {
@@ -13,15 +13,18 @@ module.exports = class Blocks extends BaseController {
 
   update(callback) {
     store.blocksAddition = false
-    store.publishedReceipts = []
+    // store.publishedReceipts = []
 
     this.service.getLastHeight((err, result) => {
-      if (err) return callback(`[Blocks] Blocks Service - Get Last Height ${err}`, null)
+      if (err) return callback(`[Blocks] Blocks Service - Get Last Height ${err}`, { success: false, message: null })
 
-      const params = { Limit: config.app.limitData, Height: result ? parseInt(result.Height + 1) : 0 }
+      const lastBlockHight = result ? parseInt(result.Height + 1) : 0
+      const params = { Limit: config.app.limitData, Height: lastBlockHight }
+      msg.blue(`[Height] Last block height is ${lastBlockHight}`)
       Block.GetBlocks(params, (err, result) => {
-        if (err) return callback(`[Blocks] Block - Get Blocks ${err}`, null)
-        if (result && result.Blocks && result.Blocks.length < 1) return callback(null, null)
+        if (err) return callback(`[Blocks] Proto Block - Get Blocks ${err}`, { success: false, message: null })
+        if (result && result.Blocks && result.Blocks.length < 1)
+          return callback(null, { success: false, message: '[Blocks] No additional data' })
 
         const matchs = ['BlockID', 'Height']
         const items = result.Blocks.map(item => {
@@ -73,12 +76,11 @@ module.exports = class Blocks extends BaseController {
         })
 
         this.service.upserts(items, matchs, (err, result) => {
-          if (err) return callback(`[Blocks] Upsert ${err}`, null)
-          if (result && result.result.ok !== 1) return callback('[Blocks] Upsert data failed', null)
+          if (err) return callback(`[Blocks] Upsert ${err}`, { success: false, message: null })
+          if (result && result.result.ok !== 1) return callback('[Blocks] Upsert data failed', { success: false, message: null })
 
           store.blocksAddition = true
-
-          const publishBlocks = items
+          const subscribeBlocks = items
             .slice(0, 5)
             .sort((a, b) => (a.Height > b.Height ? -1 : 1))
             .map(m => {
@@ -90,7 +92,7 @@ module.exports = class Blocks extends BaseController {
               }
             })
 
-          return callback(null, { data: publishBlocks, message: `[Blocks] Upsert ${items.length} data successfully` })
+          return callback(null, { success: true, data: subscribeBlocks, message: `[Blocks] Upsert ${items.length} data successfully` })
         })
       })
     })

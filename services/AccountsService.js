@@ -14,6 +14,21 @@ module.exports = class AccountsService extends BaseService {
     })
   }
 
+  updatedAvailAccount(params, payload, callback) {
+    Accounts.findOne(params.AccountAddress, (err, res) => {
+      if (err) return callback(err, null)
+      if (res) return callback(null, null)
+      Accounts.updateOne(payload, callback)
+    })
+  }
+
+  findOneAddress(accAddress, callback) {
+    Accounts.findOne({ AccountAddress: accAddress }, (err, res) => {
+      if (err) return callback(err, null)
+      if (res) return callback(null, res)
+    })
+  }
+
   checkIsNewAccounts(accounts, callback) {
     Accounts.find()
       .lean()
