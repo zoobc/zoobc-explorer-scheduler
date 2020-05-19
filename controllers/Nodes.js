@@ -9,7 +9,7 @@ module.exports = class Nodes extends BaseController {
   }
 
   update(callback) {
-    if (store.nodePublicKeys.length < 1) return callback(null, null)
+    if (store.nodePublicKeys.length < 1) return callback(null, { success: false, message: '[Nodes] No additional data' })
     const addNodePublicKeys = store.nodePublicKeys.filter(f => f.TransactionType === 'Upsert').map(m => m.NodePublicKey)
     const delNodePublicKeys = store.nodePublicKeys.filter(f => f.TransactionType === 'Remove').map(m => m.NodePublicKey)
 
@@ -18,7 +18,7 @@ module.exports = class Nodes extends BaseController {
         ? addNodePublicKeys.map(nodePublicKey => {
             return new Promise((resolve, reject) => {
               NodeRegistration.GetNodeRegistration({ NodePublicKey: nodePublicKey }, (err, resp) => {
-                if (err) return reject(`[Nodes] Node Registration - Get Node Registration ${err}`, null)
+                if (err) return reject(`[Nodes] Proto Node Registration - Get Node Registration ${err}`, null)
                 if (resp && resp.NodeRegistration && resp.NodeRegistration === {}) return resolve({ count: 0, type: 'upsert' })
 
                 const items = [
@@ -81,9 +81,9 @@ module.exports = class Nodes extends BaseController {
           .map(m => m.count)
           .reduce((prev, curr) => parseInt(prev) + parseInt(curr), 0)
 
-        if (countAdd < 1 && countDel < 1) return callback(null, null)
-        return callback(null, `[Nodes] Upsert ${countAdd} and delete ${countDel} data successfully`)
+        if (countAdd < 1 && countDel < 1) return callback(null, { success: false, message: '[Nodes] No additional data' })
+        return callback(null, { success: true, message: `[Nodes] Upsert ${countAdd} and delete ${countDel} data successfully` })
       })
-      .catch(error => callback(error, null))
+      .catch(error => callback(`[Nodes] Upsert ${error}`, { success: false, message: null }))
   }
 }
