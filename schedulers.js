@@ -13,15 +13,13 @@ const accounts = new Accounts()
 const rollback = new Rollback()
 const transactions = new Transactions()
 
-const resetter = false
-
 /** cron job */
 const event = config.app.scheduleEvent
 const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
   try {
     /** WARNING: DON'T USING RESET DATA FOR PRODUCTIONS */
-    if (resetter) {
-      reset.resetByHeight(14146, (error, { success, message } = result) => {
+    if (config.app.resetData === 'true') {
+      reset.resetByHeight(0, (error, { success, message } = result) => {
         if (error) msg.red(error)
         else success ? msg.green(message) : msg.yellow(message)
       })

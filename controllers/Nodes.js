@@ -27,7 +27,7 @@ module.exports = class Nodes extends BaseController {
                     NodePublicKey: util.bufferStr(resp.NodeRegistration.NodePublicKey),
                     OwnerAddress: resp.NodeRegistration.AccountAddress,
                     NodeAddress: resp.NodeRegistration.NodeAddress,
-                    LockedFunds: resp.NodeRegistration.LockedBalance,
+                    LockedFunds: util.zoobitConversion(resp.NodeRegistration.LockedBalance),
                     RegisteredBlockHeight: resp.NodeRegistration.RegistrationHeight,
                     ParticipationScore: null,
                     RegistryStatus: resp.NodeRegistration.RegistrationStatus,
