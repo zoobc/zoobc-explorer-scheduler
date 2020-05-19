@@ -16,45 +16,52 @@ module.exports = class Rollback extends BaseController {
 
   checking(callback) {
     this.blocksService.getLastHeight(async (err, result) => {
-      if (err) return callback(`[Rollback] Blocks Service - Get Last Height ${err}`, { success: false, info: null })
-      if (!result || !result.Height) return callback(null, { success: false, info: null })
+      if (err) return callback(`[Rollback] Blocks Service - Get Last Height ${err}`, { success: false, message: null })
+      if (!result || !result.Height) return callback(null, { success: false, message: '[Rollback] No data rollback' })
 
       const Limit = config.app.limitData * 2
       const Height = parseInt(result.Height) - Limit < 1 ? 1 : parseInt(result.Height) - Limit
       this.recursiveBlockHeight(Limit, Height, (err, result) => {
-        if (err) return callback(err, { success: false, info: null })
-        if (!result) return callback(null, { success: false, info: null })
+        if (err) return callback(`[Rollback] Recursive Block Height ${err}`, { success: false, message: null })
+        if (!result) return callback(null, { success: false, message: '[Rollback] No data rollback' })
 
-        this.blocksService.destroies({ Height: { $gte: result.Height } }, (err, result) => {
-          if (err) return callback(`[Rollback] Blocks Service - Destroy Many ${err}`, { success: false, info: null })
-          if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, info: 'Blocks' })
-          return callback(null, { success: true, info: `[Rollback - Blocks] Delete ${result.deletedCount} data successfully` })
+        let blockHeight = result.Height
+        if (blockHeight < config.app.limitData) blockHeight = 0
+        
+        this.blocksService.destroies({ Height: { $gte: blockHeight } }, (err, result) => {
+          if (err) return callback(`[Rollback] Blocks Service - Destroy Many ${err}`, { success: false, message: null })
+          if (result.ok < 1 || result.deletedCount < 1)
+            return callback(null, { success: false, message: '[Rollback - Blocks] No data rollback' })
+          return callback(null, { success: true, message: `[Rollback - Blocks] Delete ${result.deletedCount} data successfully` })
         })
 
-        this.transactionsService.destroies({ Height: { $gte: result.Height } }, (err, result) => {
-          if (err) return callback(`[Rollback] Transactions Service - Destroy Many ${err}`, { success: false, info: null })
-          if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, info: 'Transactions' })
-          return callback(null, { success: true, info: `[Rollback - Transactions] Delete ${result.deletedCount} data successfully` })
+        this.transactionsService.destroies({ Height: { $gte: blockHeight } }, (err, result) => {
+          if (err) return callback(`[Rollback] Transactions Service - Destroy Many ${err}`, { success: false, message: null })
+          if (result.ok < 1 || result.deletedCount < 1)
+            return callback(null, { success: false, message: '[Rollback - Transactions] No data rollback' })
+          return callback(null, { success: true, message: `[Rollback - Transactions] Delete ${result.deletedCount} data successfully` })
         })
 
-        this.nodesService.destroies({ Height: { $gte: result.Height } }, (err, result) => {
-          if (err) return callback(`[Rollback] Nodes Service - Destroy Many ${err}`, { success: false, info: null })
-          if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, info: 'Nodes' })
-          return callback(null, { success: true, info: `[Rollback - Nodes] Delete ${result.deletedCount} data successfully` })
+        this.nodesService.destroies({ Height: { $gte: blockHeight } }, (err, result) => {
+          if (err) return callback(`[Rollback] Nodes Service - Destroy Many ${err}`, { success: false, message: null })
+          if (result.ok < 1 || result.deletedCount < 1)
+            return callback(null, { success: false, message: '[Rollback - Nodes] No data rollback' })
+          return callback(null, { success: true, message: `[Rollback - Nodes] Delete ${result.deletedCount} data successfully` })
         })
 
-        this.accountsService.destroies({ BlockHeight: { $gte: result.Height } }, (err, result) => {
-          if (err) return callback(`[Rollback] Accounts Service - Destroy Many ${err}`, { success: false, info: null })
-          if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, info: 'Accounts' })
-          return callback(null, { success: true, info: `[Rollback - Accounts] Delete ${result.deletedCount} data successfully` })
+        this.accountsService.destroies({ BlockHeight: { $gte: blockHeight } }, (err, result) => {
+          if (err) return callback(`[Rollback] Accounts Service - Destroy Many ${err}`, { success: false, message: null })
+          if (result.ok < 1 || result.deletedCount < 1)
+            return callback(null, { success: false, message: '[Rollback - Accounts] No data rollback' })
+          return callback(null, { success: true, message: `[Rollback - Accounts] Delete ${result.deletedCount} data successfully` })
         })
 
-        // this.accountTransactionsService.destroies({ BlockHeight: { $gte: result.Height } }, (err, result) => {
-        //   if (err) return callback(`[Rollback] Accounts Service - Destroy Many ${err}`, { success: false, info: null })
-        //   if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, info: 'Account Transactions' })
+        // this.accountTransactionsService.destroies({ BlockHeight: { $gte: blockHeight } }, (err, result) => {
+        //   if (err) return callback(`[Rollback] Accounts Service - Destroy Many ${err}`, { success: false, message: null })
+        //   if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, message: '[Rollback - Account Transactions] No data rollback' })
         //   return callback(null, {
         //     success: true,
-        //     info: `[Rollback - Account Transactions] Delete ${result.deletedCount} data successfully`,
+        //     message: `[Rollback - Account Transactions] Delete ${result.deletedCount} data successfully`,
         //   })
         // })
       })
@@ -65,7 +72,7 @@ module.exports = class Rollback extends BaseController {
     if (height < 1) return callback(null, null)
 
     Block.GetBlocks({ Limit: limit, Height: height }, (err, result) => {
-      if (err) return callback(`[Rollback] Block - Get Blocks ${err}`)
+      if (err) return callback(`[Rollback] Proto Block - Get Blocks ${err}`)
       if (result && result.Blocks && result.Blocks.length < 1) {
         const prevHeight = height - limit
         return this.recursiveBlockHeight(limit, prevHeight, callback)
