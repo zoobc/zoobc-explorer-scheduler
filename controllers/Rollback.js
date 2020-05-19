@@ -1,7 +1,7 @@
 const BaseController = require('./BaseController')
 const config = require('../config')
 const { Block } = require('../protos')
-const { BlocksService, TransactionsService, NodesService, AccountsService, AccountTransactionsService } = require('../services')
+const { BlocksService, TransactionsService, NodesService, AccountsService } = require('../services')
 
 module.exports = class Rollback extends BaseController {
   constructor() {
@@ -11,7 +11,7 @@ module.exports = class Rollback extends BaseController {
     this.blocksService = new BlocksService()
     this.accountsService = new AccountsService()
     this.transactionsService = new TransactionsService()
-    this.accountTransactionsService = new AccountTransactionsService()
+    // this.accountTransactionsService = new AccountTransactionsService()
   }
 
   checking(callback) {
@@ -49,14 +49,14 @@ module.exports = class Rollback extends BaseController {
           return callback(null, { success: true, info: `[Rollback - Accounts] Delete ${result.deletedCount} data successfully` })
         })
 
-        this.accountTransactionsService.destroies({ BlockHeight: { $gte: result.Height } }, (err, result) => {
-          if (err) return callback(`[Rollback] Accounts Service - Destroy Many ${err}`, { success: false, info: null })
-          if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, info: 'Account Transactions' })
-          return callback(null, {
-            success: true,
-            info: `[Rollback - Account Transactions] Delete ${result.deletedCount} data successfully`,
-          })
-        })
+        // this.accountTransactionsService.destroies({ BlockHeight: { $gte: result.Height } }, (err, result) => {
+        //   if (err) return callback(`[Rollback] Accounts Service - Destroy Many ${err}`, { success: false, info: null })
+        //   if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, info: 'Account Transactions' })
+        //   return callback(null, {
+        //     success: true,
+        //     info: `[Rollback - Account Transactions] Delete ${result.deletedCount} data successfully`,
+        //   })
+        // })
       })
     })
   }
