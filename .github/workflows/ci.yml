@@ -1,8 +1,8 @@
-name: CI
+name: Deploy Actions
 
 on:
   push:
-    branches: [ master ]
+    branches: [ develop ]
 
 jobs:
   build:
@@ -15,4 +15,4 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
-        script: ls -al
+        script: ls
