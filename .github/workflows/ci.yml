@@ -2,17 +2,24 @@ name: Deploy Actions
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Deploy to Server Mainnet
-      uses: appleboy/ssh-action@master
-      with:
-        key: ${{ secrets.SSH_KEY_MAINNET }}
-        host: ${{ secrets.SSH_HOST_MAINNET }}
-        username: ${{ secrets.SSH_USER_MAINNET }}
-        script: pm2 deploy ecosystem.config.js scheduler update
+      - uses: actions/checkout@v1
+      - name: Deploy to Server Mainnet
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_KEY_MAINNET }}
+          host: ${{ secrets.SSH_HOST_MAINNET }}
+          username: ${{ secrets.SSH_USER_MAINNET }}
+          script: pm2 deploy ecosystem.config.js scheduler update
+      - name: Deploy to Server Testnet
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_KEY_TESTNET }}
+          host: ${{ secrets.SSH_HOST_TESTNET }}
+          username: ${{ secrets.SSH_USER_TESTNET }}
+          script: pm2 deploy ecosystem.config.js scheduler exec "git pull origin master && yarn install && pm2 restart all --update-env"
