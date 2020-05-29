@@ -1,6 +1,7 @@
 # ZooBC Explorer Scheduler
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Deploy Actions](https://github.com/zoobc/zoobc-explorer-scheduler/workflows/Deploy%20Actions/badge.svg?branch=master)
 
 Background service for synchronizing zoobc-core data with local data for the consumption of explorer api. This service scheduler runs every 30 seconds (or can be set by yourself) to retrieve data Blocks, Transactions, Nodes and Accounts.
 
