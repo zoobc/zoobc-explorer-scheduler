@@ -13,8 +13,12 @@ module.exports = class Transactions extends BaseController {
     }
 
     update(callback) {
+        // store.accBalances = []
         store.nodePublicKeys = []
         store.accountBalances = []
+            // store.accountAddList = []
+        store.transactionFees = []
+            // store.accountTransactions = []
 
         if (!store.blocksAddition) return callback(null, { success: false, message: null })
 
@@ -87,54 +91,90 @@ module.exports = class Transactions extends BaseController {
             /** filter data by height because result from proto transactions still showing data out of params */
             const results = result.Transactions.filter(item => item.Height === height)
 
-            const items = results.map(item => {
+            results.map(item => {
+                /** Get Aaddress & Fees from Sender only and Address from Sender & Recipient for Account Balances */
+                this.accountService.findOneAddress(item.SenderAccountAddress, (err, result) => {
+                    if (err) return callback(`[Transactions] Account Service - Find One Address ${err}`, { success: false, count: 0, message: null })
 
+                    /** Summarying totalFees per Account if there's multiple transation on one address */
+                    const index = store.transactionFees.findIndex(x => x.AccountAddress === item.SenderAccountAddress)
+                    const latestFee = result ? result.TotalFeesPaid : parseInt('0')
+                        // const latestTotalFee = result.TotalFeesPaidConversion ? result.TotalFeesPaidConversion : parseInt('0')
+                    if (index !== -1) {
+                        store.transactionFees[index] = {
+                            AccountAddress: item.SenderAccountAddress,
+                            Fee: parseInt(store.transactionFees[index].Fee) + latestFee + parseInt(item.Fee) ? parseInt(item.Fee) : 0,
+                        }
+                    } else {
+                        store.transactionFees.push({
+                            AccountAddress: item.SenderAccountAddress,
+                            Fee: parseInt(item.Fee) ? parseInt(item.Fee) : 0,
+                        })
+                    }
+                })
+
+                this.accountService.findOneAddress(item.RecipientAccountAddress, (err, result) => {
+                    if (err) return callback(`[Transactions] Account Service - Find One Address ${err}`, { success: false, count: 0, message: null })
+
+                    /** Summarying totalFees per Account if there's multiple transation on one address */
+                    const index = store.transactionFees.findIndex(x => x.AccountAddress === item.SenderAccountAddress)
+                    const latestFee = result ? result.TotalFeesPaid : parseInt('0')
+                        // const latestTotalFee = result.TotalFeesPaidConversion ? result.TotalFeesPaidConversion : parseInt('0')
+                    if (index !== -1) {
+                        store.transactionFees[index] = {
+                            AccountAddress: item.SenderAccountAddress,
+                            Fee: latestFee,
+                        }
+                    } else {
+                        store.transactionFees.push({
+                            AccountAddress: item.SenderAccountAddress,
+                            Fee: parseInt(item.Fee) ? parseInt(item.Fee) : 0,
+                        })
+                    }
+                })
+            })
+
+            // results.map(item => {
+            //   if (!store.accountAddList.includes(item.SenderAccountAddress)) store.accountAddList.push(item.SenderAccountAddress)
+            // })
+
+            // results.map(item => {
+            //   if (!store.accountAddList.includes(item.RecipientAccountAddress)) store.accountAddList.push(item.RecipientAccountAddress)
+            // })
+
+            // AccountBalance.GetAccountBalances({ AccountAddresses: store.accountAddList }, (error, result) => {
+            //   console.log('==resssss', ress)
+
+            //   if (error) console.log('error = ', error)
+            //   ress.AccountBalances.map(item => {
+            //     store.accBalances.push(item)
+            //   })
+            // })
+
+            const items = results.map(item => {
                 AccountBalance.GetAccountBalance({ AccountAddress: item.SenderAccountAddress }, (error, result) => {
                     if (error)
                         return callback(`[Transactions] Proto Account Balance - Get Sender Account Balance ${error}`, { success: false, message: null })
 
-                    this.accountService.findOneAddress(result.AccountBalance.AccountAddress, (err, findResult) => {
-                        const index = store.accountBalances.findIndex(x => x.AccountAddress === result.AccountBalance.AccountAddress)
-                        if (err) return callback(err, null)
-                        const latestFee = findResult ? findResult.TotalFeesPaid : parseInt('0')
-                        if (result && result.AccountBalance) {
-                            if (index !== -1) {
-                                store.accountBalances[index] = {
-                                    AccountAddress: result.AccountBalance.AccountAddress,
-                                    Balance: parseInt(result.AccountBalance.Balance),
-                                    BalanceConversion: util.zoobitConversion(result.AccountBalance.Balance),
-                                    SpendableBalance: parseInt(result.AccountBalance.SpendableBalance),
-                                    SpendableBalanceConversion: util.zoobitConversion(result.AccountBalance.SpendableBalance),
-                                    FirstActive: new Date(moment.unix(item.Timestamp).valueOf()),
-                                    LastActive: null, // TODO: completed this field
-                                    TotalRewards: null, // TODO: completed this field
-                                    TotalRewardsConversion: null, // TODO: completed this field
-                                    TotalFeesPaid: parseInt(store.accountBalances[index].Fee) + latestFee + parseInt(item.Fee),
-                                    TotalFeesPaidConversion: util.zoobitConversion(parseInt(parseInt(store.accountBalances[index].Fee) + latestFee + parseInt(item.Fee))),
-                                    BlockHeight: item.Height,
-                                    Nodes: null,
-                                    Transactions: item,
-                                }
-                            } else {
-                                store.accountBalances.push({
-                                    AccountAddress: result.AccountBalance.AccountAddress,
-                                    Balance: parseInt(result.AccountBalance.Balance),
-                                    BalanceConversion: util.zoobitConversion(result.AccountBalance.Balance),
-                                    SpendableBalance: parseInt(result.AccountBalance.SpendableBalance),
-                                    SpendableBalanceConversion: util.zoobitConversion(result.AccountBalance.SpendableBalance),
-                                    FirstActive: new Date(moment.unix(item.Timestamp).valueOf()),
-                                    LastActive: null, // TODO: completed this field
-                                    TotalRewards: null, // TODO: completed this field
-                                    TotalRewardsConversion: null, // TODO: completed this field
-                                    TotalFeesPaid: parseInt(item.Fee),
-                                    TotalFeesPaidConversion: util.zoobitConversion(parseInt(item.Fee)),
-                                    BlockHeight: item.Height,
-                                    Nodes: null,
-                                    Transactions: item,
-                                })
-                            }
-                        }
-                    })
+                    // console.log('==result account balance', result.AccountBalance)
+                    if (result && result.AccountBalance) {
+                        store.accountBalances.push({
+                            AccountAddress: result.AccountBalance.AccountAddress,
+                            Balance: parseInt(result.AccountBalance.Balance),
+                            BalanceConversion: util.zoobitConversion(result.AccountBalance.Balance),
+                            SpendableBalance: parseInt(result.AccountBalance.SpendableBalance),
+                            SpendableBalanceConversion: util.zoobitConversion(result.AccountBalance.SpendableBalance),
+                            FirstActive: new Date(moment.unix(item.Timestamp).valueOf()),
+                            LastActive: null, // TODO: completed this field
+                            TotalRewards: null, // TODO: completed this field
+                            TotalRewardsConversion: null, // TODO: completed this field
+                            TotalFeesPaid: parseInt(item.Fee),
+                            TotalFeesPaidConversion: util.zoobitConversion(parseInt(item.Fee)),
+                            BlockHeight: item.Height,
+                            Nodes: null,
+                            Transactions: item,
+                        })
+                    }
                 })
 
                 AccountBalance.GetAccountBalance({ AccountAddress: item.RecipientAccountAddress }, (error, result) => {
@@ -155,14 +195,25 @@ module.exports = class Transactions extends BaseController {
                             LastActive: null, // TODO: completed this field
                             TotalRewards: null, // TODO: completed this field
                             TotalRewardsConversion: null, // TODO: completed this field
-                            TotalFeesPaid: parseInt(item.Fee),
-                            TotalFeesPaidConversion: util.zoobitConversion(parseInt(item.Fee)),
+                            TotalFeesPaid: 0,
+                            TotalFeesPaidConversion: 0,
                             BlockHeight: item.Height,
                             Nodes: null,
                             Transactions: item,
                         })
                     }
                 })
+
+                // store.accountTransactions.push({
+                //   SenderAccountAddress: item.SenderAccountAddress,
+                //   RecipientAccountAddress: item.RecipientAccountAddress,
+                //   Fee: parseInt(item.Fee),
+                //   FeeConversion: util.zoobitConversion(parseInt(item.Fee)),
+                //   Amount: item.TransactionType === 1 ? parseInt(item.sendMoneyTransactionBody.Amount) : 0,
+                //   AmountConversion: item.TransactionType === 1 ? util.zoobitConversion(parseInt(item.sendMoneyTransactionBody.Amount)) : 0,
+                //   BlockHeight: item.Height,
+                //   Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
+                // })
 
                 let sendMoney = null
                 let claimNodeRegistration = null

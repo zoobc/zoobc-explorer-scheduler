@@ -5,4 +5,5 @@ module.exports = {
     accountTransactions: [],
     nodePublicKeys: [],
     accountAddList: [],
+    transactionFees: [],
 }

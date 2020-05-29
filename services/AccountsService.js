@@ -26,7 +26,7 @@ module.exports = class AccountsService extends BaseService {
         Accounts.findOne({ AccountAddress: accAddress }, (err, res) => {
             if (err) return callback(err, null)
             if (res) return callback(null, res)
-            return callback(null, null)
+            return callback(null, res)
         })
     }
 

@@ -1,41 +1,41 @@
 {
-  "name": "zoobc-explorer-scheduler",
-  "version": "0.1.0",
-  "description": "Scheduler ZooBC Explorer",
-  "license": "ISC",
-  "author": "ZooBC Team",
-  "private": true,
-  "main": "schedulers.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zoobc/zoobc-explorer-scheduler.git"
-  },
-  "bugs": {
-    "url": "https://github.com/zoobc/zoobc-explorer-scheduler/issues"
-  },
-  "keywords": [
-    "blockchainzoo",
-    "zoobc",
-    "scheduler",
-    "blockchain"
-  ],
-  "scripts": {
-    "start": "nodemon schedulers.js",
-    "schema": "./schema.sh"
-  },
-  "dependencies": {
-    "chalk": "^4.0.0",
-    "cron": "^1.8.2",
-    "crypto-js": "^4.0.0",
-    "grpc-pack": "^0.2.3",
-    "lodash": "^4.17.15",
-    "moment": "^2.25.3",
-    "mongoose": "^5.9.12",
-    "saslprep": "^1.0.3",
-    "uuid": "^8.0.0"
-  },
-  "devDependencies": {
-    "dotenv": "^8.2.0",
-    "nodemon": "^2.0.3"
-  }
+    "name": "zoobc-explorer-scheduler",
+    "version": "0.1.0",
+    "description": "Scheduler ZooBC Explorer",
+    "license": "ISC",
+    "author": "ZooBC Team",
+    "private": true,
+    "main": "schedulers.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/zoobc/zoobc-explorer-scheduler.git"
+    },
+    "bugs": {
+        "url": "https://github.com/zoobc/zoobc-explorer-scheduler/issues"
+    },
+    "keywords": [
+        "blockchainzoo",
+        "zoobc",
+        "scheduler",
+        "blockchain"
+    ],
+    "scripts": {
+        "start": "nodemon schedulers.js",
+        "schema": "./schema.sh"
+    },
+    "dependencies": {
+        "chalk": "^4.0.0",
+        "cron": "^1.8.2",
+        "crypto-js": "^4.0.0",
+        "grpc-pack": "^0.2.3",
+        "lodash": "^4.17.15",
+        "moment": "^2.25.3",
+        "mongoose": "^5.9.12",
+        "saslprep": "^1.0.3",
+        "uuid": "^8.0.0"
+    },
+    "devDependencies": {
+        "dotenv": "^8.2.0",
+        "nodemon": "^2.0.3"
+    }
 }
