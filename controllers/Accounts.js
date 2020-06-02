@@ -11,28 +11,20 @@ module.exports = class Accounts extends BaseController {
         if (store.accountBalances.length < 1) return callback(null, { success: false, message: '[Accounts] No additional data' })
 
         const matchs = ['AccountAddress']
-        let finalAccount = []
         const acc = new Promise((resolve, reject) => {
             this.getUniqueAccounts(store.accountBalances,
                 store.transactionFees, (err, result) => {
                     if (err) return reject(err)
                     return resolve(result)
                 })
-            finalAccount.push(acc)
         })
-
-        // console.log('finalAccount', finalAccount)
-
-        Promise.all(finalAccount)
-            .then(results => {
-                this.service.upserts(results, matchs, (err, result) => {
-                    if (err) return callback(`[Accounts] Upsert ${err}`, { success: false, message: null })
-                    if (result && result.result.ok !== 1) return callback('[Accounts] Upsert data failed', { success: false, message: null })
-                    return callback(null, { success: true, message: `[Accounts] Upsert ${store.accountBalances.length} data successfully` })
-                })
+        acc.then(results => {
+            this.service.upserts(results, matchs, (err, result) => {
+                if (err) return callback(`[Accounts] Upsert ${err}`, { success: false, message: null })
+                if (result && result.result.ok !== 1) return callback('[Accounts] Upsert data failed', { success: false, message: null })
+                return callback(null, { success: true, message: `[Accounts] Upsert ${store.accountBalances.length} data successfully` })
             })
-
-
+        })
 
         // if (store.accountTransactions.length < 1) return callback(null, null)
 

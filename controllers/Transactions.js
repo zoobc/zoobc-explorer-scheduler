@@ -91,73 +91,20 @@ module.exports = class Transactions extends BaseController {
             /** filter data by height because result from proto transactions still showing data out of params */
             const results = result.Transactions.filter(item => item.Height === height)
 
-            results.map(item => {
-                /** Get Aaddress & Fees from Sender only and Address from Sender & Recipient for Account Balances */
-                this.accountService.findOneAddress(item.SenderAccountAddress, (err, result) => {
-                    if (err) return callback(`[Transactions] Account Service - Find One Address ${err}`, { success: false, count: 0, message: null })
-
-                    /** Summarying totalFees per Account if there's multiple transation on one address */
-                    const index = store.transactionFees.findIndex(x => x.AccountAddress === item.SenderAccountAddress)
-                    const latestFee = result ? result.TotalFeesPaid : parseInt('0')
-                        // const latestTotalFee = result.TotalFeesPaidConversion ? result.TotalFeesPaidConversion : parseInt('0')
-                    if (index !== -1) {
-                        store.transactionFees[index] = {
-                            AccountAddress: item.SenderAccountAddress,
-                            Fee: parseInt(store.transactionFees[index].Fee) + latestFee + parseInt(item.Fee) ? parseInt(item.Fee) : 0,
-                        }
-                    } else {
-                        store.transactionFees.push({
-                            AccountAddress: item.SenderAccountAddress,
-                            Fee: parseInt(item.Fee) ? parseInt(item.Fee) : 0,
-                        })
-                    }
-                })
-
-                this.accountService.findOneAddress(item.RecipientAccountAddress, (err, result) => {
-                    if (err) return callback(`[Transactions] Account Service - Find One Address ${err}`, { success: false, count: 0, message: null })
-
-                    /** Summarying totalFees per Account if there's multiple transation on one address */
-                    const index = store.transactionFees.findIndex(x => x.AccountAddress === item.SenderAccountAddress)
-                    const latestFee = result ? result.TotalFeesPaid : parseInt('0')
-                        // const latestTotalFee = result.TotalFeesPaidConversion ? result.TotalFeesPaidConversion : parseInt('0')
-                    if (index !== -1) {
-                        store.transactionFees[index] = {
-                            AccountAddress: item.SenderAccountAddress,
-                            Fee: latestFee,
-                        }
-                    } else {
-                        store.transactionFees.push({
-                            AccountAddress: item.SenderAccountAddress,
-                            Fee: parseInt(item.Fee) ? parseInt(item.Fee) : 0,
-                        })
-                    }
-                })
+            results.map(async item => {
+                /** Get Address & Fees from Sender only and Address from Sender & Recipient for Account Balances */
+                const res = await this.calculateSenderFees(item)
             })
 
-            // results.map(item => {
-            //   if (!store.accountAddList.includes(item.SenderAccountAddress)) store.accountAddList.push(item.SenderAccountAddress)
-            // })
-
-            // results.map(item => {
-            //   if (!store.accountAddList.includes(item.RecipientAccountAddress)) store.accountAddList.push(item.RecipientAccountAddress)
-            // })
-
-            // AccountBalance.GetAccountBalances({ AccountAddresses: store.accountAddList }, (error, result) => {
-            //   console.log('==resssss', ress)
-
-            //   if (error) console.log('error = ', error)
-            //   ress.AccountBalances.map(item => {
-            //     store.accBalances.push(item)
-            //   })
-            // })
-
+            /** NEED TO CHECK FOR ANY DUPLICATE PUSH ON ARRAy */
             const items = results.map(item => {
                 AccountBalance.GetAccountBalance({ AccountAddress: item.SenderAccountAddress }, (error, result) => {
                     if (error)
                         return callback(`[Transactions] Proto Account Balance - Get Sender Account Balance ${error}`, { success: false, message: null })
 
-                    // console.log('==result account balance', result.AccountBalance)
-                    if (result && result.AccountBalance) {
+                    const index = store.accountBalances.findIndex(x => x.AccountAddress === item.SenderAccountAddress)
+
+                    if (result && result.AccountBalance && index === -1) {
                         store.accountBalances.push({
                             AccountAddress: result.AccountBalance.AccountAddress,
                             Balance: parseInt(result.AccountBalance.Balance),
@@ -184,7 +131,9 @@ module.exports = class Transactions extends BaseController {
                             message: null,
                         })
 
-                    if (result && result.AccountBalance) {
+                    const index = store.accountBalances.findIndex(x => x.AccountAddress === item.RecipientAccountAddress)
+
+                    if (result && result.AccountBalance && index === -1) {
                         store.accountBalances.push({
                             AccountAddress: result.AccountBalance.AccountAddress,
                             Balance: parseInt(result.AccountBalance.Balance),
@@ -349,6 +298,32 @@ module.exports = class Transactions extends BaseController {
                     data: subscribeTransactions,
                     message: `[Transactions] Upsert ${items.length} data successfully`,
                 })
+            })
+        })
+    }
+
+    calculateSenderFees(item) {
+        return new Promise(resolve => {
+            this.accountService.findOneAddress(item.SenderAccountAddress, (err, result) => {
+                if (err) return callback(`[Transactions] Account Service - Find One Address ${err}`, { success: false, count: 0, message: null })
+
+                /** Summarying totalFees per Account if there's multiple transation on one address */
+                const index = store.transactionFees.findIndex(x => x.AccountAddress === item.SenderAccountAddress)
+                const latestFee = result ? result.TotalFeesPaid : parseInt('0')
+                    // const latestTotalFee = result.TotalFeesPaidConversion ? result.TotalFeesPaidConversion : parseInt('0')
+                if (index !== -1) {
+                    store.transactionFees[index] = {
+                        AccountAddress: item.SenderAccountAddress,
+                        Fee: parseInt(store.transactionFees[index].Fee) + latestFee + parseInt(item.Fee) ? parseInt(item.Fee) : 0,
+                    }
+                } else {
+                    store.transactionFees.push({
+                        AccountAddress: item.SenderAccountAddress,
+                        Fee: parseInt(item.Fee) ? parseInt(item.Fee) : 0,
+                    })
+                }
+
+                resolve(store.transactionFees)
             })
         })
     }
