@@ -2,58 +2,59 @@ const BaseService = require('./BaseService')
 const { Accounts } = require('../models')
 
 module.exports = class AccountsService extends BaseService {
-  constructor() {
-    super(Accounts)
-  }
+    constructor() {
+        super(Accounts)
+    }
 
-  createdOnlyNew(params, payload, callback) {
-    Accounts.findOne(params, (err, res) => {
-      if (err) return callback(err, null)
-      if (res) return callback(null, null)
-      Accounts.create(payload, callback)
-    })
-  }
+    createdOnlyNew(params, payload, callback) {
+        Accounts.findOne(params, (err, res) => {
+            if (err) return callback(err, null)
+            if (res) return callback(null, null)
+            Accounts.create(payload, callback)
+        })
+    }
 
-  updatedAvailAccount(params, payload, callback) {
-    Accounts.findOne(params.AccountAddress, (err, res) => {
-      if (err) return callback(err, null)
-      if (res) return callback(null, null)
-      Accounts.updateOne(payload, callback)
-    })
-  }
+    updatedAvailAccount(params, payload, callback) {
+        Accounts.findOne(params.AccountAddress, (err, res) => {
+            if (err) return callback(err, null)
+            if (res) return callback(null, null)
+            Accounts.updateOne(payload, callback)
+        })
+    }
 
-  findOneAddress(accAddress, callback) {
-    Accounts.findOne({ AccountAddress: accAddress }, (err, res) => {
-      if (err) return callback(err, null)
-      if (res) return callback(null, res)
-    })
-  }
+    findOneAddress(accAddress, callback) {
+        Accounts.findOne({ AccountAddress: accAddress }, (err, res) => {
+            if (err) return callback(err, null)
+            if (res) return callback(null, res)
+            return callback(null, res)
+        })
+    }
 
-  checkIsNewAccounts(accounts, callback) {
-    Accounts.find()
-      .lean()
-      .select()
-      .where('AccountAddress')
-      .in(accounts)
-      .exec((err, results) => {
-        if (err) {
-          callback(err, null)
-          return
-        }
+    checkIsNewAccounts(accounts, callback) {
+        Accounts.find()
+            .lean()
+            .select()
+            .where('AccountAddress')
+            .in(accounts)
+            .exec((err, results) => {
+                if (err) {
+                    callback(err, null)
+                    return
+                }
 
-        if (results && results.length > 0) {
-          const dataAccounts = results.map(item => item.AccountAddress)
-          const newAccounts = accounts.filter(item => !dataAccounts.includes(item))
+                if (results && results.length > 0) {
+                    const dataAccounts = results.map(item => item.AccountAddress)
+                    const newAccounts = accounts.filter(item => !dataAccounts.includes(item))
 
-          if (newAccounts && newAccounts.length > 0) {
-            callback(null, newAccounts)
-            return
-          }
-          callback(null, null)
-          return
-        }
+                    if (newAccounts && newAccounts.length > 0) {
+                        callback(null, newAccounts)
+                        return
+                    }
+                    callback(null, null)
+                    return
+                }
 
-        callback(null, null)
-      })
-  }
+                callback(null, null)
+            })
+    }
 }
