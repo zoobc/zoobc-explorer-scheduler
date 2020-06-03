@@ -1,10 +1,9 @@
 module.exports = {
   blocksAddition: false,
-  // publishedReceipts: [],
+  publishedReceipts: [],
   accountBalances: [],
-  // accountTransactions: [],
+  accountTransactions: [],
   nodePublicKeys: [],
-  // transactionFees: [],
-  // accountAddList: [],
-  // accBalances: [],
+  accountAddList: [],
+  transactionFees: [],
 }
