@@ -27,7 +27,7 @@ module.exports = class Rollback extends BaseController {
 
         let blockHeight = result.Height
         if (blockHeight < config.app.limitData) blockHeight = 0
-        
+
         this.blocksService.destroies({ Height: { $gte: blockHeight } }, (err, result) => {
           if (err) return callback(`[Rollback] Blocks Service - Destroy Many ${err}`, { success: false, message: null })
           if (result.ok < 1 || result.deletedCount < 1)

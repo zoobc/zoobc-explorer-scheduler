@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const { upserts } = require('../utils')
 
-const schema = new mongoose.Schema({
+const schema = new mongoose.Schema(
+  {
     SenderAccountAddress: { type: String },
     RecipientAccountAddress: { type: String },
     Fee: { type: Number },
@@ -13,9 +14,11 @@ const schema = new mongoose.Schema({
     TransactionID: { type: String },
     Transaction: { type: mongoose.Schema.Types.Object },
     Escrow: { type: mongoose.Schema.Types.Object },
-}, {
+  },
+  {
     toJSON: { virtuals: true },
-})
+  }
+)
 
 schema.plugin(upserts)
 

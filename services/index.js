@@ -4,14 +4,14 @@ const BlocksService = require('./BlocksService')
 const AccountsService = require('./AccountsService')
 const TransactionsService = require('./TransactionsService')
 const MultiSignatureService = require('./MultiSignatureService')
-    // const AccountTransactionsService = require('./AccountTransactionsService')
+// const AccountTransactionsService = require('./AccountTransactionsService')
 
 module.exports = {
-    BaseService,
-    NodesService,
-    BlocksService,
-    AccountsService,
-    TransactionsService,
-    MultiSignatureService,
-    // AccountTransactionsService,
+  BaseService,
+  NodesService,
+  BlocksService,
+  AccountsService,
+  TransactionsService,
+  MultiSignatureService,
+  // AccountTransactionsService,
 }
