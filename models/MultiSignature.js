@@ -4,9 +4,9 @@ const { upserts } = require('../utils')
 const schema = new mongoose.Schema({
     MultisigAddress: { type: String },
     BlockHeight: { type: Number },
-    Nonce: { type: Number },
+    Nonce: { type: String },
     MinimumSignatures: { type: Number },
-    Addresses: [{ type: String }],
+    Addresses: { type: [String], default: undefined, },
     Latest: { type: Boolean }
 }, {
     toJSON: { virtuals: true },
