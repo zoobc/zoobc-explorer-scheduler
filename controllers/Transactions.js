@@ -93,6 +93,11 @@ module.exports = class Transactions extends BaseController {
             /** filter data by height because result from proto transactions still showing data out of params */
             const results = result.Transactions.filter(item => item.Height === height)
 
+            results.map(async item => {
+                /** Get Address & Fees from Sender only and Address from Sender & Recipient for Account Balances */
+                await this.calculateSenderFees(item)
+            })
+
             /** NEED TO CHECK FOR ANY DUPLICATE PUSH ON ARRAy */
             const items = results.map(item => {
                 AccountBalance.GetAccountBalance({ AccountAddress: item.SenderAccountAddress }, (error, result) => {
