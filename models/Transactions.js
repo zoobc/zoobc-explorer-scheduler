@@ -78,6 +78,7 @@ const schema = new mongoose.Schema({
             Nonce: { type: Number },
             MinimumSignatures: { type: Number },
             Addresses: { type: String },
+            Latest: { type: Boolean },
         },
         UnsignedTransactionBytes: { type: Buffer },
         SignatureInfo: {

@@ -6,7 +6,8 @@ const schema = new mongoose.Schema({
     BlockHeight: { type: Number },
     Nonce: { type: Number },
     MinimumSignatures: { type: Number },
-    Addresses: { type: String },
+    Addresses: [{ type: String }],
+    Latest: { type: Boolean }
 }, {
     toJSON: { virtuals: true },
 })
