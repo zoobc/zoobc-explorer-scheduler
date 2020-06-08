@@ -243,7 +243,7 @@ module.exports = class Transactions extends BaseController {
                             UnsignedTransactionBytes: item.MultiSignatureTransactionBody.UnsignedTransactionBytes,
                             SignatureInfo: item.MultiSignatureTransactionBody.SignatureInfo
                         }
-                        store.multiSig.push()
+                        store.multiSig.push(multiSignature)
                         break
                     default:
                         transactionTypeName = 'Empty'
