@@ -13,9 +13,9 @@ const nodes = new Nodes()
 const blocks = new Blocks()
 const reset = new ResetData()
 const accounts = new Accounts()
-const rollback = new Rollback()
+// const rollback = new Rollback()
 const transactions = new Transactions()
-const multiSig = new MultiSignature()
+// const multiSig = new MultiSignature()
 
 /** cron job */
 const event = config.app.scheduleEvent
