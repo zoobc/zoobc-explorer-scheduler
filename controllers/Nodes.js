@@ -1,89 +1,99 @@
 const BaseController = require('./BaseController')
-const { store, util } = require('../utils')
-const { NodesService } = require('../services')
 const { NodeRegistration } = require('../protos')
+const { store, queue, util, response } = require('../utils')
+const { NodesService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class Nodes extends BaseController {
   constructor() {
     super(new NodesService())
+    this.generalsService = new GeneralsService()
+    this.transactionsService = new TransactionsService()
+  }
+
+  static synchronize(service, params) {
+    /** send message telegram bot if avaiable */
+    if (!params) return response.sendBotMessage('Nodes', '[Nodes] Synchronize - Invalid params')
+
+    return new Promise(resolve => {
+      NodeRegistration.GetNodeRegistration(params, (err, res) => {
+        if (err)
+          return resolve(
+            /** send message telegram bot if avaiable */
+            response.sendBotMessage(
+              'Nodes',
+              `[Nodes] Proto Get Node Registration - ${err}`,
+              `- Params : <pre>${JSON.stringify(params)}</pre>`
+            )
+          )
+        if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(null)
+        if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(response.setResult(false, `[Nodes] No additional data`))
+
+        const payloads = [
+          {
+            NodeID: res.NodeRegistration.NodeID,
+            NodePublicKey: util.bufferStr(res.NodeRegistration.NodePublicKey),
+            OwnerAddress: res.NodeRegistration.AccountAddress,
+            NodeAddress: res.NodeRegistration.NodeAddress,
+            LockedFunds: util.zoobitConversion(res.NodeRegistration.LockedBalance),
+            RegisteredBlockHeight: res.NodeRegistration.RegistrationHeight,
+            RegistryStatus: res.NodeRegistration.RegistrationStatus,
+            BlocksFunds: null, // TODO: on progress
+            RewardsPaid: null, // TODO: on progress
+            ParticipationScore: null, // TODO: on progress
+            RewardsPaidConversion: null, // TODO: on progress
+            Latest: res.NodeRegistration.Latest,
+            Height: res.NodeRegistration.Height,
+          },
+        ]
+        service.upserts(payloads, ['NodeID', 'NodePublicKey'], (err, res) => {
+          /** send message telegram bot if avaiable */
+          if (err) return resolve(response.sendBotMessage('Nodes', `[Nodes] Upsert - ${err}`))
+          if (res && res.result.ok !== 1) return resolve(response.setError(`[Nodes] Upsert data failed`))
+          return resolve(response.setResult(true, `[Nodes] Upsert ${payloads.length} data successfully`))
+        })
+      })
+    })
   }
 
   update(callback) {
-    if (store.nodePublicKeys.length < 1) return callback(null, { success: false, message: '[Nodes] No additional data' })
-    const addNodePublicKeys = store.nodePublicKeys.filter(f => f.TransactionType === 'Upsert').map(m => m.NodePublicKey)
-    const delNodePublicKeys = store.nodePublicKeys.filter(f => f.TransactionType === 'Remove').map(m => m.NodePublicKey)
+    /** get last height node (local) */
+    this.service.getLastHeight(async (err, res) => {
+      /** send message telegram bot if avaiable */
+      if (err) return callback(response.sendBotMessage('Nodes', `[Nodes] Nodes Service - Get Last Height ${err}`))
 
-    const addNodes =
-      addNodePublicKeys.length > 0
-        ? addNodePublicKeys.map(nodePublicKey => {
-            return new Promise((resolve, reject) => {
-              NodeRegistration.GetNodeRegistration({ NodePublicKey: nodePublicKey }, (err, resp) => {
-                if (err) return reject(`[Nodes] Proto Node Registration - Get Node Registration ${err}`, null)
-                if (resp && resp.NodeRegistration && resp.NodeRegistration === {}) return resolve({ count: 0, type: 'upsert' })
+      /** set variable last height node */
+      const lastNodeHeight = res ? parseInt(res.RegisteredBlockHeight + 1) : 0
 
-                const items = [
-                  {
-                    NodeID: resp.NodeRegistration.NodeID,
-                    NodePublicKey: util.bufferStr(resp.NodeRegistration.NodePublicKey),
-                    OwnerAddress: resp.NodeRegistration.AccountAddress,
-                    NodeAddress: resp.NodeRegistration.NodeAddress,
-                    LockedFunds: util.zoobitConversion(resp.NodeRegistration.LockedBalance),
-                    RegisteredBlockHeight: resp.NodeRegistration.RegistrationHeight,
-                    ParticipationScore: null,
-                    RegistryStatus: resp.NodeRegistration.RegistrationStatus,
-                    BlocksFunds: null,
-                    RewardsPaid: null,
-                    RewardsPaidConversion: null,
-                    Latest: resp.NodeRegistration.Latest,
-                    Height: resp.NodeRegistration.Height,
-                  },
-                ]
-                const matchs = ['NodeID', 'NodePublicKey']
-                this.service.upserts(items, matchs, (err, result) => {
-                  if (err) return reject(`[Nodes] Nodes Service - Upsert ${err}`)
-                  if (result && result.ok !== 1) return resolve({ count: 0, type: 'upsert' })
-                  return resolve({ count: items.length, type: 'upsert' })
-                })
-              })
-            })
-          })
-        : { count: 0, type: 'upsert' }
+      /** getting value last check height transaction */
+      const lastCheckTransactionHeight = parseInt(await this.generalsService.getValueByKey(store.keyLastCheckTransactionHeight)) || 0
 
-    const delNodes =
-      delNodePublicKeys.length > 0
-        ? new Promise((resolve, reject) => {
-            this.service.destroies({ NodePublicKey: { $in: delNodePublicKeys } }, (err, result) => {
-              if (err) return reject(`[Nodes] Nodes Service - Destroy Many ${err}`, null)
-              if (result.deletedCount < 1) return resolve({ count: 0, type: 'remove' })
-              return resolve({ count: result.deletedCount, type: 'remove' })
-            })
-          })
-        : { count: 0, type: 'remove' }
+      /** return message if last height node greather than equal last check height transaction  */
+      if (lastNodeHeight > 0 && lastNodeHeight >= lastCheckTransactionHeight)
+        return callback(response.setResult(false, '[Nodes] No additional data'))
 
-    let nodes = []
-    nodes.push(delNodes)
-    if (Array.isArray(addNodes)) {
-      addNodes.forEach(addNode => {
-        nodes.push(addNode)
+      /** get node registrations with range height */
+      this.transactionsService.getNodePublicKeysByHeights(lastNodeHeight, lastCheckTransactionHeight, (err, res) => {
+        /** send message telegram bot if avaiable */
+        if (err) return callback(response.sendBotMessage('Nodes', `[Nodes] Transactions Service - Get Nodes ${err}`))
+        if (!res) return callback(response.setResult(false, '[Nodes] No additional data'))
+        if (res && res.length < 1) return callback(response.setResult(false, '[Nodes] No additional data'))
+
+        /** initiating the queue */
+        queue.init('Queue Nodes')
+
+        /** adding  multi jobs to the queue with with params nodes public key */
+        let count = 0
+        res.forEach(nodePublicKey => {
+          count++
+          const params = { NodePublicKey: nodePublicKey }
+          queue.addJob(params)
+        })
+
+        /** processing job the queue */
+        queue.processJob(Nodes.synchronize, this.service)
+
+        return callback(response.setResult(true, `[Queue] ${count} Nodes on processing`))
       })
-    } else {
-      nodes.push(addNodes)
-    }
-
-    Promise.all(nodes)
-      .then(results => {
-        const countAdd = results
-          .filter(f => f.type === 'upsert')
-          .map(m => m.count)
-          .reduce((prev, curr) => parseInt(prev) + parseInt(curr), 0)
-        const countDel = results
-          .filter(f => f.type === 'remove')
-          .map(m => m.count)
-          .reduce((prev, curr) => parseInt(prev) + parseInt(curr), 0)
-
-        if (countAdd < 1 && countDel < 1) return callback(null, { success: false, message: '[Nodes] No additional data' })
-        return callback(null, { success: true, message: `[Nodes] Upsert ${countAdd} and delete ${countDel} data successfully` })
-      })
-      .catch(error => callback(`[Nodes] Upsert ${error}`, { success: false, message: null }))
+    })
   }
 }

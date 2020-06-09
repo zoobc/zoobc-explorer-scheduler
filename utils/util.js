@@ -1,4 +1,6 @@
 const CryptoJS = require('crypto-js')
+
+const msg = require('./msg')
 const config = require('../config')
 
 const keySize = 256
@@ -55,4 +57,16 @@ const zoobitConversion = curr => {
   return parseFloat(result)
 }
 
-module.exports = util = { encrypt, decrypt, bufferStr, zoobitConversion }
+const log = obj => {
+  if (obj.error) return msg.red(obj.error)
+  return obj.result && obj.result.success ? msg.green(obj.result.message) : msg.yellow(obj.result.message)
+}
+
+const isObjEmpty = obj => {
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) return false
+  }
+  return true
+}
+
+module.exports = util = { encrypt, decrypt, bufferStr, zoobitConversion, log, isObjEmpty }

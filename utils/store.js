@@ -1,10 +1,4 @@
 module.exports = {
-    blocksAddition: false,
-    publishedReceipts: [],
-    accountBalances: [],
-    accountTransactions: [],
-    nodePublicKeys: [],
-    accountAddList: [],
-    transactionFees: [],
-    multiSig: [],
+  chatId: null,
+  keyLastCheckTransactionHeight: 'LastCheckTransactionHeight',
 }
