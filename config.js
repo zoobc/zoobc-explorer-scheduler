@@ -4,9 +4,9 @@ const path = require('path')
 module.exports = {
   app: {
     port: 3033,
-    limitData: 10,
+    limitData: 100,
     scheduleEvent: 10 /** seconds */,
-    chatId: 524419158 /** don't overwrite  */,
+    chatId: process.env.CHAT_ID || null,
     resetData: process.env.RESET_DATA || false,
     env: process.env.NODE_ENV || 'development',
     tokenTelegram: process.env.TOKEN_TELEGRAM || null,
