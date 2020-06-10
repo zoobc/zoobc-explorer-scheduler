@@ -1,12 +1,12 @@
 const BaseService = require('./BaseService')
-const { MultiSig } = require('../models')
+const { MultiSignature } = require('../models')
 
 module.exports = class MultiSignatureService extends BaseService {
-    constructor() {
-        super(MultiSig)
-    }
+  constructor() {
+    super(MultiSignature)
+  }
 
-    insertMany(payloads, callback) {
-        MultiSig.insertMany(payloads, callback)
-    }
+  insertMany(payloads, callback) {
+    MultiSignature.insertMany(payloads, callback)
+  }
 }

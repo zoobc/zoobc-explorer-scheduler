@@ -1,70 +1,55 @@
+const _ = require('lodash')
 const BaseService = require('./BaseService')
 const { Transactions } = require('../models')
 
 module.exports = class TransactionsService extends BaseService {
   constructor() {
     super(Transactions)
+    this.name = 'TransactionsService'
   }
 
   getLastHeight(callback) {
     Transactions.findOne().select('Height').sort('-Height').exec(callback)
   }
 
-  getAccountsByLastHeight(callback) {
-    Transactions.findOne()
-      .select('SenderAccountAddress RecipientAccountAddress')
+  getNodePublicKeysByHeights(heightStart, heightEnd, callback) {
+    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, NodeRegistration: { $ne: null } })
+      .select('NodeRegistration')
       .sort('-Height')
-      .exec((err, result) => {
-        if (err) {
-          callback(err, null)
-          return
-        }
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, null)
 
-        if (result) {
-          let accounts = []
-          if (result.SenderAccountAddress) {
-            accounts.push(result.SenderAccountAddress)
-          }
-          if (result.RecipientAccountAddress) {
-            accounts.push(result.RecipientAccountAddress)
-          }
-          callback(null, accounts)
-          return
-        }
-
-        callback(null, null)
+        const results = res.map(item => {
+          return item.NodeRegistration.NodePublicKey
+        })
+        return callback(null, results)
       })
   }
 
-  getAccountsFromTransactions(callback) {
-    Transactions.aggregate(
-      [
-        {
-          $group: {
-            _id: null,
-            SenderAccountAddress: { $addToSet: '$SenderAccountAddress' },
-            RecipientAccountAddress: { $addToSet: '$RecipientAccountAddress' },
-          },
-        },
-      ],
-      (err, results) => {
-        if (err) {
-          callback(err, null)
-          return
-        }
+  getSendersByHeights(heightStart, heightEnd, callback) {
+    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, Sender: { $ne: null } })
+      .select('Sender Height Fee SendMoney Timestamp')
+      .sort('-Height')
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, null)
 
-        if (results && results.length > 0) {
-          const accounts = results[0].SenderAccountAddress.concat(
-            results[0].RecipientAccountAddress.filter(item => {
-              return results[0].SenderAccountAddress.indexOf(item) < 0
-            })
-          )
-          callback(null, accounts)
-        } else {
-          callback(null, null)
-          return
-        }
-      }
-    )
+        const results = _.uniqBy(res, 'Sender')
+        return callback(null, results)
+      })
+  }
+
+  getRecipientsByHeights(heightStart, heightEnd, callback) {
+    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, Recipient: { $ne: null } })
+      .select('Recipient Height Fee Timestamp')
+      .sort('-Height')
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, null)
+
+        const results = _.uniqBy(res, 'Recipient')
+        return callback(null, results)
+      })
   }
 }

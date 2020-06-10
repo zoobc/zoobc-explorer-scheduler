@@ -3,13 +3,17 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 ![Deploy Actions](https://github.com/zoobc/zoobc-explorer-scheduler/workflows/Deploy%20Actions/badge.svg?branch=master)
 
-Background service for synchronizing zoobc-core data with local data for the consumption of explorer api. This service scheduler runs every 30 seconds (or can be set by yourself) to retrieve data Blocks, Transactions, Nodes and Accounts.
+Background service for synchronizing zoobc-core data with local data for the consumption of explorer api. This service scheduler runs every 10 seconds (or can be set by yourself) to retrieve data Blocks, Transactions, Nodes and Accounts. This service supports telegram bots for notification alerts if something wrong in processing queue request.
 
 ## Top-Level Dependencies
 
+- [Express](https://www.npmjs.com/package/express)
 - [gRPC](https://grpc.io/docs/quickstart/node/)
 - [Cron](https://www.npmjs.com/package/cron)
-- [MongoDB](https://www.mongodb.com/)
+- [Mongoose](https://mongoosejs.com/docs//)
+- [Redis](https://redis.io/topics/quickstart)
+- [Bull Queue](https://optimalbits.github.io/bull/)
+- [Telegram BOT API](https://www.npmjs.com/package/node-telegram-bot-api)
 
 ## How to Usage
 
@@ -40,7 +44,12 @@ $ ./schema.sh
 # delete and clone repository zoobc-schema
 ```
 
+## Queue Dashboard
+
+- [http://localhost:3033](http://localhost:3033)
+
 ## A Typical Top-Level Directory
+
     .
     ├── ...
     ├── controllers           # Containing class files for the controllers
