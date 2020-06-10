@@ -88,7 +88,6 @@ module.exports = class Transactions extends BaseController {
                             }
                             store.multiSig.push(multiSignature)
                             break
-                            break
                         case 258:
                             transactionTypeName = 'Update Node Registration'
                             updateNodeRegistration = {
