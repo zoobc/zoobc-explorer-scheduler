@@ -89,6 +89,10 @@ const schema = new mongoose.Schema(
         },
       },
     },
+    ApprovalEscrow: {
+      Approval: { type: String },
+      TransactionID: { type: Number },
+    },
   },
   {
     toJSON: { virtuals: true },

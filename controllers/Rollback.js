@@ -6,12 +6,10 @@ const { BlocksService, TransactionsService, NodesService, AccountsService } = re
 module.exports = class Rollback extends BaseController {
   constructor() {
     super()
-
     this.nodesService = new NodesService()
     this.blocksService = new BlocksService()
     this.accountsService = new AccountsService()
     this.transactionsService = new TransactionsService()
-    // this.accountTransactionsService = new AccountTransactionsService()
   }
 
   checking(callback) {
