@@ -88,7 +88,11 @@ const schema = new mongoose.Schema({
                 of: String,
             },
         },
-    }
+    },
+    ApprovalEscrow: {
+        Approval: { type: String },
+        TransactionID: { type: Number },
+    },
 }, {
     toJSON: { virtuals: true },
 })

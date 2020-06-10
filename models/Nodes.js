@@ -6,7 +6,7 @@ const schema = new mongoose.Schema(
     NodeID: { type: String },
     NodePublicKey: { type: String },
     OwnerAddress: { type: String } /** AccountAddress */,
-    NodeAddress: { type: String },
+    NodeAddress: { type: Object },
     LockedFunds: { type: String } /** LockedBalance */,
     RegisteredBlockHeight: { type: Number } /** RegistrationHeight */,
     ParticipationScore: { type: Number } /** ..waiting core */,
