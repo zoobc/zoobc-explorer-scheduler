@@ -1,4 +1,5 @@
 const moment = require('moment')
+const utils = require('util')
 
 const config = require('../config')
 const BaseController = require('./BaseController')
@@ -39,7 +40,9 @@ module.exports = class Transactions extends BaseController {
          * note: result from proto transactions still showing data out of params
          */
         const payloads = res.Transactions.filter(item => item.Height === params.Height).map(item => {
-          if (item.TransactionType === 5) console.log('Item MultiSignature', item)
+          if (item.TransactionType === 5) console.log('Item MultiSignature', utils.inspect(item, false, null, true))
+
+          if (item.TransactionType === 4) console.log('Item Escrow', utils.inspect(item, false, null, true))
 
           let sendMoney = null
           let claimNodeRegistration = null
@@ -68,7 +71,7 @@ module.exports = class Transactions extends BaseController {
                 NodeAddress: item.nodeRegistrationTransactionBody.NodeAddress,
                 LockedBalance: item.nodeRegistrationTransactionBody.LockedBalance,
                 LockedBalanceConversion: util.zoobitConversion(item.nodeRegistrationTransactionBody.LockedBalance),
-                ProofOfOwnership: item.nodeRegistrationTransactionBody.ProofOfOwnership,
+                ProofOfOwnership: item.nodeRegistrationTransactionBody.Poown,
               }
               break
             case 3:
@@ -77,11 +80,15 @@ module.exports = class Transactions extends BaseController {
               break
             case 4:
               transactionTypeName = 'Approval Escrow Transaction'
-              // TODO: completing value
+              approvalEscrow = { ...item.approvalEscrowTransactionBody }
               break
             case 5:
               transactionTypeName = 'Multi Signature Transaction'
-              // TODO: completing value
+              multiSignature = {
+                ...item.multiSignatureTransactionBody,
+                MultiSignatureInfo: { ...item.multiSignatureTransactionBody.MultiSignatureInfo },
+                SignatureInfo: { ...item.multiSignatureTransactionBody.SignatureInfo },
+              }
               break
             case 258:
               transactionTypeName = 'Update Node Registration'
@@ -90,7 +97,7 @@ module.exports = class Transactions extends BaseController {
                 NodeAddress: item.updateNodeRegistrationTransactionBody.NodeAddress,
                 LockedBalance: item.updateNodeRegistrationTransactionBody.LockedBalance,
                 LockedBalanceConversion: util.zoobitConversion(item.updateNodeRegistrationTransactionBody.LockedBalance),
-                ProofOfOwnership: item.updateNodeRegistrationTransactionBody.ProofOfOwnership,
+                ProofOfOwnership: item.updateNodeRegistrationTransactionBody.Poown,
               }
               break
             case 259:
@@ -107,8 +114,7 @@ module.exports = class Transactions extends BaseController {
               transactionTypeName = 'Claim Node Registration'
               claimNodeRegistration = {
                 NodePublicKey: util.bufferStr(item.claimNodeRegistrationTransactionBody.NodePublicKey),
-                AccountAddress: item.claimNodeRegistrationTransactionBody.AccountAddress,
-                ProofOfOwnership: item.claimNodeRegistrationTransactionBody.ProofOfOwnership,
+                ProofOfOwnership: item.claimNodeRegistrationTransactionBody.Poown,
               }
               break
             default:
@@ -124,7 +130,6 @@ module.exports = class Transactions extends BaseController {
             Height: item.Height,
             Sender: item.SenderAccountAddress,
             Recipient: item.RecipientAccountAddress,
-            Confirmations: null,
             Fee: item.Fee,
             FeeConversion: util.zoobitConversion(item.Fee),
             Version: item.Version,
@@ -144,6 +149,12 @@ module.exports = class Transactions extends BaseController {
             RemoveAccount: removeAccount,
             MultiSignature: multiSignature,
             ApprovalEscrow: approvalEscrow,
+            MultisigChild: item.MultisigChild,
+            Escrow: item.Escrow && {
+              ...item.Escrow,
+              AmountConversion: util.zoobitConversion(item.Escrow.Amount),
+              CommissionConversion: util.zoobitConversion(item.Escrow.Commission),
+            },
           }
         })
 

@@ -1,4 +1,5 @@
 const moment = require('moment')
+const utils = require('util')
 
 const config = require('../config')
 const BaseController = require('./BaseController')
@@ -29,12 +30,24 @@ module.exports = class Blocks extends BaseController {
 
         /** mapping result */
         const payloads = res.Blocks.map(item => {
+          console.log(utils.inspect(item, false, null, true))
+
           const TotalRewards = parseFloat(item.Block.TotalCoinBase) + parseFloat(item.Block.TotalFee)
           const SkippedBlockSmithMapped =
             item.SkippedBlocksmiths.length > 0 &&
             item.SkippedBlocksmiths.map(skipped => {
               let val = skipped
               val.BlocksmithPublicKey = util.bufferStr(skipped.BlocksmithPublicKey)
+              return val
+            })
+
+          const PublishedReceiptsMapped =
+            item.Block.PublishedReceipts.length > 0 &&
+            item.Block.PublishedReceipts.map(published => {
+              let val = published
+              val.IntermediateHashes = util.bufferStr(published.IntermediateHashes)
+              val.BatchReceipt.SenderPublicKey = util.bufferStr(published.BatchReceipt.SenderPublicKey)
+              val.BatchReceipt.RecipientPublicKey = util.bufferStr(published.BatchReceipt.RecipientPublicKey)
               return val
             })
 
@@ -68,8 +81,9 @@ module.exports = class Blocks extends BaseController {
             TotalRewards,
             TotalRewardsConversion: util.zoobitConversion(TotalRewards),
             /** Relations */
-            Transactions: item.Block.Transactions,
-            PublishedReceipts: item.Block.PublishedReceipts,
+            // Transactions: item.Block.Transactions,
+            // PublishedReceipts: item.Block.PublishedReceipts,
+            PublishedReceipts: PublishedReceiptsMapped,
           }
         })
 
