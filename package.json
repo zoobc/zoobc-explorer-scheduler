@@ -35,6 +35,9 @@
       "pre-commit": "lint-staged"
     }
   },
+  "engines": {
+    "node": ">=8.3.0"
+  },
   "dependencies": {
     "bull": "^3.14.0",
     "bull-board": "^0.8.0",

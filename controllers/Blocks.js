@@ -30,12 +30,28 @@ module.exports = class Blocks extends BaseController {
         /** mapping result */
         const payloads = res.Blocks.map(item => {
           const TotalRewards = parseFloat(item.Block.TotalCoinBase) + parseFloat(item.Block.TotalFee)
+
           const SkippedBlockSmithMapped =
-            item.SkippedBlocksmiths.length > 0 &&
-            item.SkippedBlocksmiths.map(skipped => {
-              let val = skipped
-              val.BlocksmithPublicKey = util.bufferStr(skipped.BlocksmithPublicKey)
-              return val
+            (item.SkippedBlocksmiths && item.SkippedBlocksmiths.length > 0) ||
+            item.SkippedBlocksmiths.map(i => {
+              return {
+                ...i,
+                BlocksmithPublicKey: util.bufferStr(i.BlocksmithPublicKey),
+              }
+            })
+
+          const PublishedReceiptsMapped =
+            (item.Block && item.Block.PublishedReceipts && item.Block.PublishedReceipts.length > 0) ||
+            item.Block.PublishedReceipts.map(i => {
+              return {
+                ...i,
+                IntermediateHashes: util.bufferStr(i.IntermediateHashes),
+                BatchReceipt: {
+                  ...i.BatchReceipt,
+                  SenderPublicKey: util.bufferStr(i.BatchReceipt.SenderPublicKey),
+                  RecipientPublicKey: util.bufferStr(i.BatchReceipt.RecipientPublicKey),
+                },
+              }
             })
 
           return {
@@ -68,8 +84,9 @@ module.exports = class Blocks extends BaseController {
             TotalRewards,
             TotalRewardsConversion: util.zoobitConversion(TotalRewards),
             /** Relations */
-            Transactions: item.Block.Transactions,
-            PublishedReceipts: item.Block.PublishedReceipts,
+            // Transactions: item.Block.Transactions,
+            // PublishedReceipts: item.Block.PublishedReceipts,
+            PublishedReceipts: PublishedReceiptsMapped,
           }
         })
 
