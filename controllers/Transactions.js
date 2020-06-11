@@ -77,7 +77,10 @@ module.exports = class Transactions extends BaseController {
               break
             case 4:
               transactionTypeName = 'Approval Escrow Transaction'
-              // TODO: completing value
+              approvalEscrow = {
+                Approval: item.approvalEscrowTransactionBody.Approval,
+                TransactionID: item.approvalEscrowTransactionBody.TransactionID,
+              }
               break
             case 5:
               transactionTypeName = 'Multi Signature Transaction'
