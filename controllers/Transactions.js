@@ -80,7 +80,10 @@ module.exports = class Transactions extends BaseController {
               break
             case 4:
               transactionTypeName = 'Approval Escrow Transaction'
-              approvalEscrow = { ...item.approvalEscrowTransactionBody }
+              approvalEscrow = {
+                Approval: item.approvalEscrowTransactionBody.Approval,
+                TransactionID: item.approvalEscrowTransactionBody.TransactionID,
+              }
               break
             case 5:
               transactionTypeName = 'Multi Signature Transaction'
@@ -219,10 +222,10 @@ module.exports = class Transactions extends BaseController {
          * so that set value last height block is same with variable reqLimit
          * because request api core having limit request (100 requests per seconds)
          */
-        const reqLimit = config.queue.optQueue.limiter.max
-        let maxBlockHeight = lastBlockHight
-        if (parseInt(lastBlockHight) - parseInt(lastCheckTransactionHeight) > reqLimit)
-          maxBlockHeight = parseInt(lastCheckTransactionHeight) + parseInt(reqLimit)
+        // const reqLimit = config.queue.optQueue.limiter.max
+        // let maxBlockHeight = lastBlockHight
+        // if (parseInt(lastBlockHight) - parseInt(lastCheckTransactionHeight) > reqLimit)
+        //   maxBlockHeight = parseInt(lastCheckTransactionHeight) + parseInt(reqLimit)
 
         /** initiating the queue */
         queue.init('Queue Transactions')
@@ -236,22 +239,22 @@ module.exports = class Transactions extends BaseController {
           /** update general last check height transaction with value 1 */
           count = 1
           this.generalsService.setValueByKey(store.keyLastCheckTransactionHeight, 1)
-        } else if (lastCheckTransactionHeight > 0 && maxBlockHeight > lastCheckTransactionHeight) {
+        } else if (lastCheckTransactionHeight > 0 && lastBlockHight > lastCheckTransactionHeight) {
           /** looping to add job with params hight */
-          for (let height = lastCheckTransactionHeight; height <= maxBlockHeight; height++) {
+          for (let height = lastCheckTransactionHeight; height <= lastBlockHight; height++) {
             count++
             const params = { Height: height, Pagination: { OrderField: 'block_height', OrderBy: 'ASC' } }
             queue.addJob(params)
           }
 
           /** update general last check height transaction with value last height block */
-          this.generalsService.setValueByKey(store.keyLastCheckTransactionHeight, maxBlockHeight)
+          this.generalsService.setValueByKey(store.keyLastCheckTransactionHeight, lastBlockHight)
         }
 
         /** processing job the queue */
         queue.processJob(Transactions.synchronize, this.service)
 
-        return callback(response.setResult(true, `[Queue] ${count} Transactions on processing`))
+        return callback(response.setResult(true, `[Queue] ${count > 1 ? count - 1 : count} Transactions on processing`))
       })
     })
   }
