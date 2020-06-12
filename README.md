@@ -14,6 +14,7 @@ Background service for synchronizing zoobc-core data with local data for the con
 - [Redis](https://redis.io/topics/quickstart)
 - [Bull Queue](https://optimalbits.github.io/bull/)
 - [Telegram BOT API](https://www.npmjs.com/package/node-telegram-bot-api)
+- [IP Stack](https://ipstack.com/documentation)
 
 ## How to Usage
 

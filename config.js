@@ -9,6 +9,7 @@ module.exports = {
     chatId: process.env.CHAT_ID || null,
     resetData: process.env.RESET_DATA || false,
     env: process.env.NODE_ENV || 'development',
+    ipStackKey: process.env.IPSTACK_KEY || null,
     tokenTelegram: process.env.TOKEN_TELEGRAM || null,
     tokenSecret: process.env.TOKEN_SECRET || '884d31c5d4766dc624e1225888babeb7',
   },

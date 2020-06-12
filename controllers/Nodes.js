@@ -1,6 +1,6 @@
 const BaseController = require('./BaseController')
 const { NodeRegistration } = require('../protos')
-const { store, queue, util, response } = require('../utils')
+const { store, queue, util, response, ipstack } = require('../utils')
 const { NodesService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class Nodes extends BaseController {
@@ -15,7 +15,7 @@ module.exports = class Nodes extends BaseController {
     if (!params) return response.sendBotMessage('Nodes', '[Nodes] Synchronize - Invalid params')
 
     return new Promise(resolve => {
-      NodeRegistration.GetNodeRegistration(params, (err, res) => {
+      NodeRegistration.GetNodeRegistration(params, async (err, res) => {
         if (err)
           return resolve(
             /** send message telegram bot if avaiable */
@@ -27,6 +27,22 @@ module.exports = class Nodes extends BaseController {
           )
         if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(null)
         if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(response.setResult(false, `[Nodes] No additional data`))
+
+        /** additional detail node address */
+        const resIpStack =
+          res.NodeRegistration && res.NodeRegistration.NodeAddress && res.NodeRegistration.NodeAddress.Address
+            ? await ipstack.get(res.NodeRegistration.NodeAddress.Address)
+            : null
+        const IpAddress = resIpStack ? resIpStack.ip : null
+        const CountryCode = resIpStack ? resIpStack.country_code : null
+        const CountryName = resIpStack ? resIpStack.country_name : null
+        const RegionCode = resIpStack ? resIpStack.region_code : null
+        const RegionName = resIpStack ? resIpStack.region_name : null
+        const City = resIpStack ? resIpStack.city : null
+        const Latitude = resIpStack ? resIpStack.latitude : null
+        const Longitude = resIpStack ? resIpStack.longitude : null
+        const CountryFlagUrl = resIpStack ? resIpStack.location.country_flag : null
+        const CountryFlagEmoji = resIpStack ? resIpStack.location.country_flag_emoji : null
 
         const payloads = [
           {
@@ -43,6 +59,16 @@ module.exports = class Nodes extends BaseController {
             RewardsPaidConversion: null, // TODO: on progress
             Latest: res.NodeRegistration.Latest,
             Height: res.NodeRegistration.Height,
+            IpAddress,
+            CountryCode,
+            CountryName,
+            RegionCode,
+            RegionName,
+            City,
+            Latitude,
+            Longitude,
+            CountryFlagUrl,
+            CountryFlagEmoji,
           },
         ]
         service.upserts(payloads, ['NodeID', 'NodePublicKey'], (err, res) => {
