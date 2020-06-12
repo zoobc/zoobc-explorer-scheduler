@@ -7,7 +7,7 @@ const { UI } = require('bull-board')
 
 const config = require('./config')
 const { msg, util, response } = require('./utils')
-const { Nodes, Blocks, Accounts, Rollback, ResetData, Transactions, MultiSignature } = require('./controllers')
+const { Nodes, Blocks, Accounts, ResetData, Transactions } = require('./controllers')
 
 const nodes = new Nodes()
 const blocks = new Blocks()
