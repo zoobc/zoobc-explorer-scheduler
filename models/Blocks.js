@@ -43,8 +43,27 @@ const schema = new mongoose.Schema(
     TotalRewardsConversion: { type: String },
 
     /** Relations */
-    Transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transactions' }],
-    PublishedReceipts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Published_Receipts' }],
+    // Transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transactions' }],
+    // PublishedReceipts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Published_Receipts' }],
+
+    PublishedReceipts: [
+      {
+        IntermediateHashes: { type: String },
+        BlockHeight: { type: Number },
+        ReceiptIndex: { type: Number },
+        PublishedIndex: { type: Number },
+        BatchReceipt: {
+          SenderPublicKey: { type: String },
+          RecipientPublicKey: { type: String },
+          DatumType: { type: Number },
+          DatumHash: { type: Buffer },
+          ReferenceBlockHeight: { type: Number },
+          ReferenceBlockHash: { type: Buffer },
+          RMRLinked: { type: Buffer },
+          RecipientSignature: { type: Buffer },
+        },
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },

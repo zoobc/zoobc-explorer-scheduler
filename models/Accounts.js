@@ -5,7 +5,7 @@ const schema = new mongoose.Schema(
   {
     AccountAddress: { type: String },
     Balance: { type: Number },
-    BalanceConversion: { type: Number },
+    BalanceConversion: { type: String },
     SpendableBalance: { type: Number },
     SpendableBalanceConversion: { type: String },
     FirstActive: { type: Date },
@@ -15,6 +15,8 @@ const schema = new mongoose.Schema(
     TotalFeesPaid: { type: Number },
     TotalFeesPaidConversion: { type: String },
     BlockHeight: { type: Number },
+    TransactionHeight: { type: Number },
+    PopRevenue: { type: Number },
     Nodes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Nodes' }],
     Transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transactions' }],
   },
