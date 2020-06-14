@@ -17,7 +17,7 @@ module.exports = {
     optQueue: {
       prefix: 'zoobc',
       limiter: {
-        max: 100,
+        max: 200,
         duration: 1000 /** miliseconds */,
         bounceBack: false,
       },
