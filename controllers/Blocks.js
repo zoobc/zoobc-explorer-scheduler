@@ -33,7 +33,7 @@ module.exports = class Blocks extends BaseController {
               /** send message telegram bot if avaiable */
               response.sendBotMessage('Blocks', `[Blocks] Proto Get Blocks - ${err}`, `- Params : <pre>${JSON.stringify(params)}</pre>`)
             )
-          if (res && res.Blocks && res.Blocks.length < 1) return null
+
           if (res && res.Blocks && res.Blocks.length < 1) return resolve(response.setResult(false, '[Blocks] No additional data'))
 
           /** mapping result */

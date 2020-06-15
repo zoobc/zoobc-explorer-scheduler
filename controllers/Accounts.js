@@ -51,7 +51,7 @@ module.exports = class Accounts extends BaseController {
                 `- Params : <pre>${JSON.stringify(params)}</pre>`
               )
             )
-          if (res && util.isObjEmpty(res.AccountBalance)) return resolve(null)
+
           if (res && util.isObjEmpty(res.AccountBalance)) return resolve(response.setResult(false, `[Accounts] No additional data`))
 
           job.progress(50)
