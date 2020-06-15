@@ -36,7 +36,7 @@ module.exports = class Nodes extends BaseController {
                 `- Params : <pre>${JSON.stringify(params)}</pre>`
               )
             )
-          if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(null)
+
           if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(response.setResult(false, `[Nodes] No additional data`))
 
           /** additional detail node address */

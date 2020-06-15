@@ -51,7 +51,7 @@ module.exports = class Accounts extends BaseController {
                 `- Params : <pre>${JSON.stringify(params)}</pre>`
               )
             )
-          if (res && util.isObjEmpty(res.AccountBalance)) return resolve(null)
+
           if (res && util.isObjEmpty(res.AccountBalance)) return resolve(response.setResult(false, `[Accounts] No additional data`))
 
           job.progress(50)
@@ -115,48 +115,52 @@ module.exports = class Accounts extends BaseController {
       if (senders.data.length < 1 && recipients.data.length < 1) return callback(response.setResult(false, '[Accounts] No additional data'))
 
       /** adding multi jobs to the queue by account sender transactions */
-      senders.data.forEach(async item => {
-        /** set first active base on data account (local), if data empty so that set by timestamp */
-        const firstActive = await this.service.asyncFirstActiveAccount(item.Sender)
+      senders.data &&
+        senders.data.length > 0 &&
+        senders.data.forEach(async item => {
+          /** set first active base on data account (local), if data empty so that set by timestamp */
+          const firstActive = await this.service.asyncFirstActiveAccount(item.Sender)
 
-        /** set total fee base on data account (local) for calculate total fee paid */
-        const totalFee = await this.service.asyncTotalFeeAccount(item.Sender)
+          /** set total fee base on data account (local) for calculate total fee paid */
+          const totalFee = await this.service.asyncTotalFeeAccount(item.Sender)
 
-        const payloads = {
-          params: { AccountAddress: item.Sender },
-          accounts: {
-            AccountAddress: item.Sender,
-            Height: item.Height,
-            TotalFee: parseInt(totalFee) + parseInt(item.Fee),
-            Timestamp: item.Timestamp,
-            FirstActive: firstActive ? firstActive : item.Timestamp,
-            SendMoney: item.SendMoney || null,
-          },
-        }
-        this.queue.add(payloads, config.queue.optJob)
-      })
+          const payloads = {
+            params: { AccountAddress: item.Sender },
+            accounts: {
+              AccountAddress: item.Sender,
+              Height: item.Height,
+              TotalFee: parseInt(totalFee) + parseInt(item.Fee),
+              Timestamp: item.Timestamp,
+              FirstActive: firstActive ? firstActive : item.Timestamp,
+              SendMoney: item.SendMoney || null,
+            },
+          }
+          this.queue.add(payloads, config.queue.optJob)
+        })
 
       /** adding multi jobs to the queue by account receipt transactions */
-      recipients.data.forEach(async item => {
-        /** set first active base on data account (local), if data empty so that set by timestamp */
-        const firstActive = await this.service.asyncFirstActiveAccount(item.Recipient)
+      recipients.data &&
+        recipients.data.length > 0 &&
+        recipients.data.forEach(async item => {
+          /** set first active base on data account (local), if data empty so that set by timestamp */
+          const firstActive = await this.service.asyncFirstActiveAccount(item.Recipient)
 
-        /** set total fee base on data account (local), its not for calculating. just for update using data before */
-        const totalFee = await this.service.asyncTotalFeeAccount(item.Recipient)
+          /** set total fee base on data account (local), its not for calculating. just for update using data before */
+          const totalFee = await this.service.asyncTotalFeeAccount(item.Recipient)
 
-        const payloads = {
-          params: { AccountAddress: item.Recipient },
-          accounts: {
-            AccountAddress: item.Recipient,
-            Height: item.Height,
-            TotalFee: totalFee,
-            Timestamp: item.Timestamp,
-            FirstActive: firstActive ? firstActive : item.Timestamp,
-            SendMoney: null,
-          },
-        }
-        this.queue.add(payloads, config.queue.optJob)
-      })
+          const payloads = {
+            params: { AccountAddress: item.Recipient },
+            accounts: {
+              AccountAddress: item.Recipient,
+              Height: item.Height,
+              TotalFee: totalFee,
+              Timestamp: item.Timestamp,
+              FirstActive: firstActive ? firstActive : item.Timestamp,
+              SendMoney: null,
+            },
+          }
+          this.queue.add(payloads, config.queue.optJob)
+        })
 
       const count = parseInt(senders.data.length) + parseInt(recipients.data.length)
       return callback(response.setResult(true, `[Queue] ${count} Accounts on processing`))
