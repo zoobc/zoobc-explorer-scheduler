@@ -3,22 +3,25 @@ const { upserts } = require('../utils')
 
 const schema = new mongoose.Schema(
   {
+    AccountAddress: { type: String },
     MultiSignature: {
-      TransactionHeight: { type: Number },
       MultiSignatureInfo: {
         MultisigAddress: { type: String },
         BlockHeight: { type: Number },
         Nonce: { type: String },
         MinimumSignatures: { type: Number },
-        Addresses: { type: [String], default: undefined },
         Latest: { type: Boolean },
+        Addresses: {
+          type: [String],
+          default: undefined,
+        },
       },
       UnsignedTransactionBytes: { type: Buffer },
       SignatureInfo: {
         TransactionHash: { type: Buffer },
         Signatures: {
           type: Map,
-          of: String,
+          of: Buffer,
         },
       },
     },

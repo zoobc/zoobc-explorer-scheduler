@@ -3,12 +3,13 @@ const path = require('path')
 
 module.exports = {
   app: {
-    port: 3033,
-    limitData: 10,
+    limitData: 100,
+    port: process.env.PORT || 3033,
     scheduleEvent: 10 /** seconds */,
-    chatId: 524419158 /** don't overwrite  */,
+    chatId: process.env.CHAT_ID || null,
     resetData: process.env.RESET_DATA || false,
     env: process.env.NODE_ENV || 'development',
+    ipStackKey: process.env.IPSTACK_KEY || null,
     tokenTelegram: process.env.TOKEN_TELEGRAM || null,
     tokenSecret: process.env.TOKEN_SECRET || '884d31c5d4766dc624e1225888babeb7',
   },
@@ -16,7 +17,7 @@ module.exports = {
     optQueue: {
       prefix: 'zoobc',
       limiter: {
-        max: 100,
+        max: 200,
         duration: 1000 /** miliseconds */,
         bounceBack: false,
       },

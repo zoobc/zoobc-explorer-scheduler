@@ -5,7 +5,7 @@ const schema = new mongoose.Schema(
   {
     AccountAddress: { type: String },
     Balance: { type: Number },
-    BalanceConversion: { type: Number },
+    BalanceConversion: { type: String },
     SpendableBalance: { type: Number },
     SpendableBalanceConversion: { type: String },
     FirstActive: { type: Date },
