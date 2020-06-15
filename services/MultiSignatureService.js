@@ -9,4 +9,8 @@ module.exports = class MultiSignatureService extends BaseService {
   insertMany(payloads, callback) {
     MultiSignature.insertMany(payloads, callback)
   }
+
+  getLatestHeight(callback) {
+    MultiSignature.findOne().sort('-TransactionHeight').exec(callback)
+  }
 }

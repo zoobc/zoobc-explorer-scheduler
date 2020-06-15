@@ -27,8 +27,12 @@
     "eslint:fix": "eslint --fix ."
   },
   "lint-staged": {
-    "*.+(js|jsx)": ["eslint --fix"],
-    "*.+(js|jsx|json|css|md)": ["prettier --write"]
+    "*.+(js|jsx)": [
+      "eslint --fix"
+    ],
+    "*.+(js|jsx|json|css|md)": [
+      "prettier --write"
+    ]
   },
   "husky": {
     "hooks": {

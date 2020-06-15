@@ -8,6 +8,18 @@ module.exports = class TransactionsService extends BaseService {
     this.name = 'TransactionsService'
   }
 
+  getMultiSigByHeight(heightStart, heightEnd, callback) {
+    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, TransactionType: 5 }).exec((err, res) => {
+      if (err) return callback(err, null)
+      if (res.length < 1) return callback(null, null)
+
+      const results = res.map(item => {
+        return item
+      })
+      return callback(null, results)
+    })
+  }
+
   getLastHeight(callback) {
     Transactions.findOne().select('Height').sort('-Height').exec(callback)
   }

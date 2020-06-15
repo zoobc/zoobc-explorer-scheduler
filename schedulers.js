@@ -15,7 +15,7 @@ const reset = new ResetData()
 const accounts = new Accounts()
 // const rollback = new Rollback()
 const transactions = new Transactions()
-// const multiSig = new MultiSignature()
+const multiSig = new MultiSignature()
 
 /** cron job */
 const event = config.app.scheduleEvent
@@ -38,6 +38,10 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
 
           accounts.update(res => {
             util.log(res)
+
+            multiSig.update(res => {
+              util.log(res)
+            })
           })
         })
       })
