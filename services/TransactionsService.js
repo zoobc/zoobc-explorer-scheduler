@@ -31,7 +31,6 @@ module.exports = class TransactionsService extends BaseService {
     return new Promise(resolve => {
       this.getSendersByHeights(heightStart, heightEnd, (err, res) => {
         if (err) return resolve({ error: err, data: [] })
-        if (!res) return resolve({ error: null, data: [] })
         return resolve({ error: null, data: res })
       })
     })
@@ -43,7 +42,7 @@ module.exports = class TransactionsService extends BaseService {
       .sort('-Height')
       .exec((err, res) => {
         if (err) return callback(err, null)
-        if (res.length < 1) return callback(null, null)
+        if (res.length < 1) return callback(null, [])
 
         const results = _.uniqBy(res, 'Sender')
         return callback(null, results)
@@ -54,7 +53,6 @@ module.exports = class TransactionsService extends BaseService {
     return new Promise(resolve => {
       this.getRecipientsByHeights(heightStart, heightEnd, (err, res) => {
         if (err) return resolve({ error: err, data: [] })
-        if (!res) return resolve({ error: null, data: [] })
         return resolve({ error: null, data: res })
       })
     })
@@ -66,7 +64,7 @@ module.exports = class TransactionsService extends BaseService {
       .sort('-Height')
       .exec((err, res) => {
         if (err) return callback(err, null)
-        if (res.length < 1) return callback(null, null)
+        if (res.length < 1) return callback(null, [])
 
         const results = _.uniqBy(res, 'Recipient')
         return callback(null, results)
