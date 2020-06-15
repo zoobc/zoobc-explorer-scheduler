@@ -139,11 +139,6 @@ module.exports = class Blocks extends BaseController {
       const params = { Limit: config.app.limitData, Height: blockHeight }
       msg.blue(`[Height] Last block height is ${blockHeight > 0 ? blockHeight - 1 : 0}`)
       msg.blue(`[Height] Last check transaction height is ${generalLastCheckTransactionHeight}`)
-
-      /** return message if having block height is same with last check transaction height  */
-      if (parseInt(blockHeight - 1) <= parseInt(generalLastCheckTransactionHeight))
-        return callback(response.setResult(false, '[Blocks] No additional data'))
-
       this.queue.add(params, config.queue.optJob)
 
       return callback(response.setResult(true, `[Queue] ${config.app.limitData} Blocks on processing`))
