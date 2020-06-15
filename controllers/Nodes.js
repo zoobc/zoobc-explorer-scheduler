@@ -1,3 +1,4 @@
+const config = require('../config')
 const BaseController = require('./BaseController')
 const { NodeRegistration } = require('../protos')
 const { store, queue, util, response, ipstack } = require('../utils')
@@ -8,74 +9,89 @@ module.exports = class Nodes extends BaseController {
     super(new NodesService())
     this.generalsService = new GeneralsService()
     this.transactionsService = new TransactionsService()
+
+    /** queue */
+    this.queue = queue.create('Queue Nodes')
+    this.processing()
+    this.queue.on('completed', (job, result) => {
+      if (result && !util.isObjEmpty(result)) util.log(result)
+    })
   }
 
-  static synchronize(service, params) {
-    /** send message telegram bot if avaiable */
-    if (!params) return response.sendBotMessage('Nodes', '[Nodes] Synchronize - Invalid params')
+  processing() {
+    this.queue.process(async job => {
+      const params = job.data
+      /** send message telegram bot if avaiable */
+      if (!params) return response.sendBotMessage('Nodes', '[Nodes] Processing - Invalid params')
 
-    return new Promise(resolve => {
-      NodeRegistration.GetNodeRegistration(params, async (err, res) => {
-        if (err)
-          return resolve(
-            /** send message telegram bot if avaiable */
-            response.sendBotMessage(
-              'Nodes',
-              `[Nodes] Proto Get Node Registration - ${err}`,
-              `- Params : <pre>${JSON.stringify(params)}</pre>`
+      return new Promise(resolve => {
+        job.progress(25)
+        NodeRegistration.GetNodeRegistration(params, async (err, res) => {
+          if (err)
+            return resolve(
+              /** send message telegram bot if avaiable */
+              response.sendBotMessage(
+                'Nodes',
+                `[Nodes] Proto Get Node Registration - ${err}`,
+                `- Params : <pre>${JSON.stringify(params)}</pre>`
+              )
             )
-          )
-        if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(null)
-        if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(response.setResult(false, `[Nodes] No additional data`))
+          if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(null)
+          if (res && util.isObjEmpty(res.NodeRegistration)) return resolve(response.setResult(false, `[Nodes] No additional data`))
 
-        /** additional detail node address */
-        const resIpStack =
-          res.NodeRegistration && res.NodeRegistration.NodeAddress && res.NodeRegistration.NodeAddress.Address
-            ? await ipstack.get(res.NodeRegistration.NodeAddress.Address)
-            : null
-        const IpAddress = resIpStack ? resIpStack.ip : null
-        const CountryCode = resIpStack ? resIpStack.country_code : null
-        const CountryName = resIpStack ? resIpStack.country_name : null
-        const RegionCode = resIpStack ? resIpStack.region_code : null
-        const RegionName = resIpStack ? resIpStack.region_name : null
-        const City = resIpStack ? resIpStack.city : null
-        const Latitude = resIpStack ? resIpStack.latitude : null
-        const Longitude = resIpStack ? resIpStack.longitude : null
-        const CountryFlagUrl = resIpStack ? resIpStack.location.country_flag : null
-        const CountryFlagEmoji = resIpStack ? resIpStack.location.country_flag_emoji : null
+          /** additional detail node address */
+          const resIpStack =
+            res.NodeRegistration && res.NodeRegistration.NodeAddress && res.NodeRegistration.NodeAddress.Address
+              ? await ipstack.get(res.NodeRegistration.NodeAddress.Address)
+              : null
+          const IpAddress = resIpStack ? resIpStack.ip : null
+          const CountryCode = resIpStack ? resIpStack.country_code : null
+          const CountryName = resIpStack ? resIpStack.country_name : null
+          const RegionCode = resIpStack ? resIpStack.region_code : null
+          const RegionName = resIpStack ? resIpStack.region_name : null
+          const City = resIpStack ? resIpStack.city : null
+          const Latitude = resIpStack ? resIpStack.latitude : null
+          const Longitude = resIpStack ? resIpStack.longitude : null
+          const CountryFlagUrl = resIpStack ? resIpStack.location.country_flag : null
+          const CountryFlagEmoji = resIpStack ? resIpStack.location.country_flag_emoji : null
 
-        const payloads = [
-          {
-            NodeID: res.NodeRegistration.NodeID,
-            NodePublicKey: util.bufferStr(res.NodeRegistration.NodePublicKey),
-            OwnerAddress: res.NodeRegistration.AccountAddress,
-            NodeAddress: res.NodeRegistration.NodeAddress,
-            LockedFunds: util.zoobitConversion(res.NodeRegistration.LockedBalance),
-            RegisteredBlockHeight: res.NodeRegistration.RegistrationHeight,
-            RegistryStatus: res.NodeRegistration.RegistrationStatus,
-            BlocksFunds: null, // TODO: on progress
-            RewardsPaid: null, // TODO: on progress
-            ParticipationScore: null, // TODO: on progress
-            RewardsPaidConversion: null, // TODO: on progress
-            Latest: res.NodeRegistration.Latest,
-            Height: res.NodeRegistration.Height,
-            IpAddress,
-            CountryCode,
-            CountryName,
-            RegionCode,
-            RegionName,
-            City,
-            Latitude,
-            Longitude,
-            CountryFlagUrl,
-            CountryFlagEmoji,
-          },
-        ]
-        service.upserts(payloads, ['NodeID', 'NodePublicKey'], (err, res) => {
-          /** send message telegram bot if avaiable */
-          if (err) return resolve(response.sendBotMessage('Nodes', `[Nodes] Upsert - ${err}`))
-          if (res && res.result.ok !== 1) return resolve(response.setError(`[Nodes] Upsert data failed`))
-          return resolve(response.setResult(true, `[Nodes] Upsert ${payloads.length} data successfully`))
+          job.progress(50)
+          const payloads = [
+            {
+              NodeID: res.NodeRegistration.NodeID,
+              NodePublicKey: util.bufferStr(res.NodeRegistration.NodePublicKey),
+              OwnerAddress: res.NodeRegistration.AccountAddress,
+              NodeAddress: res.NodeRegistration.NodeAddress,
+              LockedFunds: util.zoobitConversion(res.NodeRegistration.LockedBalance),
+              RegisteredBlockHeight: res.NodeRegistration.RegistrationHeight,
+              RegistryStatus: res.NodeRegistration.RegistrationStatus,
+              BlocksFunds: null, // TODO: on progress
+              RewardsPaid: null, // TODO: on progress
+              ParticipationScore: null, // TODO: on progress
+              RewardsPaidConversion: null, // TODO: on progress
+              Latest: res.NodeRegistration.Latest,
+              Height: res.NodeRegistration.Height,
+              IpAddress,
+              CountryCode,
+              CountryName,
+              RegionCode,
+              RegionName,
+              City,
+              Latitude,
+              Longitude,
+              CountryFlagUrl,
+              CountryFlagEmoji,
+            },
+          ]
+
+          this.service.upserts(payloads, ['NodeID', 'NodePublicKey'], (err, res) => {
+            /** send message telegram bot if avaiable */
+            if (err) return resolve(response.sendBotMessage('Nodes', `[Nodes] Upsert - ${err}`))
+            if (res && res.result.ok !== 1) return resolve(response.setError(`[Nodes] Upsert data failed`))
+
+            job.progress(100)
+            return resolve(response.setResult(true, `[Nodes] Upsert ${payloads.length} data successfully`))
+          })
         })
       })
     })
@@ -104,19 +120,13 @@ module.exports = class Nodes extends BaseController {
         if (!res) return callback(response.setResult(false, '[Nodes] No additional data'))
         if (res && res.length < 1) return callback(response.setResult(false, '[Nodes] No additional data'))
 
-        /** initiating the queue */
-        queue.init('Queue Nodes')
-
         /** adding  multi jobs to the queue with with params nodes public key */
         let count = 0
         res.forEach(nodePublicKey => {
           count++
           const params = { NodePublicKey: nodePublicKey }
-          queue.addJob(params)
+          this.queue.add(params, config.queue.optJob)
         })
-
-        /** processing job the queue */
-        queue.processJob(Nodes.synchronize, this.service)
 
         return callback(response.setResult(true, `[Queue] ${count} Nodes on processing`))
       })
