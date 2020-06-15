@@ -1,5 +1,5 @@
 const moment = require('moment')
-const config = require('../config')
+// const config = require('../config')
 const BaseController = require('./BaseController')
 const { Transaction, Escrow } = require('../protos')
 const { store, queue, util, response } = require('../utils')
@@ -64,6 +64,7 @@ module.exports = class Transactions extends BaseController {
         })
       })
     }
+
     const mappingData = async (transactions, params) => {
       const promises = transactions
         .filter(item => item.Height === params.Height)
@@ -192,16 +193,17 @@ module.exports = class Transactions extends BaseController {
 
       return await Promise.all(promises)
     }
+
     const getEscrow = async ID => {
       return new Promise(resolve => {
         Escrow.GetEscrowTransaction({ ID }, (err, res) => {
           if (err) resolve(null)
-
           resolve(res)
         })
       })
     }
 
+    /** send message telegram bot if available */
     if (!params) return response.sendBotMessage('Transactions', '[Transactions] Synchronize - Invalid params')
 
     getTransactions(params)

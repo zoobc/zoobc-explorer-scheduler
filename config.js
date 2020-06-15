@@ -3,8 +3,8 @@ const path = require('path')
 
 module.exports = {
   app: {
-    port: 3033,
     limitData: 100,
+    port: process.env.PORT || 3033,
     scheduleEvent: 10 /** seconds */,
     chatId: process.env.CHAT_ID || null,
     resetData: process.env.RESET_DATA || false,
