@@ -27,6 +27,16 @@ module.exports = class TransactionsService extends BaseService {
       })
   }
 
+  asyncSendersByHeights(heightStart, heightEnd) {
+    return new Promise(resolve => {
+      this.getSendersByHeights(heightStart, heightEnd, (err, res) => {
+        if (err) return resolve({ error: err, data: [] })
+        if (!res) return resolve({ error: null, data: [] })
+        return resolve({ error: null, data: res })
+      })
+    })
+  }
+
   getSendersByHeights(heightStart, heightEnd, callback) {
     Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, Sender: { $ne: null } })
       .select('Sender Height Fee SendMoney Timestamp')
@@ -38,6 +48,16 @@ module.exports = class TransactionsService extends BaseService {
         const results = _.uniqBy(res, 'Sender')
         return callback(null, results)
       })
+  }
+
+  asyncRecipientsByHeights(heightStart, heightEnd) {
+    return new Promise(resolve => {
+      this.getRecipientsByHeights(heightStart, heightEnd, (err, res) => {
+        if (err) return resolve({ error: err, data: [] })
+        if (!res) return resolve({ error: null, data: [] })
+        return resolve({ error: null, data: res })
+      })
+    })
   }
 
   getRecipientsByHeights(heightStart, heightEnd, callback) {

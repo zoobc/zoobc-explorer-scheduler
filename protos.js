@@ -42,6 +42,26 @@ const NodeRegistration = createClient(
   config.proto.host
 )
 
+const Escrow = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'escrow.proto',
+    servicePath: 'service',
+    serviceName: 'EscrowTransactionService',
+  },
+  config.proto.host
+)
+
+const MultiSignature = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'multiSignature.proto',
+    servicePath: 'service',
+    serviceName: 'MultisigService',
+  },
+  config.proto.host
+)
+
 const HealthCheck = createClient(
   {
     protoPath: config.proto.path,
@@ -52,4 +72,4 @@ const HealthCheck = createClient(
   config.proto.host
 )
 
-module.exports = { Block, Transaction, AccountBalance, NodeRegistration, HealthCheck }
+module.exports = { Block, Transaction, AccountBalance, NodeRegistration, HealthCheck, Escrow, MultiSignature }
