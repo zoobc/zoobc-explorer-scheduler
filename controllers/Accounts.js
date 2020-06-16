@@ -105,11 +105,13 @@ module.exports = class Accounts extends BaseController {
 
       /** getting data account sender transactions */
       const senders = await this.transactionsService.asyncSendersByHeights(lastAccountHeight, lastCheckTransactionHeight)
-      if (senders.error) return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Senders ${err}`))
+      if (senders.error && senders.data.length < 1)
+        return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Senders ${senders.error}`))
 
       /** getting data account recipient transactions */
       const recipients = await this.transactionsService.asyncRecipientsByHeights(lastAccountHeight, lastCheckTransactionHeight)
-      if (recipients.error) return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Recipients ${err}`))
+      if (recipients.error && recipients.data.length < 1)
+        return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Recipients ${recipients.error}`))
 
       /** return message if havingn't senders or receipts  */
       if (senders.data.length < 1 && recipients.data.length < 1) return callback(response.setResult(false, '[Accounts] No additional data'))
