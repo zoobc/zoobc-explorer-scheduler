@@ -105,11 +105,15 @@ module.exports = class Accounts extends BaseController {
 
       /** getting data account sender transactions */
       const senders = await this.transactionsService.asyncSendersByHeights(lastAccountHeight, lastCheckTransactionHeight)
+      console.log('==senders', senders)
+
       if (senders.error && senders.data.length < 1)
         return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Senders ${senders.error}`))
 
       /** getting data account recipient transactions */
       const recipients = await this.transactionsService.asyncRecipientsByHeights(lastAccountHeight, lastCheckTransactionHeight)
+      console.log('==recipients', recipients)
+
       if (recipients.error && recipients.data.length < 1)
         return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Recipients ${recipients.error}`))
 
