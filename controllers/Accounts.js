@@ -94,7 +94,7 @@ module.exports = class Accounts extends BaseController {
       if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Accounts Service - Get Last Height ${err}`))
 
       /** set variable last height account */
-      const lastAccountHeight = res ? parseInt(res.TransactionHeight + 1) : 0
+      const lastAccountHeight = res && res.TransactionHeight ? parseInt(res.TransactionHeight + 1) : 0
 
       /** getting value last check height transaction */
       const lastCheckTransactionHeight = parseInt(await this.generalsService.getValueByKey(store.keyLastCheckTransactionHeight)) || 0
@@ -105,15 +105,11 @@ module.exports = class Accounts extends BaseController {
 
       /** getting data account sender transactions */
       const senders = await this.transactionsService.asyncSendersByHeights(lastAccountHeight, lastCheckTransactionHeight)
-      console.log('==senders', senders)
-
       if (senders.error && senders.data.length < 1)
         return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Senders ${senders.error}`))
 
       /** getting data account recipient transactions */
       const recipients = await this.transactionsService.asyncRecipientsByHeights(lastAccountHeight, lastCheckTransactionHeight)
-      console.log('==recipients', recipients)
-
       if (recipients.error && recipients.data.length < 1)
         return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Recipients ${recipients.error}`))
 
