@@ -3,6 +3,7 @@ const { upserts } = require('../utils')
 
 const schema = new mongoose.Schema(
   {
+    TransactionHeight: { type: Number },
     AccountAddress: { type: String },
     MultiSignature: {
       MultiSignatureInfo: {

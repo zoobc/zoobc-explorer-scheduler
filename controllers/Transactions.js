@@ -136,6 +136,7 @@ module.exports = class Transactions extends BaseController {
               case 5:
                 transactionTypeName = 'Multi Signature Transaction'
                 multiSignature = {
+                  TransactionHeight: item.Height,
                   ...item.multiSignatureTransactionBody,
                   MultiSignatureInfo: {
                     ...item.multiSignatureTransactionBody.MultiSignatureInfo,
