@@ -37,5 +37,6 @@ message SnapshotPayload {
     repeated PendingSignature PendingSignatures = 9;
     repeated MultiSignatureInfo MultiSignatureInfos = 10;
     repeated SkippedBlocksmith SkippedBlocksmiths = 11;
+    repeated MultiSignatureParticipant MultiSignatureParticipants = 12;
 }
 
