@@ -8,10 +8,10 @@ import "model/pagination.proto";
 message MultiSignatureInfo {
     uint32 MinimumSignatures = 1;
     int64 Nonce = 2 [ jstype = JS_STRING ];
-    repeated string Addresses = 3;
-    string MultisigAddress = 4;
-    uint32 BlockHeight = 5;
-    bool Latest = 6;
+    string MultisigAddress = 3;
+    uint32 BlockHeight = 4;
+    bool Latest = 5;
+    repeated string Addresses = 6;
 }
 
 // represent the signature posted by account
@@ -19,7 +19,14 @@ message SignatureInfo {
     bytes TransactionHash = 1;
     map<string, bytes> Signatures = 2; 
 }
-
+// represent the multi signature's participant account addresses
+message MultiSignatureParticipant {
+    string MultiSignatureAddress = 1;
+    string AccountAddress = 2;
+    uint32 AccountAddressIndex = 3;
+    bool Latest = 4;
+    uint32 BlockHeight = 5;
+}
 // represent the pending signature counter stored by node for multi-signature transaction
 message PendingSignature {
     bytes TransactionHash = 1;
@@ -76,7 +83,7 @@ message GetPendingTransactionDetailByTransactionHashResponse {
 
 message GetMultisignatureInfoRequest {
     string MultisigAddress = 1;
-    Pagination Pagination = 2; 
+    Pagination Pagination = 2;
 }
 
 message GetMultisignatureInfoResponse {
