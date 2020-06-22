@@ -214,7 +214,13 @@ module.exports = class Transactions extends BaseController {
         return new Promise(resolve => {
           Escrow.GetEscrowTransaction({ ID }, (err, res) => {
             if (err) resolve(null)
-            resolve(res)
+            const escrow = res && {
+              ...res,
+              AmountConversion: util.zoobitConversion(res.Amount),
+              CommissionConversion: util.zoobitConversion(res.Commission),
+            }
+
+            resolve(escrow)
           })
         })
       }
