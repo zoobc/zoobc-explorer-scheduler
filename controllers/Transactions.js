@@ -120,11 +120,11 @@ module.exports = class Transactions extends BaseController {
                 }
                 break
               case 3:
-                transactionTypeName = 'Setup Account Dataset'
+                transactionTypeName = 'Setup Account'
                 setupAccount = item.setupAccountDatasetTransactionBody
                 break
               case 4:
-                transactionTypeName = 'Approval Escrow Transaction'
+                transactionTypeName = 'Approval Escrow'
                 approvalEscrow = {
                   Approval: item.approvalEscrowTransactionBody.Approval,
                   TransactionID: item.approvalEscrowTransactionBody.TransactionID,
@@ -134,7 +134,7 @@ module.exports = class Transactions extends BaseController {
 
                 break
               case 5:
-                transactionTypeName = 'Multi Signature Transaction'
+                transactionTypeName = 'Multi Signature'
                 multiSignature = {
                   ...item.multiSignatureTransactionBody,
                   MultiSignatureInfo: {
@@ -154,7 +154,7 @@ module.exports = class Transactions extends BaseController {
                 }
                 break
               case 259:
-                transactionTypeName = 'Remove Account Dataset'
+                transactionTypeName = 'Remove Account'
                 removeAccount = item.removeAccountDatasetTransactionBody
                 break
               case 514:
