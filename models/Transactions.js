@@ -11,6 +11,7 @@ const schema = new mongoose.Schema(
     Sender: { type: String } /** SenderAccountAddress */,
     Recipient: { type: String } /** RecipientAccountAddress */,
     Fee: { type: Number },
+    Status: { type: String },
     FeeConversion: { type: String },
     Version: { type: Number } /** additional */,
     TransactionHash: { type: Buffer } /** additional */,
