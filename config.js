@@ -25,7 +25,7 @@ module.exports = {
     optJob: {
       delay: 500 /** miliseconds */,
       attempts: 2,
-      removeOnComplete: false,
+      removeOnComplete: true,
     },
   },
   mongodb: {
