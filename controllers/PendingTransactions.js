@@ -20,7 +20,6 @@ module.exports = class PendingTransaction extends BaseController {
 
   processing() {
     this.queue.process(async job => {
-      console.log('job data =', job.data)
       const params = job.data
       /** send message telegram bot if avaiable */
       if (!params) return response.sendBotMessage('Pending Transaction', '[Pending Transaction] Processing - Invalid params')
@@ -38,8 +37,6 @@ module.exports = class PendingTransaction extends BaseController {
                 `- Params : <pre>${JSON.stringify(params)}</pre>`
               )
             )
-
-          console.log('res = ', res)
 
           if (res && util.isObjEmpty(res.PendingTransaction))
             return resolve(response.setResult(false, `[Pending Transaction] No additional data`))
