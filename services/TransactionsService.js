@@ -37,11 +37,9 @@ module.exports = class TransactionsService extends BaseService {
     })
   }
 
-  getTransactionHashByStatus(callback) {
-    Transactions.find({ Status: 'Pending' })
-      // .distinct('Sender')
-      .select('TransactionHash')
-      .sort('-Height')
+  getTransactionSenderhByMultiSigChild(callback) {
+    Transactions.find({ MultisigChild: true })
+      .select('Sender')
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, null)

@@ -28,8 +28,7 @@ module.exports = class PendingTransaction extends BaseController {
       return new Promise(resolve => {
         job.progress(25)
 
-        // MultiSignature.GetPendingTransactions(params, (err, res) => {
-        MultiSignature.GetPendingTransactionDetailByTransactionHash(params, (err, res) => {
+        MultiSignature.GetPendingTransactions(params, (err, res) => {
           if (err)
             return resolve(
               /** send message telegram bot if avaiable */
@@ -83,7 +82,7 @@ module.exports = class PendingTransaction extends BaseController {
   }
 
   update(callback) {
-    this.transactionsService.getTransactionHashByStatus((err, res) => {
+    this.transactionsService.getTransactionSenderhByMultiSigChild((err, res) => {
       if (err)
         return callback(
           response.sendBotMessage(
@@ -94,14 +93,9 @@ module.exports = class PendingTransaction extends BaseController {
       if (!res) return callback(response.setResult(false, '[Pending Transaction] No additional data'))
 
       let count = 0
-      // res.forEach(senderAddress => {
-      res.forEach(transactionHash => {
+      res.forEach(senderAddress => {
         count++
-        // const params = { SenderAddress: senderAddress.Sender }
-        const txhash = util.bufferStr(transactionHash.TransactionHash)
-        // console.log('tx hash = ', txhash)
-        const params = { TransactionHashHex: Buffer.from(txhash, 'base64').toString('hex') }
-        // const params = { TransactionHashHex: "205F43FB9ED934875AE166360D32327F8EAD13A6CEB5C83B127248DF7152FB10" }
+        const params = { SenderAddress: senderAddress.Sender }
         this.queue.add(params, config.queue.optJob)
       })
 
