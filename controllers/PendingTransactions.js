@@ -45,27 +45,11 @@ module.exports = class PendingTransaction extends BaseController {
             return resolve(response.setResult(false, `[Pending Transaction] No additional data`))
 
           job.progress(50)
-          let txStatus = ''
-
-          switch (res.PendingTransaction.Status) {
-            case 0:
-              txStatus = 'Pending'
-              break
-            case 1:
-              txStatus = 'Executed'
-              break
-            case 2:
-              txStatus = 'NoOp'
-              break
-            case 3:
-              txStatus = 'Expired'
-              break
-          }
 
           const payloads = [
             {
               TransactionHash: res.PendingTransaction.TransactionHash,
-              Status: txStatus,
+              Status: res.PendingTransaction.Status,
             },
           ]
 
