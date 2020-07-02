@@ -96,6 +96,7 @@ module.exports = class Transactions extends BaseController {
             let multiSignature = null
             let transactionTypeName = ''
             let escrow = null
+            let status = 'Approved'
 
             switch (item.TransactionType) {
               case 1:
@@ -135,6 +136,7 @@ module.exports = class Transactions extends BaseController {
                 break
               case 5:
                 transactionTypeName = 'Multi Signature'
+                status = 'Pending'
                 multiSignature = {
                   ...item.multiSignatureTransactionBody,
                   MultiSignatureInfo: {
@@ -184,6 +186,7 @@ module.exports = class Transactions extends BaseController {
               Sender: item.SenderAccountAddress,
               Recipient: item.RecipientAccountAddress,
               Fee: item.Fee,
+              Status: status,
               FeeConversion: util.zoobitConversion(item.Fee),
               Version: item.Version,
               TransactionHash: item.TransactionHash,

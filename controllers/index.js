@@ -5,5 +5,6 @@ const Rollback = require('./Rollback')
 const ResetData = require('./ResetData')
 const Transactions = require('./Transactions')
 const MultiSignature = require('./MultiSignature')
+const PendingTransaction = require('./PendingTransactions')
 
-module.exports = { Nodes, Blocks, Accounts, Rollback, ResetData, Transactions, MultiSignature }
+module.exports = { Nodes, Blocks, Accounts, Rollback, ResetData, Transactions, MultiSignature, PendingTransaction }
