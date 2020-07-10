@@ -22,7 +22,6 @@ module.exports = class PendingTransaction extends BaseController {
     this.queue.process(async job => {
       const params = job.data
       /** send message telegram bot if avaiable */
-      console.log('queue = ', job.data)
       if (!params) return response.sendBotMessage('Pending Transaction', '[Pending Transaction] Processing - Invalid params')
 
       return new Promise(resolve => {
@@ -43,7 +42,6 @@ module.exports = class PendingTransaction extends BaseController {
             return resolve(response.setResult(false, `[Pending Transaction] No additional data`))
 
           job.progress(50)
-          console.log('pending transaction result = ', res)
 
           let status = ''
           switch (res.PendingTransaction.Status) {
@@ -93,7 +91,6 @@ module.exports = class PendingTransaction extends BaseController {
 
       let count = 0
       res.forEach(txhash => {
-        // console.log(transactionHash)
         count++
         const params = { TransactionHashHex: Buffer.from(txhash.TransactionHash.toString('binary'), 'ascii').toString('hex') }
         this.queue.add(params, config.queue.optJob)
