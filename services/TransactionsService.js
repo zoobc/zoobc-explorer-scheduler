@@ -38,8 +38,8 @@ module.exports = class TransactionsService extends BaseService {
   }
 
   getTransactionSenderhByMultiSigChild(callback) {
-    Transactions.find({ MultisigChild: true })
-      .select('Sender')
+    Transactions.find({ MultisigChild: true, TransactionType: 'MultiSig' })
+      .select('TransactionHash')
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, null)
