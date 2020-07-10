@@ -5,7 +5,7 @@ module.exports = {
   app: {
     limitData: 100,
     port: process.env.PORT || 3033,
-    scheduleEvent: 10 /** seconds */,
+    scheduleEvent: 20 /** seconds */,
     chatId: process.env.CHAT_ID || null,
     resetData: process.env.RESET_DATA || false,
     env: process.env.NODE_ENV || 'development',
@@ -25,7 +25,7 @@ module.exports = {
     optJob: {
       delay: 500 /** miliseconds */,
       attempts: 2,
-      removeOnComplete: false,
+      removeOnComplete: true,
     },
   },
   mongodb: {

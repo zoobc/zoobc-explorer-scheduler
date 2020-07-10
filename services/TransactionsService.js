@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const BaseService = require('./BaseService')
 const { Transactions } = require('../models')
+const { Transaction } = require('../protos')
 
 module.exports = class TransactionsService extends BaseService {
   constructor() {
@@ -34,6 +35,17 @@ module.exports = class TransactionsService extends BaseService {
         return resolve({ error: null, data: res })
       })
     })
+  }
+
+  getTransactionSenderhByMultiSigChild(callback) {
+    Transactions.find({ MultisigChild: true, TransactionType: 'MultiSig' })
+      .select('TransactionHash')
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, null)
+
+        return callback(null, res)
+      })
   }
 
   getSendersByHeights(heightStart, heightEnd, callback) {

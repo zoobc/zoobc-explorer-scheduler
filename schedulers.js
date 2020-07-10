@@ -7,7 +7,7 @@ const { UI } = require('bull-board')
 
 const config = require('./config')
 const { msg, util, response } = require('./utils')
-const { Nodes, Blocks, Accounts, ResetData, Transactions } = require('./controllers')
+const { Nodes, Blocks, Accounts, ResetData, Transactions, PendingTransaction } = require('./controllers')
 
 const nodes = new Nodes()
 const blocks = new Blocks()
@@ -16,6 +16,7 @@ const accounts = new Accounts()
 // const rollback = new Rollback()
 const transactions = new Transactions()
 // const multiSig = new MultiSignature()
+// const pendingTx = new PendingTransaction()
 
 /** cron job */
 const event = config.app.scheduleEvent
@@ -38,6 +39,10 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
 
           accounts.update(res => {
             util.log(res)
+
+            // pendingTx.update(res => {
+            //   util.log(res)
+            // })
           })
         })
       })

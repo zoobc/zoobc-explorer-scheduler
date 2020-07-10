@@ -96,6 +96,7 @@ module.exports = class Transactions extends BaseController {
             let multiSignature = null
             let transactionTypeName = ''
             let escrow = null
+            let status = 'Approved'
 
             switch (item.TransactionType) {
               case 1:
@@ -120,11 +121,11 @@ module.exports = class Transactions extends BaseController {
                 }
                 break
               case 3:
-                transactionTypeName = 'Setup Account Dataset'
+                transactionTypeName = 'Setup Account'
                 setupAccount = item.setupAccountDatasetTransactionBody
                 break
               case 4:
-                transactionTypeName = 'Approval Escrow Transaction'
+                transactionTypeName = 'Approval Escrow'
                 approvalEscrow = {
                   Approval: item.approvalEscrowTransactionBody.Approval,
                   TransactionID: item.approvalEscrowTransactionBody.TransactionID,
@@ -134,7 +135,8 @@ module.exports = class Transactions extends BaseController {
 
                 break
               case 5:
-                transactionTypeName = 'Multi Signature Transaction'
+                transactionTypeName = 'Multi Signature'
+                status = 'Pending'
                 multiSignature = {
                   ...item.multiSignatureTransactionBody,
                   MultiSignatureInfo: {
@@ -154,7 +156,7 @@ module.exports = class Transactions extends BaseController {
                 }
                 break
               case 259:
-                transactionTypeName = 'Remove Account Dataset'
+                transactionTypeName = 'Remove Account'
                 removeAccount = item.removeAccountDatasetTransactionBody
                 break
               case 514:
@@ -184,6 +186,7 @@ module.exports = class Transactions extends BaseController {
               Sender: item.SenderAccountAddress,
               Recipient: item.RecipientAccountAddress,
               Fee: item.Fee,
+              Status: status,
               FeeConversion: util.zoobitConversion(item.Fee),
               Version: item.Version,
               TransactionHash: item.TransactionHash,
@@ -214,7 +217,13 @@ module.exports = class Transactions extends BaseController {
         return new Promise(resolve => {
           Escrow.GetEscrowTransaction({ ID }, (err, res) => {
             if (err) resolve(null)
-            resolve(res)
+            const escrow = res && {
+              ...res,
+              AmountConversion: util.zoobitConversion(res.Amount),
+              CommissionConversion: util.zoobitConversion(res.Commission),
+            }
+
+            resolve(escrow)
           })
         })
       }
