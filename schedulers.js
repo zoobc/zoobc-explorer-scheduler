@@ -16,7 +16,7 @@ const accounts = new Accounts()
 // const rollback = new Rollback()
 const transactions = new Transactions()
 // const multiSig = new MultiSignature()
-const pendingTx = new PendingTransaction()
+// const pendingTx = new PendingTransaction()
 
 /** cron job */
 const event = config.app.scheduleEvent
@@ -40,9 +40,9 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
           accounts.update(res => {
             util.log(res)
 
-            pendingTx.update(res => {
-              util.log(res)
-            })
+            // pendingTx.update(res => {
+            //   util.log(res)
+            // })
           })
         })
       })
