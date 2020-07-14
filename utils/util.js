@@ -70,4 +70,12 @@ const isObjEmpty = obj => {
   return true
 }
 
-module.exports = util = { encrypt, decrypt, bufferStr, zoobitConversion, log, isObjEmpty }
+const isNotNullAccountAddress = val => {
+  if (!val || val === '') return false
+  return (
+    val !==
+    '\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000'
+  )
+}
+
+module.exports = util = { encrypt, decrypt, bufferStr, zoobitConversion, log, isObjEmpty, isNotNullAccountAddress }

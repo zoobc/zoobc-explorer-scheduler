@@ -8,7 +8,6 @@ const schema = new mongoose.Schema(
     OwnerAddress: { type: String } /** AccountAddress */,
     NodeAddress: { type: Object },
     LockedFunds: { type: String } /** LockedBalance */,
-    RegisteredBlockHeight: { type: Number } /** RegistrationHeight */,
     ParticipationScore: { type: Number } /** ..waiting core */,
     RegistryStatus: { type: Number } /** Queued */,
     BlocksFunds: { type: Number } /** ..waiting core */,
@@ -16,8 +15,8 @@ const schema = new mongoose.Schema(
     RewardsPaidConversion: { type: String },
     Latest: { type: Boolean },
     Height: { type: Number },
-    Blocks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Blocks' }],
     /** additional detail node address */
+    RegisteredBlockHeight: { type: Number } /** RegistrationHeight */,
     IpAddress: { type: String },
     CountryCode: { type: String },
     CountryName: { type: String },
@@ -28,6 +27,7 @@ const schema = new mongoose.Schema(
     Longitude: { type: Number },
     CountryFlagUrl: { type: String },
     CountryFlagEmoji: { type: Buffer },
+    Blocks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Blocks' }],
   },
   {
     toJSON: { virtuals: true },
