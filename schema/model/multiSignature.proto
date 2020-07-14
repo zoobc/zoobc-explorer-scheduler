@@ -94,3 +94,21 @@ message GetMultisignatureInfoResponse {
     // content of the request
     repeated MultiSignatureInfo MultisignatureInfo = 3;
 }
+
+message GetMultisigAddressByParticipantAddressesRequest {
+    repeated string addresses = 1;
+    Pagination Pagination = 2;
+}
+
+message addresses {
+    repeated string addresses = 1;
+}
+
+message GetMultisigAddressByParticipantAddressesResponse {
+    // Number of item in current page
+    uint32 Count = 1;
+    // Starting page
+    uint32 Page = 2;
+    // content of the request
+    map<string, addresses> MultiSignatureAddresses = 3; 
+}
