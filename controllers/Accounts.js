@@ -1,7 +1,7 @@
 const config = require('../config')
 const BaseController = require('./BaseController')
 const { AccountBalance } = require('../protos')
-const { store, queue, util, response } = require('../utils')
+const { queue, util, response } = require('../utils')
 const { AccountsService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class Accounts extends BaseController {
@@ -96,20 +96,20 @@ module.exports = class Accounts extends BaseController {
       /** set variable last height account */
       const lastAccountHeight = res && res.TransactionHeight ? parseInt(res.TransactionHeight + 1) : 0
 
-      /** getting value last check height transaction */
-      const lastCheckTransactionHeight = parseInt(await this.generalsService.getValueByKey(store.keyLastCheckTransactionHeight)) || 0
+      /** getting value last check */
+      const lastCheck = await this.generalsService.getSetLastCheck()
 
       /** return message if last height account greather than last check height transaction  */
-      if (lastAccountHeight > 0 && lastAccountHeight >= lastCheckTransactionHeight)
+      if (lastAccountHeight > 0 && lastAccountHeight >= lastCheck.Height)
         return callback(response.setResult(false, '[Accounts] No additional data'))
 
       /** getting data account sender transactions */
-      const senders = await this.transactionsService.asyncSendersByHeights(lastAccountHeight, lastCheckTransactionHeight)
+      const senders = await this.transactionsService.asyncSendersByHeights(lastAccountHeight, lastCheck.Height)
       if (senders.error && senders.data.length < 1)
         return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Senders ${senders.error}`))
 
       /** getting data account recipient transactions */
-      const recipients = await this.transactionsService.asyncRecipientsByHeights(lastAccountHeight, lastCheckTransactionHeight)
+      const recipients = await this.transactionsService.asyncRecipientsByHeights(lastAccountHeight, lastCheck.Height)
       if (recipients.error && recipients.data.length < 1)
         return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Recipients ${recipients.error}`))
 
@@ -120,48 +120,54 @@ module.exports = class Accounts extends BaseController {
       senders.data &&
         senders.data.length > 0 &&
         senders.data.forEach(async item => {
-          /** set first active base on data account (local), if data empty so that set by timestamp */
-          const firstActive = await this.service.asyncFirstActiveAccount(item.Sender)
+          /** check if account address is not null */
+          if (util.isNotNullAccountAddress(item.Sender)) {
+            /** set first active base on data account (local), if data empty so that set by timestamp */
+            const firstActive = await this.service.asyncFirstActiveAccount(item.Sender)
 
-          /** set total fee base on data account (local) for calculate total fee paid */
-          const totalFee = await this.service.asyncTotalFeeAccount(item.Sender)
+            /** set total fee base on data account (local) for calculate total fee paid */
+            const totalFee = await this.service.asyncTotalFeeAccount(item.Sender)
 
-          const payloads = {
-            params: { AccountAddress: item.Sender },
-            accounts: {
-              AccountAddress: item.Sender,
-              Height: item.Height,
-              TotalFee: parseInt(totalFee) + parseInt(item.Fee),
-              Timestamp: item.Timestamp,
-              FirstActive: firstActive ? firstActive : item.Timestamp,
-              SendMoney: item.SendMoney || null,
-            },
+            const payloads = {
+              params: { AccountAddress: item.Sender },
+              accounts: {
+                AccountAddress: item.Sender,
+                Height: item.Height,
+                TotalFee: parseInt(totalFee) + parseInt(item.Fee),
+                Timestamp: item.Timestamp,
+                FirstActive: firstActive ? firstActive : item.Timestamp,
+                SendMoney: item.SendMoney || null,
+              },
+            }
+            this.queue.add(payloads, config.queue.optJob)
           }
-          this.queue.add(payloads, config.queue.optJob)
         })
 
       /** adding multi jobs to the queue by account receipt transactions */
       recipients.data &&
         recipients.data.length > 0 &&
         recipients.data.forEach(async item => {
-          /** set first active base on data account (local), if data empty so that set by timestamp */
-          const firstActive = await this.service.asyncFirstActiveAccount(item.Recipient)
+          /** check if account address is not null */
+          if (util.isNotNullAccountAddress(item.Recipient)) {
+            /** set first active base on data account (local), if data empty so that set by timestamp */
+            const firstActive = await this.service.asyncFirstActiveAccount(item.Recipient)
 
-          /** set total fee base on data account (local), its not for calculating. just for update using data before */
-          const totalFee = await this.service.asyncTotalFeeAccount(item.Recipient)
+            /** set total fee base on data account (local), its not for calculating. just for update using data before */
+            const totalFee = await this.service.asyncTotalFeeAccount(item.Recipient)
 
-          const payloads = {
-            params: { AccountAddress: item.Recipient },
-            accounts: {
-              AccountAddress: item.Recipient,
-              Height: item.Height,
-              TotalFee: totalFee,
-              Timestamp: item.Timestamp,
-              FirstActive: firstActive ? firstActive : item.Timestamp,
-              SendMoney: null,
-            },
+            const payloads = {
+              params: { AccountAddress: item.Recipient },
+              accounts: {
+                AccountAddress: item.Recipient,
+                Height: item.Height,
+                TotalFee: totalFee,
+                Timestamp: item.Timestamp,
+                FirstActive: firstActive ? firstActive : item.Timestamp,
+                SendMoney: null,
+              },
+            }
+            this.queue.add(payloads, config.queue.optJob)
           }
-          this.queue.add(payloads, config.queue.optJob)
         })
 
       const count = parseInt(senders.data.length) + parseInt(recipients.data.length)

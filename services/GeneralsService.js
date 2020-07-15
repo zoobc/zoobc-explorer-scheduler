@@ -1,10 +1,59 @@
+const moment = require('moment')
 const BaseService = require('./BaseService')
-const { Generals } = require('../models')
+const { store } = require('../utils')
+const { Generals, Blocks } = require('../models')
 
 module.exports = class GeneralsService extends BaseService {
   constructor() {
     super(Generals)
     this.name = 'GeneralsService'
+  }
+
+  getSetLastCheck() {
+    return new Promise((resolve, reject) => {
+      Generals.findOne({ Key: store.keyLastCheck })
+        .select('Value')
+        .exec((err, res) => {
+          if (err) return reject(err)
+          if (res) return resolve(JSON.parse(res.Value))
+
+          Blocks.findOne()
+            .select('Height Timestamp')
+            .sort('Timestamp')
+            .limit(1)
+            .exec(async (err, res) => {
+              if (err) return reject(err)
+              if (!res) return resolve(null)
+              const result = await this.setValueByKey(
+                store.keyLastCheck,
+                JSON.stringify({ Height: res.Height, Timestamp: moment(res.Timestamp).unix() })
+              )
+              return resolve(JSON.parse(result.Value))
+            })
+        })
+    })
+  }
+
+  getSetLastCheckTimestamp() {
+    return new Promise((resolve, reject) => {
+      Generals.findOne({ Key: store.keyLastCheckTimestamp })
+        .select('Value')
+        .exec((err, res) => {
+          if (err) return reject(err)
+          if (res) return resolve(parseInt(res.Value))
+
+          Blocks.findOne()
+            .select('Timestamp')
+            .sort('Timestamp')
+            .limit(1)
+            .exec(async (err, res) => {
+              if (err) return reject(err)
+              if (!res) return resolve(null)
+              const result = await this.setValueByKey(store.keyLastCheckTimestamp, moment(res.Timestamp).unix())
+              return resolve(parseInt(parseInt(result.Value)))
+            })
+        })
+    })
   }
 
   getValueByKey(key) {

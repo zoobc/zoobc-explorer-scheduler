@@ -8,10 +8,14 @@ module.exports = class BlocksService extends BaseService {
   }
 
   getLastHeight(callback) {
-    Blocks.findOne().select('Height').sort('-Height').exec(callback)
+    Blocks.findOne().select('Height Timestamp').sort('-Height').exec(callback)
   }
 
   getFromHeight({ Limit, Height }, callback) {
     Blocks.find().select('BlockID Height').where('Height').gte(Height).limit(Limit).sort('Height').exec(callback)
+  }
+
+  getLastTimestamp(callback) {
+    Blocks.findOne().select('Timestamp Height').sort('-Timestamp').exec(callback)
   }
 }

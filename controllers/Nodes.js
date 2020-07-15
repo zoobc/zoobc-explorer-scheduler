@@ -1,7 +1,7 @@
 const config = require('../config')
 const BaseController = require('./BaseController')
 const { NodeRegistration } = require('../protos')
-const { store, queue, util, response, ipstack } = require('../utils')
+const { queue, util, response, ipstack } = require('../utils')
 const { NodesService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class Nodes extends BaseController {
@@ -107,14 +107,14 @@ module.exports = class Nodes extends BaseController {
       const lastNodeHeight = res ? parseInt(res.RegisteredBlockHeight + 1) : 0
 
       /** getting value last check height transaction */
-      const lastCheckTransactionHeight = parseInt(await this.generalsService.getValueByKey(store.keyLastCheckTransactionHeight)) || 0
+      // const lastCheckTransactionHeight = parseInt(await this.generalsService.getValueByKey(store.keyLastCheckTransactionHeight)) || 0
+      const lastCheck = await this.generalsService.getSetLastCheck()
 
       /** return message if last height node greather than equal last check height transaction  */
-      if (lastNodeHeight > 0 && lastNodeHeight >= lastCheckTransactionHeight)
-        return callback(response.setResult(false, '[Nodes] No additional data'))
+      if (lastNodeHeight > 0 && lastNodeHeight >= lastCheck.Height) return callback(response.setResult(false, '[Nodes] No additional data'))
 
       /** get node registrations with range height */
-      this.transactionsService.getNodePublicKeysByHeights(lastNodeHeight, lastCheckTransactionHeight, (err, res) => {
+      this.transactionsService.getNodePublicKeysByHeights(lastNodeHeight, lastCheck.Height, (err, res) => {
         /** send message telegram bot if avaiable */
         if (err) return callback(response.sendBotMessage('Nodes', `[Nodes] Transactions Service - Get Nodes ${err}`))
         if (!res) return callback(response.setResult(false, '[Nodes] No additional data'))
