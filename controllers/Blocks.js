@@ -19,14 +19,24 @@ module.exports = class Blocks extends BaseController {
       /** send message telegram bot if avaiable */
       if (err) return callback(response.sendBotMessage('Blocks', `[Blocks] Blocks Service - Get Last Height ${err}`))
 
+      /** set last block height */
+      const blockHeight = res ? parseInt(res.Height + 1) : 0
+
       /** getting value last check timestamp transaction */
       const lastCheck = await this.generalsService.getSetLastCheck()
 
       /** log information */
-      if (res && res.Timestamp) msg.blue(`[Info] Last timestamp block is ${moment(res.Timestamp).format(formatDate)}`)
-      if (lastCheck) msg.blue(`[Info] Last check timestamp transaction is ${moment.unix(lastCheck.Timestamp).format(formatDate)}`)
+      if (res && res.Timestamp)
+        msg.blue(
+          `[Info] Last timestamp block height ${blockHeight > 0 ? blockHeight - 1 : blockHeight} is ${moment(res.Timestamp).format(
+            formatDate
+          )}`
+        )
+      if (lastCheck && lastCheck.Height && lastCheck.Timestamp)
+        msg.blue(
+          `[Info] Last check timestamp transaction height ${lastCheck.Height} is ${moment.unix(lastCheck.Timestamp).format(formatDate)}`
+        )
 
-      const blockHeight = res ? parseInt(res.Height + 1) : 0
       const params = { Limit: config.app.limitData, Height: blockHeight }
       Block.GetBlocks(params, (err, res) => {
         if (err)
