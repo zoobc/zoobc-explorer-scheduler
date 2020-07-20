@@ -125,7 +125,7 @@ module.exports = class Transactions extends BaseController {
                 setupAccount = item.setupAccountDatasetTransactionBody
                 break
               case 4:
-                transactionTypeName = 'Approval Escrow'
+                transactionTypeName = 'Escrow'
                 approvalEscrow = {
                   Approval: item.approvalEscrowTransactionBody.Approval,
                   TransactionID: item.approvalEscrowTransactionBody.TransactionID,
@@ -135,7 +135,7 @@ module.exports = class Transactions extends BaseController {
 
                 break
               case 5:
-                transactionTypeName = 'Multi Signature'
+                transactionTypeName = 'Multisignature'
                 status = 'Pending'
                 multiSignature = {
                   ...item.multiSignatureTransactionBody,
@@ -286,7 +286,7 @@ module.exports = class Transactions extends BaseController {
           setupAccount = item.setupAccountDatasetTransactionBody
           break
         case 4:
-          transactionTypeName = 'Approval Escrow'
+          transactionTypeName = 'Escrow'
           approvalEscrow = {
             Approval: item.approvalEscrowTransactionBody.Approval,
             TransactionID: item.approvalEscrowTransactionBody.TransactionID,
@@ -294,7 +294,7 @@ module.exports = class Transactions extends BaseController {
           escrow = await getEscrow(item.approvalEscrowTransactionBody.TransactionID)
           break
         case 5:
-          transactionTypeName = 'Multi Signature'
+          transactionTypeName = 'Multisignature'
           status = 'Pending'
           multiSignature = {
             ...item.multiSignatureTransactionBody,
