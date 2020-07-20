@@ -80,7 +80,7 @@ module.exports = class Transactions extends BaseController {
           status = escrow.Status
           break
         case 5:
-          transactionTypeName = 'Multi Signature'
+          transactionTypeName = 'Multisignature'
           status = 'Pending'
           multiSignature = {
             ...item.multiSignatureTransactionBody,
