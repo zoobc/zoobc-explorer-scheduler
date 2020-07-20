@@ -41,6 +41,10 @@ module.exports = class Transactions extends BaseController {
       let escrow = null
       let status = 'Approved'
 
+      if (item.TransactionType === 1 || item.TransactionType === 1) {
+        status = 'Pending'
+      }
+
       switch (item.TransactionType) {
         case 1:
           transactionTypeName = 'Send Money'
