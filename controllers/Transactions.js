@@ -1,8 +1,7 @@
 const moment = require('moment')
-const config = require('../config')
 const BaseController = require('./BaseController')
 const { Transaction, Escrow } = require('../protos')
-const { store, queue, util, response } = require('../utils')
+const { store, util, response } = require('../utils')
 const { BlocksService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class Transactions extends BaseController {
@@ -39,14 +38,7 @@ module.exports = class Transactions extends BaseController {
       let multiSignature = null
       let transactionTypeName = ''
       let escrow = null
-      let status =
-        item.TransactionType === 1
-          ? 'Pending'
-          : item.TransactionType === 4
-          ? 'Pending'
-          : item.TransactionType === 5
-          ? 'Pending'
-          : 'Approved'
+      let status = item.TransactionType === 1 || item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Approved'
 
       switch (item.TransactionType) {
         case 1:
@@ -56,7 +48,7 @@ module.exports = class Transactions extends BaseController {
             AmountConversion: util.zoobitConversion(item.sendMoneyTransactionBody.Amount),
           }
           escrow = await getEscrow(item.ID)
-          if (escrow && escrow.Status) status = escrow.Status
+          status = escrow && escrow.Status ? escrow.Status : 'Pending'
           break
         case 2:
           transactionTypeName = 'Node Registration'
@@ -80,11 +72,10 @@ module.exports = class Transactions extends BaseController {
             TransactionID: item.approvalEscrowTransactionBody.TransactionID,
           }
           escrow = await getEscrow(item.approvalEscrowTransactionBody.TransactionID)
-          if (escrow && escrow.Status) status = escrow.Status
+          status = escrow && escrow.Status ? escrow.Status : 'Pending'
           break
         case 5:
           transactionTypeName = 'Multisignature'
-          status = 'Pending'
           multiSignature = {
             ...item.multiSignatureTransactionBody,
             MultiSignatureInfo: {
