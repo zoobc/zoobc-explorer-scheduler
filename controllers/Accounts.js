@@ -1,7 +1,7 @@
-const config = require('../config')
+const _ = require('lodash')
 const BaseController = require('./BaseController')
+const { util, response } = require('../utils')
 const { AccountBalance } = require('../protos')
-const { store, queue, util, response } = require('../utils')
 const { AccountsService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class Accounts extends BaseController {
@@ -9,82 +9,6 @@ module.exports = class Accounts extends BaseController {
     super(new AccountsService())
     this.generalsService = new GeneralsService()
     this.transactionsService = new TransactionsService()
-
-    /** queue */
-    this.queue = queue.create('Queue Accounts')
-    this.processing()
-    this.queue.on('completed', (job, result) => {
-      if (result && !util.isObjEmpty(result)) util.log(result)
-    })
-  }
-
-  processing() {
-    this.queue.process(async job => {
-      const payloads = job.data
-      /** send message telegram bot if avaiable */
-      if (!payloads) return response.sendBotMessage('Accounts', '[Accounts] Synchronize - Invalid payloads')
-      if (payloads && !payloads.params)
-        return response.sendBotMessage(
-          'Accounts',
-          '[Accounts] Synchronize - Invalid params',
-          `- Payloads : <pre>${JSON.stringify(payloads)}</pre>`
-        )
-      if (payloads && !payloads.accounts)
-        return response.sendBotMessage(
-          'Accounts',
-          '[Accounts] Synchronize - Invalid account transactions',
-          `- Payloads : <pre>${JSON.stringify(payloads)}</pre>`
-        )
-
-      /** separated variables payloads */
-      const { params, accounts } = payloads
-
-      return new Promise(resolve => {
-        job.progress(25)
-        AccountBalance.GetAccountBalance(params, (err, res) => {
-          if (err)
-            return resolve(
-              /** send message telegram bot if avaiable */
-              response.sendBotMessage(
-                'Accounts',
-                `[Accounts] Proto Get Account Balance - ${err}`,
-                `- Params : <pre>${JSON.stringify(params)}</pre>`
-              )
-            )
-
-          if (res && util.isObjEmpty(res.AccountBalance)) return resolve(response.setResult(false, `[Accounts] No additional data`))
-
-          job.progress(50)
-          const datas = [
-            {
-              AccountAddress: res.AccountBalance.AccountAddress,
-              Balance: parseInt(res.AccountBalance.Balance),
-              BalanceConversion: util.zoobitConversion(res.AccountBalance.Balance),
-              SpendableBalance: parseInt(res.AccountBalance.SpendableBalance),
-              SpendableBalanceConversion: util.zoobitConversion(res.AccountBalance.SpendableBalance),
-              FirstActive: accounts.FirstActive,
-              LastActive: accounts.Timestamp,
-              TotalRewards: null, // TODO: onprogress
-              TotalRewardsConversion: null, // TODO: onprogress
-              TotalFeesPaid: parseInt(accounts.TotalFee),
-              TotalFeesPaidConversion: util.zoobitConversion(accounts.TotalFee),
-              BlockHeight: res.AccountBalance.BlockHeight,
-              TransactionHeight: accounts.Height,
-              PopRevenue: parseInt(res.AccountBalance.PopRevenue),
-            },
-          ]
-
-          this.service.upserts(datas, ['AccountAddress'], (err, res) => {
-            /** send message telegram bot if avaiable */
-            if (err) return resolve(response.sendBotMessage('Accounts', `[Accounts] Upsert - ${err}`))
-            if (res && res.result.ok !== 1) return resolve(response.setError(`[Accounts] Upsert data failed`))
-
-            job.progress(100)
-            return resolve(response.setResult(true, `[Accounts] Upsert ${datas.length} data successfully`))
-          })
-        })
-      })
-    })
   }
 
   update(callback) {
@@ -96,76 +20,85 @@ module.exports = class Accounts extends BaseController {
       /** set variable last height account */
       const lastAccountHeight = res && res.TransactionHeight ? parseInt(res.TransactionHeight + 1) : 0
 
-      /** getting value last check height transaction */
-      const lastCheckTransactionHeight = parseInt(await this.generalsService.getValueByKey(store.keyLastCheckTransactionHeight)) || 0
+      /** getting value last check */
+      const lastCheck = await this.generalsService.getSetLastCheck()
 
       /** return message if last height account greather than last check height transaction  */
-      if (lastAccountHeight > 0 && lastAccountHeight >= lastCheckTransactionHeight)
+      if (lastAccountHeight > 0 && lastAccountHeight >= lastCheck.Height)
         return callback(response.setResult(false, '[Accounts] No additional data'))
 
-      /** getting data account sender transactions */
-      const senders = await this.transactionsService.asyncSendersByHeights(lastAccountHeight, lastCheckTransactionHeight)
-      if (senders.error && senders.data.length < 1)
-        return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Senders ${senders.error}`))
+      /** get all account address from transactions by heights */
+      const account = await this.transactionsService.asyncAccountAddressByHeights(lastAccountHeight, lastCheck.Height)
+      if (account.error)
+        return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Account Address ${account.error}`))
 
-      /** getting data account recipient transactions */
-      const recipients = await this.transactionsService.asyncRecipientsByHeights(lastAccountHeight, lastCheckTransactionHeight)
-      if (recipients.error && recipients.data.length < 1)
-        return callback(response.sendBotMessage('Accounts', `[Accounts] Transactions Service - Get Recipients ${recipients.error}`))
+      /** return message if nothing */
+      if (account.data.length < 1) return callback(response.setResult(false, '[Accounts] No additional data'))
 
-      /** return message if havingn't senders or receipts  */
-      if (senders.data.length < 1 && recipients.data.length < 1) return callback(response.setResult(false, '[Accounts] No additional data'))
+      /** get account balances core */
+      const params = { AccountAddresses: account.data.map(i => i.Account) }
+      AccountBalance.GetAccountBalances(params, (err, res) => {
+        if (err)
+          return callback(
+            /** send message telegram bot if avaiable */
+            response.sendBotMessage(
+              'Accounts',
+              `[Accounts] Proto Get Account Balances - ${err}`,
+              `- Params : <pre>${JSON.stringify(params)}</pre>`
+            )
+          )
 
-      /** adding multi jobs to the queue by account sender transactions */
-      senders.data &&
-        senders.data.length > 0 &&
-        senders.data.forEach(async item => {
-          /** set first active base on data account (local), if data empty so that set by timestamp */
-          const firstActive = await this.service.asyncFirstActiveAccount(item.Sender)
+        if (res && res.AccountBalances.length < 1) return resolve(response.setResult(false, `[Accounts] No additional data`))
 
-          /** set total fee base on data account (local) for calculate total fee paid */
-          const totalFee = await this.service.asyncTotalFeeAccount(item.Sender)
+        /** mapping data transactions and account balances */
+        const payloads = res.AccountBalances.map(i => {
+          const accounts = account.data.filter(o => o.Account === i.AccountAddress)
 
-          const payloads = {
-            params: { AccountAddress: item.Sender },
-            accounts: {
-              AccountAddress: item.Sender,
-              Height: item.Height,
-              TotalFee: parseInt(totalFee) + parseInt(item.Fee),
-              Timestamp: item.Timestamp,
-              FirstActive: firstActive ? firstActive : item.Timestamp,
-              SendMoney: item.SendMoney || null,
-            },
+          /** get first active */
+          const FirstActive = _.sortBy(accounts, ['Height'])[0].Timestamp
+
+          /** get last active */
+          const LastActive = _.sortBy(accounts, ['Height'])[accounts.length - 1].Timestamp
+
+          /** get last transaction height */
+          const TransactionHeight = _.sortBy(accounts, ['Height'])[accounts.length - 1].Height
+
+          /** get fee paid recipient */
+          const feeRecipients = accounts.filter(o => o.Type === 'Recipient')
+          let TotalFeesPaid = feeRecipients.length > 0 ? _.sortBy(feeRecipients, ['Height'])[feeRecipients.length - 1].Fee : 0
+
+          /** summary fee if sender */
+          const feeSenders = accounts.filter(o => o.Type === 'Sender')
+          if (feeSenders.length > 0) {
+            TotalFeesPaid = _.sumBy(feeSenders, 'Fee')
           }
-          this.queue.add(payloads, config.queue.optJob)
+
+          return {
+            FirstActive,
+            LastActive,
+            TransactionHeight,
+            TotalFeesPaid: parseInt(TotalFeesPaid),
+            TotalFeesPaidConversion: util.zoobitConversion(parseInt(TotalFeesPaid)),
+            AccountAddress: i.AccountAddress,
+            Balance: parseInt(i.Balance),
+            BalanceConversion: util.zoobitConversion(parseInt(i.Balance)),
+            SpendableBalance: parseInt(i.SpendableBalance),
+            SpendableBalanceConversion: util.zoobitConversion(parseInt(i.SpendableBalance)),
+            BlockHeight: i.BlockHeight,
+            PopRevenue: parseInt(i.PopRevenue),
+            TotalRewards: null, // TODO: onprogress
+            TotalRewardsConversion: null, // TODO: onprogress
+          }
         })
 
-      /** adding multi jobs to the queue by account receipt transactions */
-      recipients.data &&
-        recipients.data.length > 0 &&
-        recipients.data.forEach(async item => {
-          /** set first active base on data account (local), if data empty so that set by timestamp */
-          const firstActive = await this.service.asyncFirstActiveAccount(item.Recipient)
+        this.service.upserts(payloads, ['AccountAddress'], (err, res) => {
+          /** send message telegram bot if avaiable */
+          if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Upsert - ${err}`))
+          if (res && res.result.ok !== 1) return callback(response.setError(`[Accounts] Upsert data failed`))
 
-          /** set total fee base on data account (local), its not for calculating. just for update using data before */
-          const totalFee = await this.service.asyncTotalFeeAccount(item.Recipient)
-
-          const payloads = {
-            params: { AccountAddress: item.Recipient },
-            accounts: {
-              AccountAddress: item.Recipient,
-              Height: item.Height,
-              TotalFee: totalFee,
-              Timestamp: item.Timestamp,
-              FirstActive: firstActive ? firstActive : item.Timestamp,
-              SendMoney: null,
-            },
-          }
-          this.queue.add(payloads, config.queue.optJob)
+          return callback(response.setResult(true, `[Accounts] Upsert ${payloads.length} data successfully`))
         })
-
-      const count = parseInt(senders.data.length) + parseInt(recipients.data.length)
-      return callback(response.setResult(true, `[Queue] ${count} Accounts on processing`))
+      })
     })
   }
 }

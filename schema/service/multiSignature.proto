@@ -20,11 +20,16 @@ service MultisigService {
             get: "/v1/multisig/GetPendingTransactionDetailByTransactionHash"
         };
     }
+
     rpc GetMultisignatureInfo(model.GetMultisignatureInfoRequest) returns (model.GetMultisignatureInfoResponse) {
         option (google.api.http) = {
             get: "/v1/multisig/GetMultisignatureInfo"
         };
-    } 
-
-
+    }
+    
+    rpc GetMultisigAddressByParticipantAddresses(model.GetMultisigAddressByParticipantAddressesRequest) returns (model.GetMultisigAddressByParticipantAddressesResponse) {
+        option (google.api.http) = {
+            get: "/v1/multisig/GetMultisigAddressByParticipantAddresses"
+        };
+    }
 }

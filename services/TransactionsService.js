@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const BaseService = require('./BaseService')
+const { util } = require('../utils')
 const { Transactions } = require('../models')
-const { Transaction } = require('../protos')
 
 module.exports = class TransactionsService extends BaseService {
   constructor() {
@@ -11,6 +11,10 @@ module.exports = class TransactionsService extends BaseService {
 
   getLastHeight(callback) {
     Transactions.findOne().select('Height').sort('-Height').exec(callback)
+  }
+
+  getLastTimestamp(callback) {
+    Transactions.findOne().select('Timestamp Height').sort('-Timestamp').exec(callback)
   }
 
   getNodePublicKeysByHeights(heightStart, heightEnd, callback) {
@@ -28,6 +32,22 @@ module.exports = class TransactionsService extends BaseService {
       })
   }
 
+  async asyncAccountAddressByHeights(heightStart, heightEnd) {
+    const sender = await this.asyncSendersByHeights(heightStart, heightEnd)
+    if (sender.error) return { error: sender.error, data: [] }
+    const senders = sender.data.map(i => {
+      return { SendMoney: i.SendMoney, Timestamp: i.Timestamp, Height: i.Height, Account: i.Sender, Fee: i.Fee, Type: 'Sender' }
+    }, [])
+
+    const recipient = await this.asyncRecipientsByHeights(heightStart, heightEnd)
+    if (recipient.error) return { error: recipient.error, data: [] }
+    const recipients = recipient.data.map(i => {
+      return { SendMoney: i.SendMoney, Timestamp: i.Timestamp, Height: i.Height, Account: i.Recipient, Fee: i.Fee, Type: 'Recipient' }
+    }, [])
+
+    return { error: null, data: [...senders, ...recipients] }
+  }
+
   asyncSendersByHeights(heightStart, heightEnd) {
     return new Promise(resolve => {
       this.getSendersByHeights(heightStart, heightEnd, (err, res) => {
@@ -37,26 +57,16 @@ module.exports = class TransactionsService extends BaseService {
     })
   }
 
-  getTransactionSenderhByMultiSigChild(callback) {
-    Transactions.find({ MultisigChild: true, TransactionType: 'MultiSig' })
-      .select('TransactionHash')
-      .exec((err, res) => {
-        if (err) return callback(err, null)
-        if (res.length < 1) return callback(null, null)
-
-        return callback(null, res)
-      })
-  }
-
   getSendersByHeights(heightStart, heightEnd, callback) {
-    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, Sender: { $ne: null } })
-      .select('Sender Height Fee SendMoney Timestamp')
-      .sort('-Height')
+    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, TransactionType: 1, Sender: { $ne: null } })
+      // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Sender: { $ne: null } }, { Sender: { $ne: '' } }] })
+      .select('Sender Height Fee Timestamp SendMoney')
+      .sort('Height')
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, [])
 
-        const results = _.uniqBy(res, 'Sender')
+        const results = _.uniqBy(res, 'Sender').filter(f => util.isNotNullAccountAddress(f.Sender))
         return callback(null, results)
       })
   }
@@ -71,15 +81,27 @@ module.exports = class TransactionsService extends BaseService {
   }
 
   getRecipientsByHeights(heightStart, heightEnd, callback) {
-    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, Recipient: { $ne: null } })
-      .select('Recipient Height Fee Timestamp')
-      .sort('-Height')
+    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, TransactionType: 1, Recipient: { $ne: null } })
+      // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Recipient: { $ne: null } }, { Recipient: { $ne: '' } }] })
+      .select('Recipient Height Fee Timestamp SendMoney')
+      .sort('Height')
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, [])
 
-        const results = _.uniqBy(res, 'Recipient')
+        const results = _.uniqBy(res, 'Recipient').filter(f => util.isNotNullAccountAddress(f.Recipient))
         return callback(null, results)
+      })
+  }
+
+  getTransactionSenderhByMultiSigChild(callback) {
+    Transactions.find({ MultisigChild: true, TransactionType: 'MultiSig' })
+      .select('TransactionHash')
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, null)
+
+        return callback(null, res)
       })
   }
 }
