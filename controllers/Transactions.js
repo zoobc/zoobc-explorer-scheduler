@@ -56,7 +56,7 @@ module.exports = class Transactions extends BaseController {
             AmountConversion: util.zoobitConversion(item.sendMoneyTransactionBody.Amount),
           }
           escrow = await getEscrow(item.ID)
-          status = escrow.Status
+          if (escrow && escrow.Status) status = escrow.Status
           break
         case 2:
           transactionTypeName = 'Node Registration'
@@ -80,7 +80,7 @@ module.exports = class Transactions extends BaseController {
             TransactionID: item.approvalEscrowTransactionBody.TransactionID,
           }
           escrow = await getEscrow(item.approvalEscrowTransactionBody.TransactionID)
-          status = escrow.Status
+          if (escrow && escrow.Status) status = escrow.Status
           break
         case 5:
           transactionTypeName = 'Multisignature'

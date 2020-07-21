@@ -62,6 +62,10 @@ const log = obj => {
   return obj.result && obj.result.success ? msg.green(obj.result.message) : msg.yellow(obj.result.message)
 }
 
+const logMutation = message => {
+  return msg.green(message)
+}
+
 const isObjEmpty = obj => {
   for (var key in obj) {
     // eslint-disable-next-line no-prototype-builtins
@@ -78,4 +82,28 @@ const isNotNullAccountAddress = val => {
   )
 }
 
-module.exports = util = { encrypt, decrypt, bufferStr, zoobitConversion, log, isObjEmpty, isNotNullAccountAddress }
+const queryfy = obj => {
+  if (typeof obj === 'number') {
+    return obj
+  }
+
+  if (Object.prototype.toString.call(obj) === '[object Date]') {
+    return JSON.stringify(obj)
+  }
+
+  if (Array.isArray(obj)) {
+    const props = obj.map(value => `${queryfy(value)}`).join(',')
+    return `[${props}]`
+  }
+
+  if (typeof obj === 'object') {
+    const props = Object.keys(obj)
+      .map(key => `${key}: ${queryfy(obj[key])}`)
+      .join(',')
+    return `{${props}}`
+  }
+
+  return JSON.stringify(obj)
+}
+
+module.exports = util = { encrypt, decrypt, bufferStr, zoobitConversion, log, isObjEmpty, isNotNullAccountAddress, logMutation, queryfy }
