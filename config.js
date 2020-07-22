@@ -44,4 +44,7 @@ module.exports = {
     path: path.resolve(__dirname, './schema'),
     host: `${process.env.PROTO_HOST}:${process.env.PROTO_PORT}`,
   },
+  graphql: {
+    host: process.env.GRAPHQL_HOST || 'https://test9090.zoobc.net/zoobc/api/v1/graphql',
+  },
 }
