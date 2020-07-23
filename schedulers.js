@@ -7,7 +7,8 @@ const { UI } = require('bull-board')
 
 const config = require('./config')
 const { msg, util, response } = require('./utils')
-const { Nodes, Blocks, Accounts, ResetData, Transactions, PendingTransaction } = require('./controllers')
+const { Nodes, Blocks, Accounts, ResetData, Transactions } = require('./controllers')
+const fetch = require('node-fetch')
 
 const nodes = new Nodes()
 const blocks = new Blocks()
@@ -27,11 +28,21 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
       logResets.forEach(log => util.log(log))
     }
 
-    blocks.update(res => {
+    blocks.update(async res => {
       util.log(res)
 
-      transactions.update(res => {
+      if (res && res.subscribes) {
+        const result = await graphqlMutation('blocks', res.subscribes)
+        util.logMutation(`[GraphQL Mutation] ${result}`)
+      }
+
+      transactions.update(async res => {
         util.log(res)
+
+        if (res && res.subscribes) {
+          const result = await graphqlMutation('transactions', res.subscribes)
+          util.logMutation(`[GraphQL Mutation] ${result}`)
+        }
 
         nodes.update(res => {
           util.log(res)
@@ -95,6 +106,28 @@ function connectRedis() {
       msg.red(response.sendBotMessage('Schedulers', `Redis connection error - retrying in 5 sec\n${error}`), '❌')
       setTimeout(connectRedis, 5000)
     })
+}
+
+const graphqlMutation = async (type, input) => {
+  const queryfyInput = util.queryfy(input)
+
+  const query = JSON.stringify({
+    query: type === 'blocks' ? `mutation { blocks(blocks: ${queryfyInput}) }` : `mutation {transactions(transactions: ${queryfyInput})}`,
+  })
+
+  try {
+    const response = await fetch(config.graphql.host, {
+      headers: { 'content-type': 'application/json' },
+      method: 'POST',
+      body: query,
+    })
+
+    const responseJson = await response.json()
+
+    return type === 'blocks' ? responseJson.data.blocks : responseJson.data.transactions
+  } catch (error) {
+    return 'An error occurred while post to graphql endpoint, please try again or report it!'
+  }
 }
 
 /** dashboard queue */
