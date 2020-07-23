@@ -27,28 +27,24 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
       logResets.forEach(log => util.log(log))
     }
 
-    // blocks.update(res => {
-    //   util.log(res)
-
-    //   transactions.update(res => {
-    //     util.log(res)
-
-    //     nodes.update(res => {
-    //       util.log(res)
-
-    //       accounts.update(res => {
-    //         util.log(res)
-
-    //         // pendingTx.update(res => {
-    //         //   util.log(res)
-    //         // })
-    //       })
-    //     })
-    //   })
-    // })
-
-    pendingTx.update(res => {
+    blocks.update(res => {
       util.log(res)
+
+      transactions.update(res => {
+        util.log(res)
+
+        nodes.update(res => {
+          util.log(res)
+
+          accounts.update(res => {
+            util.log(res)
+
+            pendingTx.update(res => {
+              util.log(res)
+            })
+          })
+        })
+      })
     })
   } catch (error) {
     msg.red(`Scheduler error:\n${error}`, '❌')
