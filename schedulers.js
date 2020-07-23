@@ -7,7 +7,7 @@ const { UI } = require('bull-board')
 
 const config = require('./config')
 const { msg, util, response } = require('./utils')
-const { Nodes, Blocks, Accounts, ResetData, Transactions } = require('./controllers')
+const { Nodes, Blocks, Accounts, ResetData, Transactions, PendingTransaction } = require('./controllers')
 
 const nodes = new Nodes()
 const blocks = new Blocks()
@@ -15,7 +15,7 @@ const reset = new ResetData()
 const accounts = new Accounts()
 // const rollback = new Rollback()
 const transactions = new Transactions()
-// const pendingTx = new PendingTransaction()
+const pendingTx = new PendingTransaction()
 
 /** cron job */
 const event = config.app.scheduleEvent
@@ -27,24 +27,28 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
       logResets.forEach(log => util.log(log))
     }
 
-    blocks.update(res => {
+    // blocks.update(res => {
+    //   util.log(res)
+
+    //   transactions.update(res => {
+    //     util.log(res)
+
+    //     nodes.update(res => {
+    //       util.log(res)
+
+    //       accounts.update(res => {
+    //         util.log(res)
+
+    //         // pendingTx.update(res => {
+    //         //   util.log(res)
+    //         // })
+    //       })
+    //     })
+    //   })
+    // })
+
+    pendingTx.update(res => {
       util.log(res)
-
-      transactions.update(res => {
-        util.log(res)
-
-        nodes.update(res => {
-          util.log(res)
-
-          accounts.update(res => {
-            util.log(res)
-
-            // pendingTx.update(res => {
-            //   util.log(res)
-            // })
-          })
-        })
-      })
     })
   } catch (error) {
     msg.red(`Scheduler error:\n${error}`, '❌')
