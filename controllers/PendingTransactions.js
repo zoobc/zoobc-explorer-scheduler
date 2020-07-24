@@ -23,7 +23,6 @@ module.exports = class PendingTransaction extends BaseController {
       if (!res) return callback(response.setResult(false, '[Pending Transaction] No additional data'))
 
       res.forEach(txHash => {
-        count++
         const params = { TransactionHashHex: Buffer.from(txHash.TransactionHash.toString('binary'), 'ascii').toString('hex') }
         MultiSignature.GetPendingTransactionDetailByTransactionHash(params, (err, res) => {
           return new Promise(resolve => {
@@ -64,7 +63,7 @@ module.exports = class PendingTransaction extends BaseController {
               // if (err) return callback(response.setResult(false, `[Pending Transaction] Upsert - ${err}`))
               if (err) return resolve(response.sendBotMessage('Pending Transaction', `[Pending Transaction] Upsert - ${err}`))
 
-              return callback(response.setResult(true, `[Pending Transaction] Upsert data successfully`))
+              return resolve(callback(response.setResult(true, `[Pending Transaction] Upsert data successfully`)))
             })
 
             // this.transactionsService.upserts(payloads, ['TransactionHash'], (err, res) => {
