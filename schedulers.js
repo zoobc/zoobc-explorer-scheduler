@@ -7,14 +7,13 @@ const { UI } = require('bull-board')
 
 const config = require('./config')
 const { msg, util, response } = require('./utils')
-const { Nodes, Blocks, Accounts, ResetData, Transactions } = require('./controllers')
+const { Nodes, Blocks, Accounts, ResetData, Transactions, PendingTransaction } = require('./controllers')
 const fetch = require('node-fetch')
 
 const nodes = new Nodes()
 const blocks = new Blocks()
 const reset = new ResetData()
 const accounts = new Accounts()
-// const rollback = new Rollback()
 const transactions = new Transactions()
 const pendingTx = new PendingTransaction()
 
