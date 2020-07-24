@@ -29,6 +29,7 @@ enum EscrowStatus {
 enum EscrowApproval {
     Approve = 0;
     Reject = 1;
+    Expire = 2;
 }
 
 // GetEscrowTransactionsRequest message for get escrow transactions

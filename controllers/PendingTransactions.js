@@ -1,7 +1,7 @@
 const BaseController = require('./BaseController')
 const config = require('../config')
 const { MultiSignature } = require('../protos')
-const { queue, util, response } = require('../utils')
+const { util, response } = require('../utils')
 const { MultiSignatureService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class PendingTransaction extends BaseController {
@@ -9,77 +9,10 @@ module.exports = class PendingTransaction extends BaseController {
     super(new MultiSignatureService())
     this.transactionsService = new TransactionsService()
     this.generalsService = new GeneralsService()
-
-    /** queue */
-    this.queue = queue.create('Queue Pending-Transactions')
-    this.processing()
-    this.queue.on('completed', (job, result) => {
-      if (result && !util.isObjEmpty(result)) util.log(result)
-    })
-  }
-
-  processing() {
-    this.queue.process(async job => {
-      const params = job.data
-      /** send message telegram bot if avaiable */
-      if (!params) return response.sendBotMessage('Pending Transaction', '[Pending Transaction] Processing - Invalid params')
-
-      return new Promise(resolve => {
-        job.progress(25)
-
-        MultiSignature.GetPendingTransactionDetailByTransactionHash(params, (err, res) => {
-          if (err)
-            return resolve(
-              /** send message telegram bot if avaiable */
-              response.sendBotMessage(
-                'Pending Transaction',
-                `[Pending Transaction] Proto Get Pending Transaction Detail by Tx Hash - ${err}`,
-                `- Params : <pre>${JSON.stringify(params)}</pre>`
-              )
-            )
-
-          if (res && util.isObjEmpty(res.PendingTransaction))
-            return resolve(response.setResult(false, `[Pending Transaction] No additional data`))
-
-          job.progress(50)
-
-          let status = ''
-          switch (res.PendingTransaction.Status) {
-            case 'PendingTransactionPending':
-              status = 'Pending'
-              break
-            case 'PendingTransactionExecuted':
-              status = 'Executed'
-              break
-            case 'PendingTransactionNoOp':
-              status = 'Rejected'
-              break
-            case 'PendingTransactionExpired':
-              status = 'Expired'
-              break
-          }
-
-          const payloads = [
-            {
-              TransactionHash: res.PendingTransaction.TransactionHash,
-              Status: status,
-            },
-          ]
-
-          // this.transactionsService.upserts(payloads, ['TransactionHash'], (err, res) => {
-          //     if (err) return resolve(response.sendBotMessage('Pending Transaction', `[Pending Transaction] Upsert - ${err}`))
-          //     if (res && res.result.ok !== 1) return resolve(response.setError(`[Pending Transaction] Upsert data failed`))
-
-          //     job.progress(100)
-          //     return resolve(response.setResult(true, `[Pending Transaction] Upsert ${payloads.length} data successfully`))
-          // })
-        })
-      })
-    })
   }
 
   update(callback) {
-    this.transactionsService.getTransactionSenderhByMultiSigChild((err, res) => {
+    this.transactionsService.getTransactionSenderhByParticipant((err, res) => {
       if (err)
         return callback(
           response.sendBotMessage(
@@ -90,13 +23,63 @@ module.exports = class PendingTransaction extends BaseController {
       if (!res) return callback(response.setResult(false, '[Pending Transaction] No additional data'))
 
       let count = 0
-      res.forEach(txhash => {
+      res.forEach(txHash => {
         count++
-        const params = { TransactionHashHex: Buffer.from(txhash.TransactionHash.toString('binary'), 'ascii').toString('hex') }
-        this.queue.add(params, config.queue.optJob)
+        const params = { TransactionHashHex: Buffer.from(txHash.TransactionHash.toString('binary'), 'ascii').toString('hex') }
+        MultiSignature.GetPendingTransactionDetailByTransactionHash(params, (err, res) => {
+          return new Promise(resolve => {
+            if (err)
+              return resolve(
+                /** send message telegram bot if avaiable */
+                console.log(
+                  'Pending Transaction',
+                  `[Pending Transaction] Proto Get Pending Transaction Detail by Tx Hash - ${err}`,
+                  `- Params : <pre>${JSON.stringify(params)}</pre>`
+                )
+              )
+            if (res && util.isObjEmpty(res.PendingTransaction))
+              return resolve(response.setResult(false, `[Pending Transaction] No additional data`))
+
+            let status = ''
+            switch (res.PendingTransaction.Status) {
+              case 'PendingTransactionPending':
+                status = 'Pending'
+                break
+              case 'PendingTransactionExecuted':
+                status = 'Executed'
+                break
+              case 'PendingTransactionNoOp':
+                status = 'Rejected'
+                break
+              case 'PendingTransactionExpired':
+                status = 'Expired'
+                break
+            }
+
+            const payloads = {
+              TransactionHash: res.PendingTransaction.TransactionHash,
+              Status: status,
+            }
+
+            this.transactionsService.getTestFindAndUpdate(payloads, (err, res) => {
+              if (err) return callback(response.setResult(false, `[Pending Transaction] Upsert - ${err}`))
+
+              return callback(response.setResult(true, `[Pending Transaction] Upsert data successfully`))
+            })
+
+            // this.transactionsService.upserts(payloads, ['TransactionHash'], (err, res) => {
+            //     // if (err) return resolve(response.sendBotMessage('Pending Transaction', `[Pending Transaction] Upsert - ${err}`))
+            //     if (err) return callback(response.setResult(false, `[Pending Transaction] Upsert - ${err}`))
+            //         // if (res && res.result.ok !== 1) return resolve(response.setError(`[Pending Transaction] Upsert data failed`))
+            //     if (res && res.result.ok !== 1) return callback(response.setResult(false, `[Pending Transaction] Upsert data failed`))
+
+            //     return callback(response.setResult(true, `[Pending Transaction] Upsert data successfully`))
+            // })
+          })
+        })
       })
 
-      return callback(response.setResult(true, `[Queue] ${count} Pending Transaction on processing`))
+      // return callback(response.setResult(true, `[Queue] ${count} Pending Transaction on processing`))
     })
   }
 }
