@@ -37,7 +37,7 @@ module.exports = class AccountsService extends BaseService {
     Accounts.findOne({ AccountAddress: accountAddress }).select('TotalFeesPaid').exec(callback)
   }
 
-  getFindAndUpdate(payloads, callback) {
+  findAndUpdate(payloads, callback) {
     Accounts.findOneAndUpdate(
       { AccountAddress: payloads.AccountAddress },
       { TotalRewards: payloads.TotalRewards, TotalRewardsConversion: payloads.TotalRewardsConversion },

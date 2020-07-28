@@ -20,7 +20,7 @@ module.exports = class AccountLedgers extends BaseController {
       const TimestampEnd = moment(res.Timestamp).unix()
       const lastCheck = await this.generalsService.getSetLastCheck()
       const params = { EventType: 'EventReward', TimestampStart: lastCheck.Timestamp, TimestampEnd: TimestampEnd }
-      AccountLedger.GetAccountLedgers(params, (err, result) => {
+      AccountLedger.GetAccountLedgers(params, async (err, result) => {
         if (err)
           return callback(
             /** send message telegram bot if avaiable */
@@ -33,19 +33,31 @@ module.exports = class AccountLedgers extends BaseController {
 
         if (result && result.AccountLedgers.length < 1) return resolve(response.setResult(false, `[AccountLedgers] No additional data`))
 
-        result.AccountLedgers.forEach(item => {
-          const payloads = {
-            AccountAddress: item.AccountAddress,
-            TotalRewards: item.BalanceChange,
-            TotalRewardsConversion: util.zoobitConversion(item.BalanceChange),
-          }
+        const promises = result.AccountLedgers.map(item => {
+          return new Promise(resolve => {
+            const payload = {
+              AccountAddress: item.AccountAddress,
+              TotalRewards: item.BalanceChange,
+              TotalRewardsConversion: util.zoobitConversion(item.BalanceChange),
+            }
 
-          this.service.getFindAndUpdate(payloads, (err, ress) => {
-            if (err) return callback(response.sendBotMessage('AccountLedger', `[AccountLedgers] Upsert - ${err}`))
-
-            return callback(response.setResult(true, `[AccountLedgers] Upsert ${payloads.length} data successfully`))
+            this.service.findAndUpdate(payload, (err, res) => {
+              if (err) return resolve({ err, res: null })
+              return resolve({ err: null, res })
+            })
           })
         })
+
+        const results = await Promise.all(promises)
+        const errors = results.filter(f => f.err !== null)
+
+        if (errors && errors.length > 0) {
+          errors.forEach(err => {
+            return callback(response.sendBotMessage('AccountLedger', `[AccountLedgers] Upsert - ${JSON.stringify(err)}`))
+          })
+        }
+
+        return callback(response.setResult(true, `[AccountLedgers] Upsert ${results.length} data successfully`))
       })
     })
   }
