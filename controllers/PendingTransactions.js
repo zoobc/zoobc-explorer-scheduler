@@ -1,5 +1,4 @@
 const BaseController = require('./BaseController')
-const config = require('../config')
 const { MultiSignature } = require('../protos')
 const { util, response } = require('../utils')
 const { MultiSignatureService, TransactionsService, GeneralsService } = require('../services')
@@ -12,7 +11,7 @@ module.exports = class PendingTransaction extends BaseController {
   }
 
   update(callback) {
-    this.transactionsService.getTransactionSenderhByParticipant((err, res) => {
+    this.transactionsService.getTransactionSenderByParticipant((err, res) => {
       if (err)
         return callback(
           response.sendBotMessage(
