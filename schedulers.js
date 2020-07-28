@@ -9,7 +9,6 @@ const config = require('./config')
 const { msg, util, response } = require('./utils')
 const { Nodes, Blocks, Accounts, AccountLedgers, ResetData, Transactions, PendingTransaction } = require('./controllers')
 const fetch = require('node-fetch')
-const { AccountLedger } = require('./protos')
 
 const nodes = new Nodes()
 const blocks = new Blocks()
