@@ -94,7 +94,7 @@ module.exports = class TransactionsService extends BaseService {
       })
   }
 
-  getTransactionSenderhByParticipant(callback) {
+  getTransactionSenderByParticipant(callback) {
     Transactions.find({ MultisigChild: true, Status: 'Pending' })
       .select('TransactionHash')
       .exec((err, res) => {
