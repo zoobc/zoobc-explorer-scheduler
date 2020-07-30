@@ -105,7 +105,7 @@ module.exports = class TransactionsService extends BaseService {
       })
   }
 
-  getTestFindAndUpdate(payloads, callback) {
+  TestFindAndUpdate(payloads, callback) {
     Transactions.findOneAndUpdate(
       { TransactionHash: payloads.TransactionHash },
       { Status: payloads.Status },
