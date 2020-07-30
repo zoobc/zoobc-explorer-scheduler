@@ -1,7 +1,7 @@
-const BaseController = require('./BaseController')
-const { AccountLedger, Block } = require('../protos')
-const { util, response } = require('../utils')
 const moment = require('moment')
+const BaseController = require('./BaseController')
+const { AccountLedger } = require('../protos')
+const { util, response } = require('../utils')
 const { AccountsService, BlocksService, GeneralsService } = require('../services')
 
 module.exports = class AccountLedgers extends BaseController {
@@ -31,7 +31,7 @@ module.exports = class AccountLedgers extends BaseController {
             )
           )
 
-        if (result && result.AccountLedgers.length < 1) return resolve(response.setResult(false, `[AccountLedgers] No additional data`))
+        if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[AccountLedgers] No additional data`))
 
         const promises = result.AccountLedgers.map(item => {
           return new Promise(resolve => {
@@ -53,6 +53,7 @@ module.exports = class AccountLedgers extends BaseController {
 
         if (errors && errors.length > 0) {
           errors.forEach(err => {
+            /** send message telegram bot if avaiable */
             return callback(response.sendBotMessage('AccountLedger', `[AccountLedgers] Upsert - ${JSON.stringify(err)}`))
           })
         }

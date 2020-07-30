@@ -1,6 +1,6 @@
 const BaseController = require('./BaseController')
-const { MultiSignature } = require('../protos')
 const { util, response } = require('../utils')
+const { MultiSignature } = require('../protos')
 const { MultiSignatureService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class PendingTransaction extends BaseController {
@@ -30,7 +30,7 @@ module.exports = class PendingTransaction extends BaseController {
             if (err)
               return resolve(
                 /** send message telegram bot if avaiable */
-                console.log(
+                response.sendBotMessage(
                   'Pending Transaction',
                   `[Pending Transaction] Proto Get Pending Transaction Detail by Tx Hash - ${err}`,
                   `- Params : <pre>${JSON.stringify(params)}</pre>`
@@ -60,10 +60,8 @@ module.exports = class PendingTransaction extends BaseController {
               Status: status,
             }
 
-            this.transactionsService.getTestFindAndUpdate(payloads, (err, res) => {
-              // if (err) return callback(response.setResult(false, `[Pending Transaction] Upsert - ${err}`))
+            this.transactionsService.getTestFindAndUpdate(payloads, err => {
               if (err) return resolve(response.sendBotMessage('Pending Transaction', `[Pending Transaction] Upsert - ${err}`))
-
               return resolve(callback(response.setResult(true, `[Pending Transaction] Upsert data successfully`)))
             })
           })
