@@ -1,5 +1,6 @@
 const cron = require('cron')
 const redis = require('redis')
+const moment = require('moment')
 const express = require('express')
 const fetch = require('node-fetch')
 const saslprep = require('saslprep')
@@ -113,24 +114,33 @@ function connectRedis() {
 }
 
 const graphqlMutation = async (type, input) => {
-  const queryfyInput = util.queryfy(input)
+  const timestamp = moment.utc().unix() - moment.utc('1970-01-01 00:00:00').unix()
+  const consumerId = config.graphql.consumerId
+  const consumerSecret = config.graphql.consumerSecret
+  const signature = util.hmacEncrypt(`${consumerId}&${timestamp}`, consumerSecret)
+  const headers = {
+    'x-timestamp': timestamp,
+    'x-cons-id': consumerId,
+    'x-signature': signature,
+    'content-type': 'application/json',
+  }
 
+  const queryfyInput = util.queryfy(input)
   const query = JSON.stringify({
     query: type === 'blocks' ? `mutation { blocks(blocks: ${queryfyInput}) }` : `mutation {transactions(transactions: ${queryfyInput})}`,
   })
 
   try {
     const response = await fetch(config.graphql.host, {
-      headers: { 'content-type': 'application/json' },
+      headers,
       method: 'POST',
       body: query,
     })
-
     const responseJson = await response.json()
 
     return type === 'blocks' ? responseJson.data.blocks : responseJson.data.transactions
   } catch (error) {
-    return 'An error occurred while post to graphql endpoint, please try again or report it!'
+    return `An error occurred while post to graphql endpoint, please try again or report it!\n${error}`
   }
 }
 

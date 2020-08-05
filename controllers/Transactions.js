@@ -193,7 +193,7 @@ module.exports = class Transactions extends BaseController {
               return {
                 TransactionID: m.TransactionID,
                 Timestamp: m.Timestamp,
-                FeeConversion: m.FeeConversion,
+                FeeConversion: m.FeeConversion.toString(),
               }
             })
 
