@@ -1,0 +1,18 @@
+name: Deploy Experimental
+
+on:
+  push:
+    branches: [experimental]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Deploy to Server Development
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_KEY_TESTNET }}
+          host: ${{ secrets.SSH_HOST_TESTNET }}
+          username: ${{ secrets.SSH_USER_TESTNET }}
+          script: pm2 deploy ecosystem.config.js scheduler update --force
