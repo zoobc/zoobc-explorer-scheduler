@@ -4,12 +4,16 @@ package model;
 
 option go_package = "github.com/zoobc/zoobc-core/common/model";
 
+import "model/nodeAddressInfo.proto";
+
 // NodeInfo represent the node information data structure
 message Node {
 	int64 ID = 1;
 	string SharedAddress = 2;
 	string Address       = 3;
 	uint32 Port          = 4;
+	// AddressStatus the pending/confirmed status of node address
+	NodeAddressStatus AddressStatus = 5;
 }
 
 message NodeKey {
