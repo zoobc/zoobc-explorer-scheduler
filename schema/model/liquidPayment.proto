@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+message LiquidPayment {
+    int64 ID = 1 [ jstype = JS_STRING ];
+    string SenderAddress = 2;
+    string RecipientAddress = 3;
+    int64 Amount = 4 [ jstype = JS_STRING ];
+    int64 AppliedTime = 5 [ jstype = JS_STRING ];
+    uint64 CompleteMinutes = 6 [ jstype = JS_STRING ];
+    LiquidPaymentStatus Status = 7;
+    uint32 BlockHeight = 8;
+    bool Latest = 9;
+}
+enum LiquidPaymentStatus {
+    LiquidPaymentPending = 0;
+    LiquidPaymentCompleted = 1;
+}

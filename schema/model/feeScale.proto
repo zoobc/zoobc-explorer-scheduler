@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package model;
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+message FeeScale {
+    int64 FeeScale = 1 [ jstype = JS_STRING ];
+    uint32 BlockHeight = 2;
+    bool Latest = 3;
+}
+enum FeeVotePhase {
+    FeeVotePhaseCommmit = 0;
+    FeeVotePhaseReveal = 1;
+    FeeVotePhaseAdjust = 2;
+
+}
+

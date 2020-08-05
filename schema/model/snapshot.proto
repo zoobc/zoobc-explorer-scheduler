@@ -13,6 +13,9 @@ import "model/escrow.proto";
 import "model/multiSignature.proto";
 import "model/block.proto";
 import "model/skippedBlocksmith.proto";
+import "model/feeScale.proto";
+import "model/feeVote.proto";
+import "model/liquidPayment.proto";
 
 // SnapshotFileInfo model to pass data between snapshot and spineBlockManifest interfaces
 message SnapshotFileInfo {
@@ -37,6 +40,11 @@ message SnapshotPayload {
     repeated PendingSignature PendingSignatures = 9;
     repeated MultiSignatureInfo MultiSignatureInfos = 10;
     repeated SkippedBlocksmith SkippedBlocksmiths = 11;
-    repeated MultiSignatureParticipant MultiSignatureParticipants = 12;
+    repeated FeeScale FeeScale = 12;
+    repeated FeeVoteCommitmentVote FeeVoteCommitmentVote = 13;
+    repeated FeeVoteRevealVote FeeVoteRevealVote = 14;
+    repeated LiquidPayment LiquidPayment = 15;
+    repeated NodeAdmissionTimestamp NodeAdmissionTimestamp = 16;
+    repeated MultiSignatureParticipant MultiSignatureParticipants = 17;
 }
 
