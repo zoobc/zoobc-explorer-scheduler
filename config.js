@@ -5,7 +5,7 @@ module.exports = {
   app: {
     limitData: 100,
     port: process.env.PORT || 3033,
-    scheduleEvent: 20 /** seconds */,
+    scheduleEvent: 10 /** seconds */,
     chatId: process.env.CHAT_ID || null,
     resetData: process.env.RESET_DATA || false,
     env: process.env.NODE_ENV || 'development',
@@ -46,5 +46,7 @@ module.exports = {
   },
   graphql: {
     host: process.env.GRAPHQL_HOST || 'https://test9090.zoobc.net/zoobc/api/v1/graphql',
+    consumerId: process.env.GRAPHQL_CLIENT_ID || '1234567890',
+    consumerSecret: process.env.GRAPHQL_CLIENT_SECRET || 'client-secret-key',
   },
 }
