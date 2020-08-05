@@ -15,7 +15,7 @@ message FeeVoteCommitmentVote {
 message FeeVoteInfo {
    bytes RecentBlockHash = 1;
    uint32 RecentBlockHeight = 2;
-   int64 FeeVote = 3 [ jstype = JS_STRING ];;
+   int64 FeeVote = 3 [ jstype = JS_STRING ];
 }
 // FeeVoteRevealVote represents the fields might be contains what previous commitmentVote submitted
 message FeeVoteRevealVote {
