@@ -38,7 +38,7 @@ module.exports = class Transactions extends BaseController {
       let multiSignature = null
       let transactionTypeName = ''
       let escrow = null
-      let status = item.TransactionType === 1 || item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Approved'
+      let status = item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Approved'
 
       switch (item.TransactionType) {
         case 1:
@@ -48,7 +48,7 @@ module.exports = class Transactions extends BaseController {
             AmountConversion: util.zoobitConversion(item.sendMoneyTransactionBody.Amount),
           }
           escrow = await getEscrow(item.ID)
-          status = escrow && escrow.Status ? escrow.Status : 'Pending'
+          status = escrow && escrow.Status ? escrow.Status : 'Approved'
           break
         case 2:
           transactionTypeName = 'Node Registration'
