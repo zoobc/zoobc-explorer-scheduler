@@ -9,6 +9,7 @@ import "model/batchReceipt.proto";
 import "model/nodeRegistration.proto";
 import "model/escrow.proto";
 import "model/multiSignature.proto";
+import "model/feeVote.proto";
 
 // Transaction represent the transaction data structure stored in the database
 message Transaction {
@@ -38,10 +39,14 @@ message Transaction {
         RemoveAccountDatasetTransactionBody removeAccountDatasetTransactionBody = 22;
         ApprovalEscrowTransactionBody approvalEscrowTransactionBody = 23;
         MultiSignatureTransactionBody multiSignatureTransactionBody = 24;
+        FeeVoteCommitTransactionBody feeVoteCommitTransactionBody = 25;
+        FeeVoteRevealTransactionBody feeVoteRevealTransactionBody = 26;
+        LiquidPaymentTransactionBody liquidPaymentTransactionBody = 27;
+        LiquidPaymentStopTransactionBody liquidPaymentStopTransactionBody = 28;
     }
-    bytes Signature = 25;
+    bytes Signature = 29;
     // nullable
-    Escrow Escrow = 26;
+    Escrow Escrow = 30;
 }
 
 enum TransactionType {
@@ -65,6 +70,10 @@ enum TransactionType {
     ApprovalEscrowTransaction = 4;
     // in bytes: []byte{5,0,0,0}
     MultiSignatureTransaction = 5;
+    // in bytes: []byte{7,0,0,0}
+    FeeVoteCommitmentVoteTransaction  = 7;
+    // in bytes: []byte{7,1,0,0}
+    FeeVoteRevealVoteTransaction = 263;
 }
 
 
@@ -78,19 +87,17 @@ message NodeRegistrationTransactionBody {
     bytes NodePublicKey = 1;
     string AccountAddress = 2;
     // Funds to be locked to register the node
-    NodeAddress NodeAddress = 3;
-    int64 LockedBalance = 4 [ jstype = JS_STRING ];
+    int64 LockedBalance = 3 [ jstype = JS_STRING ];
     // Proof of ownership (message + signature)
-    ProofOfOwnership Poown = 5;
+    ProofOfOwnership Poown = 4;
 }
 
 message UpdateNodeRegistrationTransactionBody {
     bytes NodePublicKey = 1;
-    NodeAddress NodeAddress = 2;
     // Funds to be locked to register the node
-    int64 LockedBalance = 3 [ jstype = JS_STRING ];
+    int64 LockedBalance = 2 [ jstype = JS_STRING ];
     // Proof of ownership (message + signature)
-    ProofOfOwnership Poown = 4;
+    ProofOfOwnership Poown = 3;
 }
 
 message RemoveNodeRegistrationTransactionBody { bytes NodePublicKey = 1; }
@@ -102,26 +109,18 @@ message ClaimNodeRegistrationTransactionBody {
 }
 
 message SetupAccountDatasetTransactionBody {
-    // Account Address that set Dataset
-    string SetterAccountAddress = 1;
-    // Account Address that got property of Dataset
-    string RecipientAccountAddress = 2;
     // Property name
-    string Property = 3;
+    string Property = 1;
     // Value of property
-    string Value = 4;
+    string Value = 2;
     // How long Dataset will active in second
 }
 
 message RemoveAccountDatasetTransactionBody {
-    // Account Address that set Dataset
-    string SetterAccountAddress = 1;
-    // Account Address that got property of Dataset
-    string RecipientAccountAddress = 2;
     // Property name
-    string Property = 3;
+    string Property = 1;
     // Value of property
-    string Value = 4;
+    string Value = 2;
 }
 
 message ApprovalEscrowTransactionBody {
@@ -136,6 +135,24 @@ message MultiSignatureTransactionBody {
     bytes UnsignedTransactionBytes = 2;
     // List of participantAddress-participantSignature with its tx hash
     SignatureInfo SignatureInfo = 3;
+}
+
+message FeeVoteCommitTransactionBody{
+    // VoteHash the hash of fee vote object
+    bytes VoteHash =1;
+}
+message FeeVoteRevealTransactionBody {
+    FeeVoteInfo FeeVoteInfo = 1;
+    bytes VoterSignature = 2;
+}
+
+message LiquidPaymentTransactionBody {
+    int64 Amount = 1 [ jstype = JS_STRING ];
+    // CompleteMinutes indicates how many minutes is required before the liquid payment is completed
+    uint64 CompleteMinutes = 2 [ jstype = JS_STRING ];
+}
+message LiquidPaymentStopTransactionBody {
+    int64 TransactionID = 1 [ jstype = JS_STRING ];
 }
 
 //------------

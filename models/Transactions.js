@@ -116,6 +116,24 @@ const schema = new mongoose.Schema(
       Latest: { type: Boolean },
       Instruction: { type: String },
     },
+    FeeVoteCommit: {
+      VoteHash: { type: Buffer },
+    },
+    FeeVoteRevealTransactionBody: {
+      FeeVoteInfo: {
+        RecentBlockHash: { type: Buffer },
+        RecentBlockHeight: { type: Buffer },
+        FeeVote: { type: Number },
+      },
+      VoterSignature: { type: Buffer },
+    },
+    LiquidPaymentTransactionBody: {
+      Amount: { type: Number },
+      CompleteMinutes: { type: Number },
+    },
+    LiquidPaymentStopTransactionBody: {
+      TransactionID: { type: String } /** ID */,
+    },
   },
   {
     toJSON: { virtuals: true },

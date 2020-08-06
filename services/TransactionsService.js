@@ -94,8 +94,8 @@ module.exports = class TransactionsService extends BaseService {
       })
   }
 
-  getTransactionSenderhByMultiSigChild(callback) {
-    Transactions.find({ MultisigChild: true, TransactionType: 'MultiSig' })
+  getTransactionSenderByParticipant(callback) {
+    Transactions.find({ MultisigChild: true, Status: 'Pending' })
       .select('TransactionHash')
       .exec((err, res) => {
         if (err) return callback(err, null)
@@ -103,5 +103,21 @@ module.exports = class TransactionsService extends BaseService {
 
         return callback(null, res)
       })
+  }
+
+  TestFindAndUpdate(payloads, callback) {
+    Transactions.findOneAndUpdate(
+      { TransactionHash: payloads.TransactionHash },
+      { Status: payloads.Status },
+      {
+        new: true,
+        upsert: true,
+      }
+    ).exec((err, res) => {
+      if (err) return callback(err, null)
+      if (res.length < 1) return callback(null, null)
+
+      return callback(null, res)
+    })
   }
 }

@@ -10,8 +10,14 @@ import "model/block.proto";
 import "model/blockchain.proto";
 import "model/transaction.proto";
 import "model/fileDownload.proto";
+import "model/node.proto";
+import "model/nodeAddressInfo.proto";
+import "model/proofOfOrigin.proto";
 
 service P2PCommunication {
+  rpc GetNodeAddressesInfo(model.GetNodeAddressesInfoRequest) returns (model.GetNodeAddressesInfoResponse) {}
+  rpc SendNodeAddressInfo(model.SendNodeAddressInfoRequest) returns (model.Empty) {}
+  rpc GetNodeProofOfOrigin(model.GetNodeProofOfOriginRequest) returns (model.ProofOfOrigin) {}
   rpc GetPeerInfo(model.GetPeerInfoRequest) returns (model.GetPeerInfoResponse) {}
   rpc GetMorePeers(model.Empty) returns (model.GetMorePeersResponse) {}
   rpc SendPeers(model.SendPeersRequest) returns (model.Empty) {}

@@ -72,4 +72,14 @@ const HealthCheck = createClient(
   config.proto.host
 )
 
-module.exports = { Block, Transaction, AccountBalance, NodeRegistration, HealthCheck, Escrow, MultiSignature }
+const AccountLedger = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'accountLedger.proto',
+    servicePath: 'service',
+    serviceName: 'AccountLedgerService',
+  },
+  config.proto.host
+)
+
+module.exports = { Block, Transaction, AccountBalance, AccountLedger, NodeRegistration, HealthCheck, Escrow, MultiSignature }

@@ -1,0 +1,21 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+// ProofOfOrigin a message send by a node to prove its identity
+message ProofOfOrigin {
+	// MessageBytes Response to the challenge message sent to this node
+	bytes MessageBytes = 1;
+	// Timestamp expiration time for this proof of origin message
+	int64 Timestamp = 2 [ jstype = JS_STRING ];
+	// Signature signature of above fields (signed by the node and verifiable with node's public key at above block height)
+	bytes Signature = 3;
+}
+
+message GetNodeProofOfOriginRequest {
+	bytes ChallengeMessage = 1;
+	int64 Timestamp =2 [ jstype = JS_STRING ];
+}
+

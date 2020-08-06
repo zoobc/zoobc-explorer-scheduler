@@ -1,0 +1,26 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+// FeeVoteCommitmentVote represent the commitment vote of fee vote structure stored in the database
+message FeeVoteCommitmentVote {
+   bytes  VoteHash = 1;
+   string  VoterAddress = 2;
+   uint32 BlockHeight = 3 ;
+}
+
+// FeeVoteInfo represents the fields might be contains what previous commitmentVote submitted
+message FeeVoteInfo {
+   bytes RecentBlockHash = 1;
+   uint32 RecentBlockHeight = 2;
+   int64 FeeVote = 3 [ jstype = JS_STRING ];
+}
+// FeeVoteRevealVote represents the fields might be contains what previous commitmentVote submitted
+message FeeVoteRevealVote {
+   FeeVoteInfo VoteInfo = 1;
+   bytes VoterSignature = 2;
+   string VoterAddress = 3;
+   uint32 BlockHeight = 4;
+}
