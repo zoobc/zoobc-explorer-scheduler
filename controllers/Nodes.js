@@ -21,6 +21,9 @@ module.exports = class Nodes extends BaseController {
       /** getting value last check height transaction */
       const lastCheck = await this.generalsService.getSetLastCheck()
 
+      /** return message if last check is null */
+      if (!lastCheck) return callback(response.setResult(false, '[Nodes] No additional data'))
+
       /** return message if last height node greather than equal last check height transaction  */
       if (lastNodeHeight > 0 && lastNodeHeight >= lastCheck.Height) return callback(response.setResult(false, '[Nodes] No additional data'))
 
