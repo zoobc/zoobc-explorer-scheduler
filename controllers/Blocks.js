@@ -115,19 +115,19 @@ module.exports = class Blocks extends BaseController {
           if (res && res.result.ok !== 1) return callback(response.setError('[Blocks] Upsert data failed'))
 
           /** subscribe graphql */
-          const subscribeBlocks = payloads
-            .slice(0, 5)
-            .sort((a, b) => (a.Height > b.Height ? -1 : 1))
-            .map(m => {
-              return {
-                BlockID: m.BlockID,
-                Height: m.Height,
-                BlocksmithAddress: m.BlocksmithAddress,
-                Timestamp: m.Timestamp,
-              }
-            })
+          // const subscribeBlocks = payloads
+          //   .slice(0, 5)
+          //   .sort((a, b) => (a.Height > b.Height ? -1 : 1))
+          //   .map(m => {
+          //     return {
+          //       BlockID: m.BlockID,
+          //       Height: m.Height,
+          //       BlocksmithAddress: m.BlocksmithAddress,
+          //       Timestamp: m.Timestamp,
+          //     }
+          //   })
 
-          return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`, subscribeBlocks))
+          return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`))
         })
       })
     })
