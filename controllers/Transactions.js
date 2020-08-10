@@ -186,18 +186,18 @@ module.exports = class Transactions extends BaseController {
           if (res && res.result.ok !== 1) return callback(response.setError(`[Transactions] Upsert data failed`))
 
           /** subscribe graphql */
-          const subscribeTransactions = payloads
-            .slice(0, 5)
-            .sort((a, b) => (a.Height > b.Height ? -1 : 1))
-            .map(m => {
-              return {
-                TransactionID: m.TransactionID,
-                Timestamp: m.Timestamp,
-                FeeConversion: m.FeeConversion.toString(),
-              }
-            })
+          // const subscribeTransactions = payloads
+          //   .slice(0, 5)
+          //   .sort((a, b) => (a.Height > b.Height ? -1 : 1))
+          //   .map(m => {
+          //     return {
+          //       TransactionID: m.TransactionID,
+          //       Timestamp: m.Timestamp,
+          //       FeeConversion: m.FeeConversion.toString(),
+          //     }
+          //   })
 
-          return callback(response.setResult(true, `[Transactions] Upsert ${payloads.length} data successfully`, subscribeTransactions))
+          return callback(response.setResult(true, `[Transactions] Upsert ${payloads.length} data successfully`))
         })
       })
     })
