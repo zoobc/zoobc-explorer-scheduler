@@ -14,18 +14,22 @@ module.exports = class AccountLedgers extends BaseController {
   async update(callback) {
     this.blocksService.getLastTimestamp(async (err, res) => {
       /** send message telegram bot if avaiable */
-      if (err) return callback(response.sendBotMessage('Transactions', `[Transactions] Blocks Service - Get Last Timestamp ${err}`))
-      if (!res) return callback(response.setResult(false, '[Transactions] No additional data'))
+      if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Blocks Service - Get Last Timestamp ${err}`))
+      if (!res) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
       const TimestampEnd = moment(res.Timestamp).unix()
+
       const lastCheck = await this.generalsService.getSetLastCheck()
+      /** return message if nothing */
+      if (!lastCheck) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
+
       const params = { EventType: 'EventReward', TimestampStart: lastCheck.Timestamp, TimestampEnd: TimestampEnd }
       AccountLedger.GetAccountLedgers(params, async (err, result) => {
         if (err)
           return callback(
             /** send message telegram bot if avaiable */
             response.sendBotMessage(
-              'Accounts',
+              'AccountLedger',
               `[AccountLedger] Proto Get Account Ledger - ${err}`,
               `- Params : <pre>${JSON.stringify(params)}</pre>`
             )
@@ -54,11 +58,11 @@ module.exports = class AccountLedgers extends BaseController {
         if (errors && errors.length > 0) {
           errors.forEach(err => {
             /** send message telegram bot if avaiable */
-            return callback(response.sendBotMessage('AccountLedger', `[AccountLedgers] Upsert - ${JSON.stringify(err)}`))
+            return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Upsert - ${JSON.stringify(err)}`))
           })
         }
 
-        return callback(response.setResult(true, `[AccountLedgers] Upsert ${results.length} data successfully`))
+        return callback(response.setResult(true, `[Account Ledgers] Upsert ${results.length} data successfully`))
       })
     })
   }

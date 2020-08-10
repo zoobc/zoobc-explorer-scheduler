@@ -140,7 +140,7 @@ const graphqlMutation = async (type, input) => {
 
     return type === 'blocks' ? responseJson.data.blocks : responseJson.data.transactions
   } catch (error) {
-    return `An error occurred while post to graphql endpoint, please try again or report it!\n${error}`
+    return error
   }
 }
 
