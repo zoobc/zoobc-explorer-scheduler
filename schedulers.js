@@ -9,12 +9,13 @@ const { UI } = require('bull-board')
 
 const config = require('./config')
 const { msg, util, response } = require('./utils')
-const { Nodes, Blocks, Accounts, AccountLedgers, ResetData, Transactions, PendingTransaction } = require('./controllers')
+const { Nodes, Blocks, Accounts, AccountLedgers, ResetData, Transactions, PendingTransaction, NodeAddress } = require('./controllers')
 
 const nodes = new Nodes()
 const blocks = new Blocks()
 const reset = new ResetData()
 const accounts = new Accounts()
+const nodeAddress = new NodeAddress()
 const transactions = new Transactions()
 const pendingTx = new PendingTransaction()
 const accountLedger = new AccountLedgers()
@@ -56,6 +57,10 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
 
               accountLedger.update(res => {
                 util.log(res)
+
+                nodeAddress.update(res => {
+                  util.log(res)
+                })
               })
             })
           })
@@ -81,7 +86,7 @@ function initApp() {
   }
   return mongoose.connect(uris, options, error => {
     if (error) {
-      msg.red(response.sendBotMessage('Schedulers', `MongoDB connection error - retrying in 5 sec\n${error}`), '❌')
+      msg.red(`MongoDB connection error - retrying in 5 sec\n${error}`, '❌')
       setTimeout(initApp, 5000)
     } else {
       msg.green('MongoDB connection success')
