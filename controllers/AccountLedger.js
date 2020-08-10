@@ -20,7 +20,6 @@ module.exports = class AccountLedgers extends BaseController {
       const TimestampEnd = moment(res.Timestamp).unix()
 
       const lastCheck = await this.generalsService.getSetLastCheck()
-      /** return message if nothing */
       if (!lastCheck) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
       const params = { EventType: 'EventReward', TimestampStart: lastCheck.Timestamp, TimestampEnd: TimestampEnd }
@@ -35,13 +34,13 @@ module.exports = class AccountLedgers extends BaseController {
             )
           )
 
-        if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[AccountLedgers] No additional data`))
+        if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         const promises = result.AccountLedgers.map(item => {
           return new Promise(resolve => {
             const payload = {
               AccountAddress: item.AccountAddress,
-              TotalRewards: item.BalanceChange,
+              TotalRewards: parseInt(item.BalanceChange),
               TotalRewardsConversion: util.zoobitConversion(item.BalanceChange),
             }
 
@@ -54,6 +53,9 @@ module.exports = class AccountLedgers extends BaseController {
 
         const results = await Promise.all(promises)
         const errors = results.filter(f => f.err !== null)
+        const updates = results.filter(f => f.res !== null)
+
+        if (updates && updates.length < 1) return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         if (errors && errors.length > 0) {
           errors.forEach(err => {
@@ -62,7 +64,7 @@ module.exports = class AccountLedgers extends BaseController {
           })
         }
 
-        return callback(response.setResult(true, `[Account Ledgers] Upsert ${results.length} data successfully`))
+        return callback(response.setResult(true, `[Account Ledgers] Upsert ${updates.length} data successfully`))
       })
     })
   }
