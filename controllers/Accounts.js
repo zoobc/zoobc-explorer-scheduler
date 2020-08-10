@@ -51,7 +51,7 @@ module.exports = class Accounts extends BaseController {
             )
           )
 
-        if (res && res.AccountBalances.length < 1) return resolve(response.setResult(false, `[Accounts] No additional data`))
+        if (res && res.AccountBalances.length < 1) return callback(response.setResult(false, `[Accounts] No additional data`))
 
         /** mapping data transactions and account balances */
         const payloads = res.AccountBalances.map(i => {
@@ -89,20 +89,18 @@ module.exports = class Accounts extends BaseController {
             SpendableBalanceConversion: util.zoobitConversion(parseInt(i.SpendableBalance)),
             BlockHeight: i.BlockHeight,
             PopRevenue: parseInt(i.PopRevenue),
-            TotalRewards: null, // TODO: onprogress
-            TotalRewardsConversion: null, // TODO: onprogress
+            TotalRewards: null,
+            TotalRewardsConversion: null,
           }
         })
 
-        console.log('==payloads', payloads)
+        this.service.upserts(payloads, ['AccountAddress'], (err, res) => {
+          /** send message telegram bot if avaiable */
+          if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Upsert - ${err}`))
+          if (res && res.result.ok !== 1) return callback(response.setError(`[Accounts] Upsert data failed`))
 
-        // this.service.upserts(payloads, ['AccountAddress'], (err, res) => {
-        //   /** send message telegram bot if avaiable */
-        //   if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Upsert - ${err}`))
-        //   if (res && res.result.ok !== 1) return callback(response.setError(`[Accounts] Upsert data failed`))
-
-        //   return callback(response.setResult(true, `[Accounts] Upsert ${payloads.length} data successfully`))
-        // })
+          return callback(response.setResult(true, `[Accounts] Upsert ${payloads.length} data successfully`))
+        })
       })
     })
   }
