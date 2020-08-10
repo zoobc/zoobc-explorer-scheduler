@@ -23,6 +23,9 @@ module.exports = class Accounts extends BaseController {
       /** getting value last check */
       const lastCheck = await this.generalsService.getSetLastCheck()
 
+      /** return message if nothing */
+      if (!lastCheck) return callback(response.setResult(false, '[Accounts] No additional data'))
+
       /** return message if last height account greather than last check height transaction  */
       if (lastAccountHeight > 0 && lastAccountHeight >= lastCheck.Height)
         return callback(response.setResult(false, '[Accounts] No additional data'))
@@ -91,13 +94,15 @@ module.exports = class Accounts extends BaseController {
           }
         })
 
-        this.service.upserts(payloads, ['AccountAddress'], (err, res) => {
-          /** send message telegram bot if avaiable */
-          if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Upsert - ${err}`))
-          if (res && res.result.ok !== 1) return callback(response.setError(`[Accounts] Upsert data failed`))
+        console.log('==payloads', payloads)
 
-          return callback(response.setResult(true, `[Accounts] Upsert ${payloads.length} data successfully`))
-        })
+        // this.service.upserts(payloads, ['AccountAddress'], (err, res) => {
+        //   /** send message telegram bot if avaiable */
+        //   if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Upsert - ${err}`))
+        //   if (res && res.result.ok !== 1) return callback(response.setError(`[Accounts] Upsert data failed`))
+
+        //   return callback(response.setResult(true, `[Accounts] Upsert ${payloads.length} data successfully`))
+        // })
       })
     })
   }

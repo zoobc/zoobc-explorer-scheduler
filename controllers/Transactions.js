@@ -159,7 +159,11 @@ module.exports = class Transactions extends BaseController {
 
       const TimestampEnd = moment(res.Timestamp).unix()
       const payloadLastCheck = JSON.stringify({ Height: res.Height, Timestamp: TimestampEnd })
+
       const lastCheck = await this.generalsService.getSetLastCheck()
+      /** return message if nothing */
+      if (!lastCheck) return callback(response.setResult(false, '[Accounts] No additional data'))
+
       const params = { TimestampStart: lastCheck.Timestamp, TimestampEnd }
       Transaction.GetTransactions(params, async (err, res) => {
         if (err)
