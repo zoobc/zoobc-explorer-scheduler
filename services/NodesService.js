@@ -21,6 +21,7 @@ module.exports = class NodesService extends BaseService {
     Nodes.findOneAndUpdate(
       { NodeID: payload.NodeID },
       {
+        NodeAddressInfo: payload.NodeAddressInfo,
         IpAddress: payload.IpAddress,
         Port: payload.Port,
         CountryCode: payload.CountryCode,

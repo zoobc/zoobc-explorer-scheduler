@@ -33,6 +33,7 @@ module.exports = class NodeAddress extends BaseController {
 
           return new Promise(resolve => {
             const payload = {
+              NodeAddressInfo: item,
               NodeID: item.NodeID,
               IpAddress: item.Address,
               Port: item.Port,
