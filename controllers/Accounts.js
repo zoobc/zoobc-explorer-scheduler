@@ -23,6 +23,9 @@ module.exports = class Accounts extends BaseController {
       /** getting value last check */
       const lastCheck = await this.generalsService.getSetLastCheck()
 
+      /** return message if nothing */
+      if (!lastCheck) return callback(response.setResult(false, '[Accounts] No additional data'))
+
       /** return message if last height account greather than last check height transaction  */
       if (lastAccountHeight > 0 && lastAccountHeight >= lastCheck.Height)
         return callback(response.setResult(false, '[Accounts] No additional data'))
@@ -48,7 +51,7 @@ module.exports = class Accounts extends BaseController {
             )
           )
 
-        if (res && res.AccountBalances.length < 1) return resolve(response.setResult(false, `[Accounts] No additional data`))
+        if (res && res.AccountBalances.length < 1) return callback(response.setResult(false, `[Accounts] No additional data`))
 
         /** mapping data transactions and account balances */
         const payloads = res.AccountBalances.map(i => {
@@ -86,8 +89,8 @@ module.exports = class Accounts extends BaseController {
             SpendableBalanceConversion: util.zoobitConversion(parseInt(i.SpendableBalance)),
             BlockHeight: i.BlockHeight,
             PopRevenue: parseInt(i.PopRevenue),
-            TotalRewards: null, // TODO: onprogress
-            TotalRewardsConversion: null, // TODO: onprogress
+            TotalRewards: null,
+            TotalRewardsConversion: null,
           }
         })
 

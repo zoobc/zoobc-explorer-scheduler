@@ -62,16 +62,6 @@ const MultiSignature = createClient(
   config.proto.host
 )
 
-const HealthCheck = createClient(
-  {
-    protoPath: config.proto.path,
-    protoName: 'healthCheck.proto',
-    servicePath: 'service',
-    serviceName: 'HealthCheckService',
-  },
-  config.proto.host
-)
-
 const AccountLedger = createClient(
   {
     protoPath: config.proto.path,
@@ -82,4 +72,14 @@ const AccountLedger = createClient(
   config.proto.host
 )
 
-module.exports = { Block, Transaction, AccountBalance, AccountLedger, NodeRegistration, HealthCheck, Escrow, MultiSignature }
+const NodeAddressInfo = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'nodeAddressInfo.proto',
+    servicePath: 'service',
+    serviceName: 'NodeAddressInfoService',
+  },
+  config.proto.host
+)
+
+module.exports = { Block, Transaction, AccountBalance, AccountLedger, NodeRegistration, Escrow, MultiSignature, NodeAddressInfo }

@@ -41,14 +41,10 @@ module.exports = class AccountsService extends BaseService {
     Accounts.findOneAndUpdate(
       { AccountAddress: payloads.AccountAddress },
       { TotalRewards: payloads.TotalRewards, TotalRewardsConversion: payloads.TotalRewardsConversion },
-      {
-        new: true,
-        upsert: true,
-      }
+      { new: false, upsert: false }
     ).exec((err, res) => {
       if (err) return callback(err, null)
-      if (res.length < 1) return callback(null, null)
-
+      if (res && res.length < 1) return callback(null, null)
       return callback(null, res)
     })
   }
