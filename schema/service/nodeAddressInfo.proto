@@ -1,0 +1,17 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/nodeAddressInfo.proto";
+import "google/api/annotations.proto";
+
+// NodeAddressInfoService represent request on db NodeAddressInfo
+service NodeAddressInfoService {
+    rpc GetNodeAddressInfo(model.GetNodeAddressesInfoRequest) returns (model.GetNodeAddressesInfoResponse) {
+        option (google.api.http) = {
+            get: "/v1/nodeAddressInfo/GetNodeAddressInfo"
+        };
+    }
+}
