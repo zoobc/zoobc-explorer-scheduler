@@ -1,7 +1,7 @@
 const BaseController = require('./BaseController')
+const { response } = require('../utils')
 const { NodesService } = require('../services')
 const { ParticipationScore } = require('../protos')
-const { response } = require('../utils')
 
 module.exports = class ParticipationScores extends BaseController {
   constructor() {
