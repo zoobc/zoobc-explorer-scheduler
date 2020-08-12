@@ -10,7 +10,6 @@ import "model/block.proto";
 import "model/blockchain.proto";
 import "model/transaction.proto";
 import "model/fileDownload.proto";
-import "model/node.proto";
 import "model/nodeAddressInfo.proto";
 import "model/proofOfOrigin.proto";
 

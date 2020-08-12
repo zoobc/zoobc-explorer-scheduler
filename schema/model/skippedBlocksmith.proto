@@ -10,3 +10,17 @@ message SkippedBlocksmith {
     uint32 BlockHeight = 3;
     int32 BlocksmithIndex = 4;
 }
+
+
+message GetSkippedBlocksmithsRequest {
+    uint32 BlockHeightStart = 1;
+    uint32 BlockHeightEnd = 2;
+}
+
+message GetSkippedBlocksmithsResponse {
+    // Number of skipped block in total
+    uint64 Total = 1 [ jstype = JS_STRING ];
+    // Skipped block smiths returned
+    repeated SkippedBlocksmith SkippedBlocksmiths = 2;
+}
+

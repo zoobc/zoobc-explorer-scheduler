@@ -14,6 +14,8 @@ message Node {
 	uint32 Port          = 4;
 	// AddressStatus the pending/confirmed status of node address
 	NodeAddressStatus AddressStatus = 5;
+	string Version	= 6;
+	string CodeName = 7;
 }
 
 message NodeKey {

@@ -19,6 +19,11 @@ service NodeRegistrationService {
         option (google.api.http) = {
             get: "/v1/nodeRegistration/GetNodeRegistration"
         };
-    }    
+    }
 
+    rpc GetNodeRegistrationsByNodePublicKeys(model.GetNodeRegistrationsByNodePublicKeysRequest) returns (model.GetNodeRegistrationsByNodePublicKeysResponse) {
+        option (google.api.http) = {
+            get: "/v1/nodeRegistration/GetNodeRegistrationsByNodePublicKeys"
+        };
+    }    
 }
