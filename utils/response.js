@@ -4,15 +4,13 @@ const config = require('../config')
 const setError = error => {
   return {
     error,
-    subscribes: null,
     result: { success: false, message: null },
   }
 }
 
-const setResult = (success, message, subscribes = null) => {
+const setResult = (success, message) => {
   return {
     error: null,
-    subscribes,
     result: { success, message },
   }
 }

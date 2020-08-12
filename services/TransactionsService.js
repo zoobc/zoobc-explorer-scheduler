@@ -109,10 +109,7 @@ module.exports = class TransactionsService extends BaseService {
     Transactions.findOneAndUpdate(
       { TransactionHash: payloads.TransactionHash },
       { Status: payloads.Status },
-      {
-        new: true,
-        upsert: true,
-      }
+      { new: true, upsert: true }
     ).exec((err, res) => {
       if (err) return callback(err, null)
       if (res.length < 1) return callback(null, null)

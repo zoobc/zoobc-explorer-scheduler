@@ -14,30 +14,33 @@ module.exports = class AccountLedgers extends BaseController {
   async update(callback) {
     this.blocksService.getLastTimestamp(async (err, res) => {
       /** send message telegram bot if avaiable */
-      if (err) return callback(response.sendBotMessage('Transactions', `[Transactions] Blocks Service - Get Last Timestamp ${err}`))
-      if (!res) return callback(response.setResult(false, '[Transactions] No additional data'))
+      if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Blocks Service - Get Last Timestamp ${err}`))
+      if (!res) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
       const TimestampEnd = moment(res.Timestamp).unix()
+
       const lastCheck = await this.generalsService.getSetLastCheck()
+      if (!lastCheck) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
+
       const params = { EventType: 'EventReward', TimestampStart: lastCheck.Timestamp, TimestampEnd: TimestampEnd }
       AccountLedger.GetAccountLedgers(params, async (err, result) => {
         if (err)
           return callback(
             /** send message telegram bot if avaiable */
             response.sendBotMessage(
-              'Accounts',
+              'AccountLedger',
               `[AccountLedger] Proto Get Account Ledger - ${err}`,
               `- Params : <pre>${JSON.stringify(params)}</pre>`
             )
           )
 
-        if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[AccountLedgers] No additional data`))
+        if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         const promises = result.AccountLedgers.map(item => {
           return new Promise(resolve => {
             const payload = {
               AccountAddress: item.AccountAddress,
-              TotalRewards: item.BalanceChange,
+              TotalRewards: parseInt(item.BalanceChange),
               TotalRewardsConversion: util.zoobitConversion(item.BalanceChange),
             }
 
@@ -50,15 +53,18 @@ module.exports = class AccountLedgers extends BaseController {
 
         const results = await Promise.all(promises)
         const errors = results.filter(f => f.err !== null)
+        const updates = results.filter(f => f.res !== null)
+
+        if (updates && updates.length < 1) return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         if (errors && errors.length > 0) {
           errors.forEach(err => {
             /** send message telegram bot if avaiable */
-            return callback(response.sendBotMessage('AccountLedger', `[AccountLedgers] Upsert - ${JSON.stringify(err)}`))
+            return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Upsert - ${JSON.stringify(err)}`))
           })
         }
 
-        return callback(response.setResult(true, `[AccountLedgers] Upsert ${results.length} data successfully`))
+        return callback(response.setResult(true, `[Account Ledgers] Upsert ${updates.length} data successfully`))
       })
     })
   }

@@ -9,12 +9,13 @@ const { UI } = require('bull-board')
 
 const config = require('./config')
 const { msg, util, response } = require('./utils')
-const { Nodes, Blocks, Accounts, AccountLedgers, ResetData, Transactions, PendingTransaction } = require('./controllers')
+const { Nodes, Blocks, Accounts, AccountLedgers, ResetData, Transactions, PendingTransaction, NodeAddress } = require('./controllers')
 
 const nodes = new Nodes()
 const blocks = new Blocks()
 const reset = new ResetData()
 const accounts = new Accounts()
+const nodeAddress = new NodeAddress()
 const transactions = new Transactions()
 const pendingTx = new PendingTransaction()
 const accountLedger = new AccountLedgers()
@@ -32,16 +33,16 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
     blocks.update(async res => {
       util.log(res)
 
-      if (res && res.subscribes) {
-        const result = await graphqlMutation('blocks', res.subscribes)
+      if (res && res.result && res.result.success && res.result.success === true) {
+        const result = await graphqlMutation('blocks')
         util.logMutation(`[GraphQL Mutation] ${result}`)
       }
 
       transactions.update(async res => {
         util.log(res)
 
-        if (res && res.subscribes) {
-          const result = await graphqlMutation('transactions', res.subscribes)
+        if (res && res.result && res.result.success && res.result.success === true) {
+          const result = await graphqlMutation('transactions')
           util.logMutation(`[GraphQL Mutation] ${result}`)
         }
 
@@ -56,6 +57,10 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
 
               accountLedger.update(res => {
                 util.log(res)
+
+                nodeAddress.update(res => {
+                  util.log(res)
+                })
               })
             })
           })
@@ -81,7 +86,7 @@ function initApp() {
   }
   return mongoose.connect(uris, options, error => {
     if (error) {
-      msg.red(response.sendBotMessage('Schedulers', `MongoDB connection error - retrying in 5 sec\n${error}`), '❌')
+      msg.red(`MongoDB connection error - retrying in 5 sec\n${error}`, '❌')
       setTimeout(initApp, 5000)
     } else {
       msg.green('MongoDB connection success')
@@ -113,7 +118,7 @@ function connectRedis() {
     })
 }
 
-const graphqlMutation = async (type, input) => {
+const graphqlMutation = async type => {
   const timestamp = moment.utc().unix() - moment.utc('1970-01-01 00:00:00').unix()
   const consumerId = config.graphql.consumerId
   const consumerSecret = config.graphql.consumerSecret
@@ -125,9 +130,8 @@ const graphqlMutation = async (type, input) => {
     'content-type': 'application/json',
   }
 
-  const queryfyInput = util.queryfy(input)
   const query = JSON.stringify({
-    query: type === 'blocks' ? `mutation { blocks(blocks: ${queryfyInput}) }` : `mutation {transactions(transactions: ${queryfyInput})}`,
+    query: type === 'blocks' ? `mutation { blocks }` : `mutation { transactions }`,
   })
 
   try {
@@ -140,7 +144,7 @@ const graphqlMutation = async (type, input) => {
 
     return type === 'blocks' ? responseJson.data.blocks : responseJson.data.transactions
   } catch (error) {
-    return `An error occurred while post to graphql endpoint, please try again or report it!\n${error}`
+    return error
   }
 }
 

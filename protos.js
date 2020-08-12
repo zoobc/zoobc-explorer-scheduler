@@ -62,22 +62,22 @@ const MultiSignature = createClient(
   config.proto.host
 )
 
-const HealthCheck = createClient(
-  {
-    protoPath: config.proto.path,
-    protoName: 'healthCheck.proto',
-    servicePath: 'service',
-    serviceName: 'HealthCheckService',
-  },
-  config.proto.host
-)
-
 const AccountLedger = createClient(
   {
     protoPath: config.proto.path,
     protoName: 'accountLedger.proto',
     servicePath: 'service',
     serviceName: 'AccountLedgerService',
+  },
+  config.proto.host
+)
+
+const NodeAddressInfo = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'nodeAddressInfo.proto',
+    servicePath: 'service',
+    serviceName: 'NodeAddressInfoService',
   },
   config.proto.host
 )
