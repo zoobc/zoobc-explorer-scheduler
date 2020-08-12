@@ -32,7 +32,7 @@ module.exports = class ParticipationScores extends BaseController {
 
         const promises = res.ParticipationScores.map(item => {
           return new Promise(resolve => {
-            this.service.update({ NodeID: item.NodeID }, { ParticipationScore: parseInt(item.Score) }, (err, res) => {
+            this.service.update({ NodeID: item.NodeID }, { ParticipationScore: item.Score.toString() }, (err, res) => {
               if (err) return resolve({ err, res: null })
               return resolve({ err: null, res })
             })
