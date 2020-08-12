@@ -101,6 +101,16 @@ const ParticipationScore = createClient(
   config.proto.host
 )
 
+const SkippedBlockSmiths = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'skippedBlocksmith.proto',
+    servicePath: 'service',
+    serviceName: 'SkippedBlockSmithsService',
+  },
+  config.proto.host
+)
+
 module.exports = {
   Block,
   Escrow,
@@ -112,4 +122,5 @@ module.exports = {
   NodeRegistration,
   PublishedReceipt,
   ParticipationScore,
+  SkippedBlockSmiths,
 }
