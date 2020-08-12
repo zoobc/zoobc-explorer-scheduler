@@ -24,9 +24,7 @@ message PeerBasicResponse {
     string Error = 2;
 }
 
-message GetPeerInfoRequest {
-    string Version =1;
-}
+message GetPeerInfoRequest {}
 
 message GetPeerInfoResponse {
     Node HostInfo = 1;

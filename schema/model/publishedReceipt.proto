@@ -11,3 +11,13 @@ message PublishedReceipt {
     uint32 ReceiptIndex = 4;
     uint32 PublishedIndex = 5;
 }
+
+message GetPublishedReceiptsRequest {
+    uint32 FromHeight = 1;
+    uint32 ToHeight = 2;
+}
+
+message GetPublishedReceiptsResponse {
+    // PublishedReceipts list of published receipts in `FromHeight` to `ToHeight`
+    repeated PublishedReceipt PublishedReceipts = 1;
+}

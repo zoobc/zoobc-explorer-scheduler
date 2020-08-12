@@ -82,4 +82,24 @@ const AccountLedger = createClient(
   config.proto.host
 )
 
-module.exports = { Block, Transaction, AccountBalance, AccountLedger, NodeRegistration, HealthCheck, Escrow, MultiSignature }
+const PublishedReceipt = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'publishedReceipt.proto',
+    servicePath: 'service',
+    serviceName: 'PublishedReceiptService',
+  },
+  config.proto.host
+)
+
+module.exports = {
+  Block,
+  Transaction,
+  AccountBalance,
+  AccountLedger,
+  NodeRegistration,
+  HealthCheck,
+  Escrow,
+  MultiSignature,
+  PublishedReceipt,
+}
