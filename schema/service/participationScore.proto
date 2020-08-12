@@ -1,0 +1,17 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/participationScore.proto";
+import "google/api/annotations.proto";
+
+// ParticipationScoreService represent request on db participation_score
+service ParticipationScoreService {
+    rpc GetParticipationScores(model.GetParticipationScoresRequest) returns (model.GetParticipationScoresResponse) {
+        option (google.api.http) = {
+            get: "/v1/account/GetParticipationScores"
+        };
+    }
+}

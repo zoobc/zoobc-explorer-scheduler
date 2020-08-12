@@ -7,5 +7,17 @@ const NodeAddress = require('./NodeAddress')
 const Transactions = require('./Transactions')
 const AccountLedgers = require('./AccountLedger')
 const PendingTransaction = require('./PendingTransactions')
+const ParticipationScores = require('./ParticipationScores')
 
-module.exports = { Nodes, Blocks, Accounts, AccountLedgers, Rollback, ResetData, Transactions, NodeAddress, PendingTransaction }
+module.exports = {
+  Nodes,
+  Blocks,
+  Accounts,
+  Rollback,
+  ResetData,
+  NodeAddress,
+  Transactions,
+  AccountLedgers,
+  PendingTransaction,
+  ParticipationScores,
+}
