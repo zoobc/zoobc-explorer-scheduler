@@ -46,5 +46,7 @@ module.exports = {
   },
   graphql: {
     host: process.env.GRAPHQL_HOST || 'https://test9090.zoobc.net/zoobc/api/v1/graphql',
+    consumerId: process.env.GRAPHQL_CLIENT_ID || '1234567890',
+    consumerSecret: process.env.GRAPHQL_CLIENT_SECRET || 'client-secret-key',
   },
 }

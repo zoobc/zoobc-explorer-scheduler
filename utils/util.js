@@ -7,6 +7,11 @@ const keySize = 256
 const iterations = 100
 const secretKey = config.app.tokenSecret
 
+function hmacEncrypt(message, key) {
+  const encrypted = CryptoJS.HmacSHA256(message, key)
+  return encrypted.toString(CryptoJS.enc.Base64)
+}
+
 function encrypt(payload) {
   const salt = CryptoJS.lib.WordArray.random(128 / 8)
   const iv = CryptoJS.lib.WordArray.random(128 / 8)
@@ -106,4 +111,15 @@ const queryfy = obj => {
   return JSON.stringify(obj)
 }
 
-module.exports = util = { encrypt, decrypt, bufferStr, zoobitConversion, log, isObjEmpty, isNotNullAccountAddress, logMutation, queryfy }
+module.exports = util = {
+  encrypt,
+  decrypt,
+  bufferStr,
+  zoobitConversion,
+  log,
+  isObjEmpty,
+  isNotNullAccountAddress,
+  logMutation,
+  queryfy,
+  hmacEncrypt,
+}
