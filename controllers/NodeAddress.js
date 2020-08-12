@@ -38,15 +38,15 @@ module.exports = class NodeAddress extends BaseController {
               IpAddress: item.Address,
               Port: item.Port,
               /** additional detail node address */
-              CountryCode: resIpStack.country_code || null,
-              CountryName: resIpStack.country_name || null,
-              RegionCode: resIpStack.region_code || null,
-              RegionName: resIpStack.region_name || null,
-              City: resIpStack.city || null,
-              Latitude: resIpStack.latitude || null,
-              Longitude: resIpStack.longitude || null,
-              CountryFlagUrl: resIpStack.location.country_flag || null,
-              CountryFlagEmoji: resIpStack.location.country_flag_emoji || null,
+              CountryCode: (resIpStack && resIpStack.country_code) || null,
+              CountryName: (resIpStack && resIpStack.country_name) || null,
+              RegionCode: (resIpStack && resIpStack.region_code) || null,
+              RegionName: (resIpStack && resIpStack.region_name) || null,
+              City: (resIpStack && resIpStack.city) || null,
+              Latitude: (resIpStack && resIpStack.latitude) || null,
+              Longitude: (resIpStack && resIpStack.longitude) || null,
+              CountryFlagUrl: (resIpStack && resIpStack.location.country_flag) || null,
+              CountryFlagEmoji: (resIpStack && resIpStack.location.country_flag_emoji) || null,
             }
 
             this.service.findAndUpdate(payload, (err, res) => {
