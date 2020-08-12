@@ -91,14 +91,25 @@ const PublishedReceipt = createClient(
   },
   config.proto.host
 )
+const ParticipationScore = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'participationScore.proto',
+    servicePath: 'service',
+    serviceName: 'ParticipationScoreService',
+  },
+  config.proto.host
+)
 
 module.exports = {
   Block,
-  Transaction,
-  AccountBalance,
-  AccountLedger,
-  NodeRegistration,
   Escrow,
+  Transaction,
+  AccountLedger,
   MultiSignature,
+  AccountBalance,
+  NodeAddressInfo,
+  NodeRegistration,
   PublishedReceipt,
+  ParticipationScore,
 }
