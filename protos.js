@@ -98,7 +98,6 @@ module.exports = {
   AccountBalance,
   AccountLedger,
   NodeRegistration,
-  HealthCheck,
   Escrow,
   MultiSignature,
   PublishedReceipt,
