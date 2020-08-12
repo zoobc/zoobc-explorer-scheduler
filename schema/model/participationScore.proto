@@ -11,3 +11,12 @@ message ParticipationScore {
     bool Latest = 3;
     uint32 Height = 4;
 }
+
+message GetParticipationScoresRequest{
+    uint32 fromHeight = 1;
+    uint32 toHeight = 2;
+}
+
+message GetParticipationScoresResponse{
+    repeated ParticipationScore ParticipationScores = 1;
+}

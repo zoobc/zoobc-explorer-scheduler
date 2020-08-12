@@ -17,6 +17,19 @@ module.exports = class NodesService extends BaseService {
       .exec(callback)
   }
 
+  getRangeHeight(callback) {
+    Nodes.find()
+      .select('Height')
+      .sort('Height')
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, null)
+
+        const result = { fromHeight: res[0].Height, toHeight: res[res.length - 1].Height }
+        return callback(null, result)
+      })
+  }
+
   findAndUpdate(payload, callback) {
     Nodes.findOneAndUpdate(
       { NodeID: payload.NodeID },

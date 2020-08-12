@@ -54,8 +54,8 @@ module.exports = class Nodes extends BaseController {
             Latest: item.Latest,
             Height: item.Height,
             NodeAddressInfo: item.NodeAddressInfo,
-            /** not implemented in core */
             ParticipationScore: null,
+            /** waiting core */
             BlocksFunds: null,
             RewardsPaid: null,
             RewardsPaidConversion: null,
