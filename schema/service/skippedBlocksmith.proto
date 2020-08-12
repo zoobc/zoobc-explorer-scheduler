@@ -1,0 +1,17 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/skippedBlocksmith.proto";
+import "google/api/annotations.proto";
+
+// SkippedBlockSmithsService represent request on Skipped Block Smiths data
+service SkippedBlockSmithsService {
+    rpc GetSkippedBlockSmiths(model.GetSkippedBlocksmithsRequest) returns (model.GetSkippedBlocksmithsResponse) {
+        option (google.api.http) = {
+            get: "/v1/skippedBlockSmiths/GetSkippedBlockSmiths"
+        };
+    }
+}
