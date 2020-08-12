@@ -134,7 +134,7 @@ module.exports = class Blocks extends BaseController {
             if (err) return callback(response.sendBotMessage('Blocks', `[Blocks] Upsert - ${err}`))
             if (res && res.result.ok !== 1) return callback(response.setError('[Blocks] Upsert data failed'))
 
-            return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`, subscribeBlocks))
+            return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`))
           })
         })
       })
