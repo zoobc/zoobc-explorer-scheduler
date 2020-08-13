@@ -1,7 +1,7 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { Block, PublishedReceipt } = require('../protos')
+const { Block, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 const { util, msg, response } = require('../utils')
 const { BlocksService, GeneralsService } = require('../services')
 
@@ -11,6 +11,98 @@ module.exports = class Blocks extends BaseController {
   constructor() {
     super(new BlocksService())
     this.generalsService = new GeneralsService()
+  }
+
+  async mappingBlocks(blocks) {
+    const getPublishedReceipts = async BlockHeight => {
+      return new Promise(resolve => {
+        PublishedReceipt.GetPublishedReceipts({ FromHeight: BlockHeight, ToHeight: BlockHeight }, (err, res) => {
+          if (err) resolve(null)
+
+          resolve(res)
+        })
+      })
+    }
+
+    const getSkippedBlockSmiths = async BlockHeight => {
+      return new Promise(resolve => {
+        SkippedBlockSmiths.GetSkippedBlockSmiths({ BlockHeightStart: BlockHeight, BlockHeightEnd: BlockHeight }, (err, res) => {
+          if (err) resolve(null)
+
+          resolve(res)
+        })
+      })
+    }
+
+    const promises = blocks.map(async item => {
+      const TotalRewards = parseFloat(item.Block.TotalCoinBase) + parseFloat(item.Block.TotalFee)
+
+      const receipts = await getPublishedReceipts(item.Block.Height)
+
+      const skippeds = await getSkippedBlockSmiths(item.Block.Height)
+
+      const receiptsMapped =
+        receipts &&
+        receipts.PublishedReceipts &&
+        receipts.PublishedReceipts.length > 0 &&
+        receipts.PublishedReceipts.map(i => {
+          return {
+            ...i,
+            IntermediateHashes: util.bufferStr(i.IntermediateHashes),
+            BatchReceipt: {
+              ...i.BatchReceipt,
+              SenderPublicKey: util.bufferStr(i.BatchReceipt.SenderPublicKey),
+              RecipientPublicKey: util.bufferStr(i.BatchReceipt.RecipientPublicKey),
+            },
+          }
+        })
+
+      const skippedsMapped =
+        skippeds &&
+        skippeds.SkippedBlocksmiths &&
+        skippeds.SkippedBlocksmiths.length > 0 &&
+        skippeds.SkippedBlocksmiths.map(i => {
+          return {
+            ...i,
+            BlocksmithPublicKey: util.bufferStr(i.BlocksmithPublicKey),
+          }
+        })
+
+      return {
+        BlockID: item.Block.ID,
+        BlockHash: item.Block.BlockHash,
+        PreviousBlockID: item.Block.PreviousBlockHash,
+        Height: item.Block.Height,
+        Timestamp: new Date(moment.unix(item.Block.Timestamp).valueOf()),
+        BlockSeed: item.Block.BlockSeed,
+        BlockSignature: item.Block.BlockSignature,
+        CumulativeDifficulty: item.Block.CumulativeDifficulty,
+        SmithScale: item.Block.SmithScale,
+        BlocksmithID: util.bufferStr(item.Block.BlocksmithPublicKey),
+        TotalAmount: item.Block.TotalAmount,
+        TotalAmountConversion: util.zoobitConversion(item.Block.TotalAmount),
+        TotalFee: item.Block.TotalFee,
+        TotalFeeConversion: util.zoobitConversion(item.Block.TotalFee),
+        TotalCoinBase: item.Block.TotalCoinBase,
+        TotalCoinBaseConversion: util.zoobitConversion(item.Block.TotalCoinBase),
+        Version: item.Block.Version,
+        PayloadLength: item.Block.PayloadLength,
+        PayloadHash: item.Block.PayloadHash,
+        /** BlockExtendedInfo */
+        TotalReceipts: item.TotalReceipts,
+        PopChange: item.PopChange,
+        ReceiptValue: item.ReceiptValue,
+        BlocksmithAddress: item.BlocksmithAccountAddress,
+        SkippedBlocksmiths: skippedsMapped,
+        /** Aggregate */
+        TotalRewards,
+        TotalRewardsConversion: util.zoobitConversion(TotalRewards),
+        /** Relations */
+        PublishedReceipts: receiptsMapped,
+      }
+    })
+
+    return await Promise.all(promises)
   }
 
   update(callback) {
@@ -38,7 +130,7 @@ module.exports = class Blocks extends BaseController {
         )
 
       const params = { Limit: config.app.limitData, Height: blockHeight }
-      Block.GetBlocks(params, (err, res) => {
+      Block.GetBlocks(params, async (err, res) => {
         if (err)
           return callback(
             /** send message telegram bot if avaiable */
@@ -47,95 +139,16 @@ module.exports = class Blocks extends BaseController {
 
         if (res && res.Blocks && res.Blocks.length < 1) return callback(response.setResult(false, '[Blocks] No additional data'))
 
-        /** get the value of Published receipt from between heights */
-        const maxHeight = res.Blocks.reduce((max, ress) => (ress.Block.Height > max ? ress.Block.Height : max), res.Blocks[0].Block.Height)
+        /** mapping result */
+        const payloads = await this.mappingBlocks(res.Blocks)
 
-        const param = { FromHeight: blockHeight, ToHeight: maxHeight }
+        /** update or insert data */
+        this.service.upserts(payloads, ['BlockID', 'Height'], (err, res) => {
+          /** send message telegram bot if avaiable */
+          if (err) return callback(response.sendBotMessage('Blocks', `[Blocks] Upsert - ${err}`))
+          if (res && res.result.ok !== 1) return callback(response.setError('[Blocks] Upsert data failed'))
 
-        PublishedReceipt.GetPublishedReceipts(param, (err, result) => {
-          if (err)
-            return callback(
-              /** send message telegram bot if avaiable */
-              response.sendBotMessage(
-                'Blocks',
-                `[Blocks] Proto Get Published Receipt - ${err}`,
-                `- Params : <pre>${JSON.stringify(params)}</pre>`
-              )
-            )
-
-          if (result && result.PublishedReceipts && result.length < 1)
-            return callback(response.setResult(false, '[Blocks] No additional data for Get Published Receipt'))
-
-          /** mapping result */
-          const payloads = res.Blocks.map(item => {
-            const TotalRewards = parseFloat(item.Block.TotalCoinBase) + parseFloat(item.Block.TotalFee)
-
-            const SkippedBlockSmithMapped =
-              (item.SkippedBlocksmiths && item.SkippedBlocksmiths.length > 0) ||
-              item.SkippedBlocksmiths.map(i => {
-                return {
-                  ...i,
-                  BlocksmithPublicKey: util.bufferStr(i.BlocksmithPublicKey),
-                }
-              })
-
-            const receipt = result.PublishedReceipts.filter(f => f.BlockHeight === item.Block.Height)
-            const PublishedReceipts =
-              (receipt && receipt.PublishedReceipts && receipt.PublishedReceipts.length > 0) ||
-              receipt.map(i => {
-                return {
-                  ...i,
-                  IntermediateHashes: util.bufferStr(i.IntermediateHashes),
-                  BatchReceipt: {
-                    ...i.BatchReceipt,
-                    SenderPublicKey: util.bufferStr(i.BatchReceipt.SenderPublicKey),
-                    RecipientPublicKey: util.bufferStr(i.BatchReceipt.RecipientPublicKey),
-                  },
-                }
-              })
-
-            return {
-              BlockID: item.Block.ID,
-              BlockHash: item.Block.BlockHash,
-              PreviousBlockID: item.Block.PreviousBlockHash,
-              Height: item.Block.Height,
-              Timestamp: new Date(moment.unix(item.Block.Timestamp).valueOf()),
-              BlockSeed: item.Block.BlockSeed,
-              BlockSignature: item.Block.BlockSignature,
-              CumulativeDifficulty: item.Block.CumulativeDifficulty,
-              SmithScale: item.Block.SmithScale,
-              BlocksmithID: util.bufferStr(item.Block.BlocksmithPublicKey),
-              TotalAmount: item.Block.TotalAmount,
-              TotalAmountConversion: util.zoobitConversion(item.Block.TotalAmount),
-              TotalFee: item.Block.TotalFee,
-              TotalFeeConversion: util.zoobitConversion(item.Block.TotalFee),
-              TotalCoinBase: item.Block.TotalCoinBase,
-              TotalCoinBaseConversion: util.zoobitConversion(item.Block.TotalCoinBase),
-              Version: item.Block.Version,
-              PayloadLength: item.Block.PayloadLength,
-              PayloadHash: item.Block.PayloadHash,
-              /** BlockExtendedInfo */
-              TotalReceipts: item.TotalReceipts,
-              PopChange: item.PopChange,
-              ReceiptValue: item.ReceiptValue,
-              BlocksmithAddress: item.BlocksmithAccountAddress,
-              SkippedBlocksmiths: SkippedBlockSmithMapped,
-              /** Aggregate */
-              TotalRewards,
-              TotalRewardsConversion: util.zoobitConversion(TotalRewards),
-              /** Relations */
-              PublishedReceipts: PublishedReceipts,
-            }
-          })
-
-          /** update or insert data */
-          this.service.upserts(payloads, ['BlockID', 'Height'], (err, res) => {
-            /** send message telegram bot if avaiable */
-            if (err) return callback(response.sendBotMessage('Blocks', `[Blocks] Upsert - ${err}`))
-            if (res && res.result.ok !== 1) return callback(response.setError('[Blocks] Upsert data failed'))
-
-            return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`))
-          })
+          return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`))
         })
       })
     })
