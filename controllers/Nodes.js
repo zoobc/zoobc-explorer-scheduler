@@ -11,7 +11,7 @@ module.exports = class Nodes extends BaseController {
 
   update(callback) {
     /** get last height node (local) */
-    this.service.getLastHeight(async (err, res) => {
+    this.service.getLastRegisteredHeight(async (err, res) => {
       /** send message telegram bot if avaiable */
       if (err) return callback(response.sendBotMessage('Nodes', `[Nodes] Nodes Service - Get Last Height ${err}`))
 

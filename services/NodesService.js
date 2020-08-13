@@ -7,8 +7,12 @@ module.exports = class NodesService extends BaseService {
     this.name = 'NodesService'
   }
 
-  getLastHeight(callback) {
+  getLastRegisteredHeight(callback) {
     Nodes.findOne().select('RegisteredBlockHeight').sort('-RegisteredBlockHeight').exec(callback)
+  }
+
+  getLastHeight(callback) {
+    Nodes.findOne().select('Height').sort('-Height').exec(callback)
   }
 
   getNodeIds(callback) {

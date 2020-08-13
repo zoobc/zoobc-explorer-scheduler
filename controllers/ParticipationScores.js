@@ -15,7 +15,7 @@ module.exports = class ParticipationScores extends BaseController {
         return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Nodes Service - Get Range Height ${err}`))
       if (!res) return callback(response.setResult(false, '[Participation Score] No additional data'))
 
-      const params = { FromHeight: res.fromHeight, ToHeight: res.toHeight }
+      const params = { FromHeight: res.toHeight > 0 ? res.toHeight - 100 : 0, ToHeight: res.toHeight }
       ParticipationScore.GetParticipationScores(params, async (err, res) => {
         if (err)
           return callback(
