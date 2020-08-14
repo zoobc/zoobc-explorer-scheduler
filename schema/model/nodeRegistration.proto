@@ -66,3 +66,17 @@ message NodeAdmissionTimestamp {
     uint32 BlockHeight = 2;
     bool Latest = 3;
 }
+
+// GetNodeRegistrationsByNodePublicKeys create request to get a list of node registry by a list of NodePublicKey
+message GetNodeRegistrationsByNodePublicKeysRequest {
+    repeated bytes NodePublicKeys = 1;
+    // Fetch Node Registries based on Pagination field
+    Pagination Pagination = 2;
+}
+
+message GetNodeRegistrationsByNodePublicKeysResponse {
+    // Number of node registry in total
+    uint64 Total = 1 [jstype = JS_STRING];
+    // NodeRegistrations list of NodeRegistration
+    repeated NodeRegistration NodeRegistrations = 2;
+}

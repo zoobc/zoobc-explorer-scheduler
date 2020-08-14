@@ -11,7 +11,7 @@ const schema = new mongoose.Schema(
     RegistrationStatus: { type: Number },
     Latest: { type: Boolean },
     Height: { type: Number },
-    ParticipationScore: { type: Number } /** not implemented in core */,
+    ParticipationScore: { type: String },
     BlocksFunds: { type: Number } /** not implemented in core */,
     RewardsPaid: { type: Number } /** not implemented in core */,
     RewardsPaidConversion: { type: String } /** not implemented in core */,

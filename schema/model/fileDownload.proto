@@ -10,6 +10,9 @@ message FileDownloadResponse {
 
 // RequestFilesRequest a model request of requesting files to download from a peer 
 message FileDownloadRequest {
-    repeated string FileChunkNames = 1;
+
+    // SnapshotHash hash from snapshot payload
+    bytes  SnapshotHash = 1;
+    repeated string FileChunkNames = 2;
 }
 

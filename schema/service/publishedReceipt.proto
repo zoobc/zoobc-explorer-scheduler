@@ -1,0 +1,18 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/publishedReceipt.proto";
+import "google/api/annotations.proto";
+
+// TransactionService represent request on db Transaction
+service PublishedReceiptService {
+    rpc GetPublishedReceipts(model.GetPublishedReceiptsRequest) returns (model.GetPublishedReceiptsResponse) {
+        option (google.api.http) = {
+            get: "/v1/publishedReceipt/GetPublishedReceipts"
+        };
+    }
+
+}

@@ -7,14 +7,31 @@ module.exports = class NodesService extends BaseService {
     this.name = 'NodesService'
   }
 
-  getLastHeight(callback) {
+  getLastRegisteredHeight(callback) {
     Nodes.findOne().select('RegisteredBlockHeight').sort('-RegisteredBlockHeight').exec(callback)
+  }
+
+  getLastHeight(callback) {
+    Nodes.findOne().select('Height').sort('-Height').exec(callback)
   }
 
   getNodeIds(callback) {
     Nodes.find({ IpAddress: { $eq: null } })
       .select('NodeID')
       .exec(callback)
+  }
+
+  getRangeHeight(callback) {
+    Nodes.find()
+      .select('Height')
+      .sort('Height')
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, null)
+
+        const result = { fromHeight: res[0].Height, toHeight: res[res.length - 1].Height }
+        return callback(null, result)
+      })
   }
 
   findAndUpdate(payload, callback) {

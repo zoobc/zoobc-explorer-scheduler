@@ -82,4 +82,45 @@ const NodeAddressInfo = createClient(
   config.proto.host
 )
 
-module.exports = { Block, Transaction, AccountBalance, AccountLedger, NodeRegistration, Escrow, MultiSignature, NodeAddressInfo }
+const PublishedReceipt = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'publishedReceipt.proto',
+    servicePath: 'service',
+    serviceName: 'PublishedReceiptService',
+  },
+  config.proto.host
+)
+const ParticipationScore = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'participationScore.proto',
+    servicePath: 'service',
+    serviceName: 'ParticipationScoreService',
+  },
+  config.proto.host
+)
+
+const SkippedBlockSmiths = createClient(
+  {
+    protoPath: config.proto.path,
+    protoName: 'skippedBlocksmith.proto',
+    servicePath: 'service',
+    serviceName: 'SkippedBlockSmithsService',
+  },
+  config.proto.host
+)
+
+module.exports = {
+  Block,
+  Escrow,
+  Transaction,
+  AccountLedger,
+  MultiSignature,
+  AccountBalance,
+  NodeAddressInfo,
+  NodeRegistration,
+  PublishedReceipt,
+  ParticipationScore,
+  SkippedBlockSmiths,
+}
