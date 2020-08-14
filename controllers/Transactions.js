@@ -48,7 +48,7 @@ module.exports = class Transactions extends BaseController {
             AmountConversion: util.zoobitConversion(item.sendMoneyTransactionBody.Amount),
           }
           escrow = await getEscrow(item.ID)
-          status = escrow && escrow.Status ? escrow.Status : 'Approved'
+          status = item.MultisigChild ? 'Pending' : escrow && escrow.Status ? escrow.Status : 'Approved'
           break
         case 2:
           transactionTypeName = 'Node Registration'

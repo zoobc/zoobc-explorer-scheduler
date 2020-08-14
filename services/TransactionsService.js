@@ -94,27 +94,14 @@ module.exports = class TransactionsService extends BaseService {
       })
   }
 
-  getTransactionSenderByParticipant(callback) {
-    Transactions.find({ MultisigChild: true, Status: 'Pending' })
-      .select('TransactionHash')
+  getTransactionMultisigChild(callback) {
+    Transactions.find({ MultisigChild: true, Status: { $ne: 'Approved' } })
+      .select('TransactionHash BlockID')
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, null)
 
         return callback(null, res)
       })
-  }
-
-  TestFindAndUpdate(payloads, callback) {
-    Transactions.findOneAndUpdate(
-      { TransactionHash: payloads.TransactionHash },
-      { Status: payloads.Status },
-      { new: true, upsert: true }
-    ).exec((err, res) => {
-      if (err) return callback(err, null)
-      if (res.length < 1) return callback(null, null)
-
-      return callback(null, res)
-    })
   }
 }

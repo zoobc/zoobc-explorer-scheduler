@@ -6,7 +6,7 @@ const ResetData = require('./ResetData')
 const NodeAddress = require('./NodeAddress')
 const Transactions = require('./Transactions')
 const AccountLedgers = require('./AccountLedger')
-const PendingTransaction = require('./PendingTransactions')
+const MultiSignatures = require('./MultiSignatures')
 const ParticipationScores = require('./ParticipationScores')
 
 module.exports = {
@@ -18,6 +18,6 @@ module.exports = {
   NodeAddress,
   Transactions,
   AccountLedgers,
-  PendingTransaction,
+  MultiSignatures,
   ParticipationScores,
 }
