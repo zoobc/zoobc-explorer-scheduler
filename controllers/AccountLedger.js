@@ -55,7 +55,8 @@ module.exports = class AccountLedgers extends BaseController {
         const errors = results.filter(f => f.err !== null)
         const updates = results.filter(f => f.res !== null)
 
-        if (updates && updates.length < 1) return callback(response.setResult(false, `[Account Ledgers] No additional data`))
+        if (updates && updates.length < 1 && errors.length < 1)
+          return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         if (errors && errors.length > 0) {
           errors.forEach(err => {

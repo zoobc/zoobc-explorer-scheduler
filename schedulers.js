@@ -17,7 +17,7 @@ const {
   NodeAddress,
   Transactions,
   AccountLedgers,
-  PendingTransaction,
+  MultiSignatures,
   ParticipationScores,
 } = require('./controllers')
 
@@ -27,8 +27,8 @@ const reset = new ResetData()
 const accounts = new Accounts()
 const nodeAddress = new NodeAddress()
 const transactions = new Transactions()
-const pendingTx = new PendingTransaction()
 const accountLedger = new AccountLedgers()
+const multiSignatures = new MultiSignatures()
 const participationScores = new ParticipationScores()
 
 /** cron job */
@@ -63,7 +63,7 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
           accounts.update(res => {
             util.log(res)
 
-            pendingTx.update(res => {
+            multiSignatures.update(res => {
               util.log(res)
 
               accountLedger.update(res => {

@@ -15,7 +15,7 @@ module.exports = class ParticipationScores extends BaseController {
         return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Nodes Service - Get Range Height ${err}`))
       if (!res) return callback(response.setResult(false, '[Participation Score] No additional data'))
 
-      const params = { FromHeight: res.toHeight > 0 ? res.toHeight - 100 : 0, ToHeight: res.toHeight }
+      const params = { FromHeight: res.toHeight > 100 ? res.toHeight - 100 : 0, ToHeight: res.toHeight }
       ParticipationScore.GetParticipationScores(params, async (err, res) => {
         if (err)
           return callback(
@@ -43,7 +43,8 @@ module.exports = class ParticipationScores extends BaseController {
         const errors = results.filter(f => f.err !== null)
         const updates = results.filter(f => f.res !== null)
 
-        if (updates && updates.length < 1) return callback(response.setResult(false, `[Participation Score] No additional data`))
+        if (updates && updates.length < 1 && errors.length < 1)
+          return callback(response.setResult(false, `[Participation Score] No additional data`))
 
         if (errors && errors.length > 0) {
           errors.forEach(err => {
