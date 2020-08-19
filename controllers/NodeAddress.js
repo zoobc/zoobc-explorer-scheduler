@@ -45,8 +45,8 @@ module.exports = class NodeAddress extends BaseController {
               City: (resIpStack && resIpStack.city) || null,
               Latitude: (resIpStack && resIpStack.latitude) || null,
               Longitude: (resIpStack && resIpStack.longitude) || null,
-              CountryFlagUrl: (resIpStack && resIpStack.location.country_flag) || null,
-              CountryFlagEmoji: (resIpStack && resIpStack.location.country_flag_emoji) || null,
+              CountryFlagUrl: (resIpStack && resIpStack.location && resIpStack.location.country_flag) || null,
+              CountryFlagEmoji: (resIpStack && resIpStack.location && resIpStack.location.country_flag_emoji) || null,
             }
 
             this.service.findAndUpdate(payload, (err, res) => {
