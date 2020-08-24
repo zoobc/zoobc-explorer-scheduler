@@ -25,6 +25,7 @@ const schema = new mongoose.Schema(
       Signature: { type: Buffer },
     },
     /** additional detail node address */
+    RegistrationTime: { type: Date },
     IpAddress: { type: String },
     CountryCode: { type: String },
     CountryName: { type: String },

@@ -80,3 +80,11 @@ message GetNodeRegistrationsByNodePublicKeysResponse {
     // NodeRegistrations list of NodeRegistration
     repeated NodeRegistration NodeRegistrations = 2;
 }
+
+message GetPendingNodeRegistrationsRequest{
+    uint32 Limit = 1;
+}
+
+message GetPendingNodeRegistrationsResponse{
+    repeated NodeRegistration NodeRegistrations = 1;
+}
