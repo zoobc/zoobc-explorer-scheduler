@@ -16,12 +16,12 @@ module.exports = class AccountLedgers extends BaseController {
     this.blocksService.getLastTimestamp(async (err, res) => {
       /** send message telegram bot if avaiable */
       if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Blocks Service - Get Last Timestamp ${err}`))
-      if (!res) return callback(response.setResult(false, '[Account Ledgers-1] No additional data'))
+      if (!res) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
       const TimestampEnd = moment(res.Timestamp).unix()
 
       const lastCheck = await this.generalsService.getSetLastCheck()
-      if (!lastCheck) return callback(response.setResult(false, '[Account Ledgers-2] No additional data'))
+      if (!lastCheck) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
       const params = {
         EventType: 'EventReward',
@@ -39,7 +39,7 @@ module.exports = class AccountLedgers extends BaseController {
             )
           )
 
-        if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[Account Ledgers-3] No additional data`))
+        if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         const promises = result.AccountLedgers.map(item => {
           const AccAdd = item.AccountAddress
@@ -92,7 +92,7 @@ module.exports = class AccountLedgers extends BaseController {
         const updates = results.filter(f => f.res !== null)
 
         if (updates && updates.length < 1 && errors.length < 1)
-          return callback(response.setResult(false, `[Account Ledgers-4] No additional data`))
+          return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         if (errors && errors.length > 0) {
           errors.forEach(err => {
