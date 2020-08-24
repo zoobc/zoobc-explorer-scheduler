@@ -4,8 +4,6 @@ const { util, response } = require('../utils')
 const { NodeRegistration } = require('../protos')
 const { NodesService, GeneralsService, BlocksService } = require('../services')
 
-const formatDate = 'DD MMM YYYY hh:mm:ss'
-
 module.exports = class Nodes extends BaseController {
   constructor() {
     super(new NodesService())
