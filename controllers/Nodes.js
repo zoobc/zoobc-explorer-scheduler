@@ -10,6 +10,15 @@ module.exports = class Nodes extends BaseController {
   }
 
   update(callback) {
+    const getTotalNode = params => {
+      return new Promise(resolve => {
+        NodeRegistration.GetNodeRegistrations(params, async (err, res) => {
+          if (err) return resolve(0)
+          return resolve(parseInt(res.Total))
+        })
+      })
+    }
+
     /** get last height node (local) */
     this.service.getLastRegisteredHeight(async (err, res) => {
       /** send message telegram bot if avaiable */
@@ -27,7 +36,11 @@ module.exports = class Nodes extends BaseController {
       /** return message if last height node greather than equal last check height transaction  */
       if (lastNodeHeight > 0 && lastNodeHeight >= lastCheck.Height) return callback(response.setResult(false, '[Nodes] No additional data'))
 
-      const params = { MinRegistrationHeight: lastNodeHeight, MaxRegistrationHeight: lastCheck.Height }
+      /** checking total node to adding params limit request data */
+      let params = { MinRegistrationHeight: lastNodeHeight, MaxRegistrationHeight: lastCheck.Height, Pagination: { Limit: 100 } }
+      const totalNode = await getTotalNode(params)
+      if (totalNode > params.Pagination.Limit) params.Pagination.Limit = totalNode
+
       NodeRegistration.GetNodeRegistrations(params, async (err, res) => {
         if (err)
           return callback(
