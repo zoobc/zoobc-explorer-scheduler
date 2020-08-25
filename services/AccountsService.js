@@ -40,12 +40,31 @@ module.exports = class AccountsService extends BaseService {
   findAndUpdate(payloads, callback) {
     Accounts.findOneAndUpdate(
       { AccountAddress: payloads.AccountAddress },
-      { TotalRewards: payloads.TotalRewards, TotalRewardsConversion: payloads.TotalRewardsConversion },
-      { new: false, upsert: false }
+      {
+        FirstActive: payloads.FirstActive,
+        LastActive: payloads.LastActive,
+        TransactionHeight: payloads.TransactionHeight,
+        TotalFeesPaid: payloads.TotalFeesPaid,
+        TotalFeesPaidConversion: payloads.TotalFeesPaid,
+        AccountAddress: payloads.AccountAddress,
+        Balance: payloads.Balance,
+        BalanceConversion: payloads.Balance,
+        SpendableBalance: payloads.SpendableBalance,
+        SpendableBalanceConversion: payloads.SpendableBalance,
+        BlockHeight: payloads.BlockHeight,
+        PopRevenue: payloads.PopRevenue,
+        TotalRewards: payloads.TotalRewards,
+        TotalRewardsConversion: payloads.TotalRewardsConversion,
+      },
+      { new: false, upsert: true }
     ).exec((err, res) => {
       if (err) return callback(err, null)
       if (res && res.length < 1) return callback(null, null)
       return callback(null, res)
     })
+  }
+
+  getCurrentTotalRewardByAccountAddress(accountAddress, callback) {
+    Accounts.findOne({ AccountAddress: accountAddress }).exec(callback)
   }
 }

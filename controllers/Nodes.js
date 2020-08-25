@@ -1,11 +1,13 @@
+const moment = require('moment')
 const BaseController = require('./BaseController')
 const { util, response } = require('../utils')
 const { NodeRegistration } = require('../protos')
-const { NodesService, GeneralsService } = require('../services')
+const { NodesService, GeneralsService, BlocksService } = require('../services')
 
 module.exports = class Nodes extends BaseController {
   constructor() {
     super(new NodesService())
+    this.blocksService = new BlocksService()
     this.generalsService = new GeneralsService()
   }
 
@@ -56,37 +58,59 @@ module.exports = class Nodes extends BaseController {
           return callback(response.setResult(false, `[Nodes] No additional data`))
 
         /** mapping data and additional info */
-        const payloads = res.NodeRegistrations.map(item => {
-          return {
-            NodeID: item.NodeID,
-            NodePublicKey: util.getZBCAdress(item.NodePublicKey, 'ZNK'),
-            OwnerAddress: item.AccountAddress,
-            RegisteredBlockHeight: item.RegistrationHeight,
-            LockedFunds: util.zoobitConversion(item.LockedBalance),
-            RegistrationStatus: item.RegistrationStatus,
-            Latest: item.Latest,
-            Height: item.Height,
-            NodeAddressInfo: item.NodeAddressInfo,
-            ParticipationScore: null,
-            /** waiting core */
-            BlocksFunds: null,
-            RewardsPaid: null,
-            RewardsPaidConversion: null,
-            /** additional detail node address */
-            IpAddress: null,
-            CountryCode: null,
-            CountryName: null,
-            RegionCode: null,
-            RegionName: null,
-            City: null,
-            Latitude: null,
-            Longitude: null,
-            CountryFlagUrl: null,
-            CountryFlagEmoji: null,
-          }
+        const promises = res.NodeRegistrations.map(item => {
+          return new Promise(resolve => {
+            this.blocksService.getTimestampByHeight({ Height: item.RegistrationHeight }, (err, res) => {
+              if (err) return resolve({ err, res: null })
+              return resolve({
+                err: null,
+                res: {
+                  NodeID: item.NodeID,
+                  NodePublicKey: util.getZBCAdress(item.NodePublicKey, 'ZNK'),
+                  OwnerAddress: item.AccountAddress,
+                  RegisteredBlockHeight: item.RegistrationHeight,
+                  LockedFunds: util.zoobitConversion(item.LockedBalance),
+                  RegistrationStatus: item.RegistrationStatus,
+                  Latest: item.Latest,
+                  Height: item.Height,
+                  NodeAddressInfo: item.NodeAddressInfo,
+                  ParticipationScore: null,
+                  /** waiting core */
+                  BlocksFunds: null,
+                  RewardsPaid: null,
+                  RewardsPaidConversion: null,
+                  /** additional detail node address */
+                  IpAddress: null,
+                  CountryCode: null,
+                  CountryName: null,
+                  RegionCode: null,
+                  RegionName: null,
+                  City: null,
+                  Latitude: null,
+                  Longitude: null,
+                  CountryFlagUrl: null,
+                  CountryFlagEmoji: null,
+                  RegistrationTime: moment(res.Timestamp).valueOf(),
+                },
+              })
+            })
+          })
         })
 
-        console.log('XXX => ', payloads)
+        const results = await Promise.all(promises)
+        const errors = results.filter(f => f.err !== null).map(i => i.err)
+        const payloads = results.filter(f => f.res !== null).map(i => i.res)
+
+        if (payloads && payloads.length < 1 && errors.length < 1) return callback(response.setResult(false, `[Nodes] No additional data`))
+
+        if (errors && errors.length > 0) {
+          errors.forEach(i => {
+            /** send message telegram bot if avaiable */
+            return callback(response.sendBotMessage('Nodes', `[Nodes] Upsert - ${JSON.stringify(i.err)}`))
+          })
+        }
+
+        console.log('XXX', payloads)
 
         this.service.upserts(payloads, ['NodeID', 'NodePublicKey'], (err, res) => {
           /** send message telegram bot if avaiable */
