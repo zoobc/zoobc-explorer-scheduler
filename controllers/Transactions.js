@@ -81,7 +81,10 @@ module.exports = class Transactions extends BaseController {
             MultiSignatureInfo: {
               ...item.multiSignatureTransactionBody.MultiSignatureInfo,
             },
-            SignatureInfo: { ...item.multiSignatureTransactionBody.SignatureInfo },
+            SignatureInfo: {
+              ...item.multiSignatureTransactionBody.SignatureInfo,
+              TransactionHash: util.getZBCAdress(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash, 'ZTX'),
+            },
           }
           break
         case 258:
