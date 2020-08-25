@@ -51,8 +51,8 @@ module.exports = class Blocks extends BaseController {
             IntermediateHashes: util.bufferStr(i.IntermediateHashes),
             BatchReceipt: {
               ...i.BatchReceipt,
-              SenderPublicKey: util.bufferStr(i.BatchReceipt.SenderPublicKey),
-              RecipientPublicKey: util.bufferStr(i.BatchReceipt.RecipientPublicKey),
+              SenderPublicKey: util.getZBCAdress(i.BatchReceipt.SenderPublicKey, 'ZNK'),
+              RecipientPublicKey: util.getZBCAdress(i.BatchReceipt.RecipientPublicKey, 'ZNK'),
             },
           }
         })
@@ -64,21 +64,21 @@ module.exports = class Blocks extends BaseController {
         skippeds.SkippedBlocksmiths.map(i => {
           return {
             ...i,
-            BlocksmithPublicKey: util.bufferStr(i.BlocksmithPublicKey),
+            BlocksmithPublicKey: util.getZBCAdress(i.BlocksmithPublicKey, 'ZNK'),
           }
         })
 
       return {
         BlockID: item.Block.ID,
-        BlockHash: item.Block.BlockHash,
-        PreviousBlockID: item.Block.PreviousBlockHash,
+        BlockHash: util.getZBCAdress(item.Block.BlockHash, 'ZBL'),
+        PreviousBlockID: util.getZBCAdress(item.Block.PreviousBlockHash, 'ZBL'),
         Height: item.Block.Height,
         Timestamp: new Date(moment.unix(item.Block.Timestamp).valueOf()),
         BlockSeed: item.Block.BlockSeed,
         BlockSignature: item.Block.BlockSignature,
         CumulativeDifficulty: item.Block.CumulativeDifficulty,
         SmithScale: item.Block.SmithScale,
-        BlocksmithID: util.bufferStr(item.Block.BlocksmithPublicKey),
+        BlocksmithID: util.getZBCAdress(item.Block.BlocksmithPublicKey, 'ZNK'),
         TotalAmount: item.Block.TotalAmount,
         TotalAmountConversion: util.zoobitConversion(item.Block.TotalAmount),
         TotalFee: item.Block.TotalFee,

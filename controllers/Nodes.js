@@ -110,8 +110,6 @@ module.exports = class Nodes extends BaseController {
           })
         }
 
-        console.log('XXX', payloads)
-
         this.service.upserts(payloads, ['NodeID', 'NodePublicKey'], (err, res) => {
           /** send message telegram bot if avaiable */
           if (err) return callback(response.sendBotMessage('Nodes', `[Nodes] Upsert - ${err}`))
