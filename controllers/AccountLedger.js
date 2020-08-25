@@ -2,11 +2,12 @@ const moment = require('moment')
 const BaseController = require('./BaseController')
 const { AccountLedger } = require('../protos')
 const { util, response } = require('../utils')
-const { AccountsService, BlocksService, GeneralsService } = require('../services')
+const { AccountLedgerService, AccountsService, BlocksService, GeneralsService } = require('../services')
 
 module.exports = class AccountLedgers extends BaseController {
   constructor() {
-    super(new AccountsService())
+    super(new AccountLedgerService())
+    this.accountService = new AccountsService()
     this.blocksService = new BlocksService()
     this.generalsService = new GeneralsService()
   }
@@ -22,7 +23,11 @@ module.exports = class AccountLedgers extends BaseController {
       const lastCheck = await this.generalsService.getSetLastCheck()
       if (!lastCheck) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
-      const params = { EventType: 'EventReward', TimestampStart: lastCheck.Timestamp, TimestampEnd: TimestampEnd }
+      const params = {
+        EventType: 'EventReward',
+        TimestampStart: lastCheck.Timestamp,
+        TimestampEnd: TimestampEnd,
+      }
       AccountLedger.GetAccountLedgers(params, async (err, result) => {
         if (err)
           return callback(
@@ -37,16 +42,47 @@ module.exports = class AccountLedgers extends BaseController {
         if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         const promises = result.AccountLedgers.map(item => {
+          const AccAdd = item.AccountAddress
           return new Promise(resolve => {
-            const payload = {
-              AccountAddress: item.AccountAddress,
-              TotalRewards: parseInt(item.BalanceChange),
-              TotalRewardsConversion: util.zoobitConversion(item.BalanceChange),
-            }
+            this.accountService.getCurrentTotalRewardByAccountAddress(AccAdd, async (err, result) => {
+              let RewardBefore = 0
 
-            this.service.findAndUpdate(payload, (err, res) => {
-              if (err) return resolve({ err, res: null })
-              return resolve({ err: null, res })
+              const payload = {
+                FirstActive: item.Timestamp,
+                LastActive: item.Timestamp,
+                TransactionHeight: null,
+                TotalFeesPaid: 0,
+                TotalFeesPaidConversion: util.zoobitConversion(0),
+                AccountAddress: item.AccountAddress,
+                Balance: parseInt(item.BalanceChange),
+                BalanceConversion: util.zoobitConversion(parseInt(item.Balance)),
+                SpendableBalance: 0,
+                SpendableBalanceConversion: util.zoobitConversion(0),
+                BlockHeight: item.BlockHeight,
+                PopRevenue: 0,
+                TotalRewards: parseInt(item.BalanceChange),
+                TotalRewardsConversion: util.zoobitConversion(parseInt(item.BalanceChange)),
+              }
+
+              if (result) {
+                if (result.TotalRewards) {
+                  payload.TransactionHeight = result.TransactionHeight
+                  payload.TotalFeesPaid = result.TotalFeesPaid
+                  payload.TotalFeesPaidConversion = result.TotalFeesPaidConversion
+                  payload.Balance = result.Balance
+                  payload.BalanceConversion = result.BalanceConversion
+                  payload.SpendableBalance = result.SpendableBalance
+                  payload.SpendableBalanceConversion = result.SpendableBalanceConversion
+                  payload.PopRevenue = result.PopRevenue
+                  payload.TotalRewards = parseInt(result.TotalRewards) + parseInt(item.BalanceChange)
+                  payload.TotalRewardsConversion = util.zoobitConversion(result.TotalRewards + item.BalanceChange)
+                }
+              }
+
+              this.accountService.findAndUpdate(payload, (err, res) => {
+                if (err) return resolve({ err, res: null })
+                return resolve({ err: null, res })
+              })
             })
           })
         })
@@ -65,7 +101,13 @@ module.exports = class AccountLedgers extends BaseController {
           })
         }
 
-        return callback(response.setResult(true, `[Account Ledgers] Upsert ${updates.length} data successfully`))
+        this.service.upserts(result.AccountLedgers, ['AccountAddress', 'BlockHeight', 'TransactionID'], (erro, results) => {
+          if (erro) {
+            return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Upsert - ${JSON.stringify(erro)}`))
+          }
+
+          return callback(response.setResult(true, `[Account Ledgers] Upsert ${updates.length} data successfully`))
+        })
       })
     })
   }
