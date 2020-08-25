@@ -9,4 +9,5 @@ enum RequestType {
     GetNodeHardware = 0;
     GetProofOfOwnership = 1;
     GeneratetNodeKey = 2;
+    GetPendingNodeRegistrationsStream = 3;
 }

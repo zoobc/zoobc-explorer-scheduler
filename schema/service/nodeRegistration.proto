@@ -26,4 +26,6 @@ service NodeRegistrationService {
             get: "/v1/nodeRegistration/GetNodeRegistrationsByNodePublicKeys"
         };
     }    
+
+    rpc GetPendingNodeRegistrations(stream model.GetPendingNodeRegistrationsRequest) returns (stream model.GetPendingNodeRegistrationsResponse) {}
 }
