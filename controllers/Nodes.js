@@ -59,7 +59,7 @@ module.exports = class Nodes extends BaseController {
         const payloads = res.NodeRegistrations.map(item => {
           return {
             NodeID: item.NodeID,
-            NodePublicKey: util.bufferStr(item.NodePublicKey),
+            NodePublicKey: util.getZBCAdress(item.NodePublicKey, 'ZNK'),
             OwnerAddress: item.AccountAddress,
             RegisteredBlockHeight: item.RegistrationHeight,
             LockedFunds: util.zoobitConversion(item.LockedBalance),
@@ -85,6 +85,8 @@ module.exports = class Nodes extends BaseController {
             CountryFlagEmoji: null,
           }
         })
+
+        console.log('XXX => ', payloads)
 
         this.service.upserts(payloads, ['NodeID', 'NodePublicKey'], (err, res) => {
           /** send message telegram bot if avaiable */
