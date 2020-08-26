@@ -83,7 +83,10 @@ module.exports = class Transactions extends BaseController {
             },
             SignatureInfo: {
               ...item.multiSignatureTransactionBody.SignatureInfo,
-              TransactionHash: util.getZBCAdress(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash, 'ZTX'),
+              TransactionHashFormatted:
+                item.multiSignatureTransactionBody.SignatureInfo &&
+                item.multiSignatureTransactionBody.SignatureInfo.TransactionHash &&
+                util.getZBCAdress(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash, 'ZTX'),
             },
           }
           break
@@ -131,7 +134,8 @@ module.exports = class Transactions extends BaseController {
         Status: status,
         FeeConversion: util.zoobitConversion(item.Fee),
         Version: item.Version,
-        TransactionHash: util.getZBCAdress(item.TransactionHash, 'ZTX'),
+        TransactionHash: item.TransactionHash,
+        TransactionHashFormatted: util.getZBCAdress(item.TransactionHash, 'ZTX'),
         TransactionBodyLength: item.TransactionBodyLength,
         TransactionBodyBytes: item.TransactionBodyBytes,
         TransactionIndex: item.TransactionIndex,

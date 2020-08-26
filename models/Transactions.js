@@ -15,6 +15,7 @@ const schema = new mongoose.Schema(
     FeeConversion: { type: String },
     Version: { type: Number } /** additional */,
     TransactionHash: { type: Buffer } /** additional */,
+    TransactionHashFormatted: { type: String } /** additional */,
     TransactionBodyLength: { type: Number } /** additional */,
     TransactionBodyBytes: { type: Buffer } /** additional */,
     TransactionIndex: { type: Number } /** additional */,
@@ -91,6 +92,7 @@ const schema = new mongoose.Schema(
       UnsignedTransactionBytes: { type: Buffer },
       SignatureInfo: {
         TransactionHash: { type: Buffer },
+        TransactionHashFormatted: { type: String },
         Signatures: {
           type: Map,
           of: Buffer,
