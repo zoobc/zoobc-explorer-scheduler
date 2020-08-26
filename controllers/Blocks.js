@@ -1,7 +1,7 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { Block, ParticipationScore, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
+const { Block, ParticipationScore, PublishedReceipt } = require('../protos')
 const { util, msg, response } = require('../utils')
 const { BlocksService, GeneralsService, ParticipationScoresService } = require('../services')
 
@@ -25,16 +25,6 @@ module.exports = class Blocks extends BaseController {
       })
     }
 
-    const getSkippedBlockSmiths = async BlockHeight => {
-      return new Promise(resolve => {
-        SkippedBlockSmiths.GetSkippedBlockSmiths({ BlockHeightStart: BlockHeight, BlockHeightEnd: BlockHeight }, (err, res) => {
-          if (err) resolve(null)
-
-          resolve(res)
-        })
-      })
-    }
-
     const promises = blocks.map(async item => {
       const TotalRewards = parseFloat(item.TotalCoinBase) + parseFloat(item.TotalFee)
 
@@ -50,23 +40,23 @@ module.exports = class Blocks extends BaseController {
             IntermediateHashes: util.bufferStr(i.IntermediateHashes),
             BatchReceipt: {
               ...i.BatchReceipt,
-              SenderPublicKey: util.bufferStr(i.BatchReceipt.SenderPublicKey),
-              RecipientPublicKey: util.bufferStr(i.BatchReceipt.RecipientPublicKey),
+              SenderPublicKey: util.getZBCAdress(i.BatchReceipt.SenderPublicKey, 'ZNK'),
+              RecipientPublicKey: util.getZBCAdress(i.BatchReceipt.RecipientPublicKey, 'ZNK'),
             },
           }
         })
 
       return {
         BlockID: item.ID,
-        BlockHash: item.BlockHash,
-        PreviousBlockID: item.PreviousBlockHash,
+        BlockHash: util.getZBCAdress(item.BlockHash, 'ZBL'),
+        PreviousBlockID: util.getZBCAdress(item.PreviousBlockHash, 'ZBL'),
         Height: item.Height,
         Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
         BlockSeed: item.BlockSeed,
         BlockSignature: item.BlockSignature,
         CumulativeDifficulty: item.CumulativeDifficulty,
         SmithScale: null,
-        BlocksmithID: util.bufferStr(item.BlocksmithPublicKey),
+        BlocksmithID: util.getZBCAdress(item.BlocksmithPublicKey, 'ZNK'),
         TotalAmount: item.TotalAmount,
         TotalAmountConversion: util.zoobitConversion(item.TotalAmount),
         TotalFee: item.TotalFee,

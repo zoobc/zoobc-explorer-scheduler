@@ -53,7 +53,7 @@ module.exports = class Transactions extends BaseController {
         case 2:
           transactionTypeName = 'Node Registration'
           nodeRegistration = {
-            NodePublicKey: util.bufferStr(item.nodeRegistrationTransactionBody.NodePublicKey),
+            NodePublicKey: util.getZBCAdress(item.nodeRegistrationTransactionBody.NodePublicKey, 'ZNK'),
             AccountAddress: item.nodeRegistrationTransactionBody.AccountAddress,
             NodeAddress: item.nodeRegistrationTransactionBody.NodeAddress,
             LockedBalance: item.nodeRegistrationTransactionBody.LockedBalance,
@@ -81,13 +81,16 @@ module.exports = class Transactions extends BaseController {
             MultiSignatureInfo: {
               ...item.multiSignatureTransactionBody.MultiSignatureInfo,
             },
-            SignatureInfo: { ...item.multiSignatureTransactionBody.SignatureInfo },
+            SignatureInfo: {
+              ...item.multiSignatureTransactionBody.SignatureInfo,
+              TransactionHash: util.getZBCAdress(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash, 'ZTX'),
+            },
           }
           break
         case 258:
           transactionTypeName = 'Update Node Registration'
           updateNodeRegistration = {
-            NodePublicKey: util.bufferStr(item.updateNodeRegistrationTransactionBody.NodePublicKey),
+            NodePublicKey: util.getZBCAdress(item.updateNodeRegistrationTransactionBody.NodePublicKey, 'ZNK'),
             NodeAddress: item.updateNodeRegistrationTransactionBody.NodeAddress,
             LockedBalance: item.updateNodeRegistrationTransactionBody.LockedBalance,
             LockedBalanceConversion: util.zoobitConversion(item.updateNodeRegistrationTransactionBody.LockedBalance),
@@ -101,13 +104,13 @@ module.exports = class Transactions extends BaseController {
         case 514:
           transactionTypeName = 'Remove Node Registration'
           removeNodeRegistration = {
-            NodePublicKey: util.bufferStr(item.removeNodeRegistrationTransactionBody.NodePublicKey),
+            NodePublicKey: util.getZBCAdress(item.removeNodeRegistrationTransactionBody.NodePublicKey, 'ZNK'),
           }
           break
         case 770:
           transactionTypeName = 'Claim Node Registration'
           claimNodeRegistration = {
-            NodePublicKey: util.bufferStr(item.claimNodeRegistrationTransactionBody.NodePublicKey),
+            NodePublicKey: util.getZBCAdress(item.claimNodeRegistrationTransactionBody.NodePublicKey, 'ZNK'),
             ProofOfOwnership: item.claimNodeRegistrationTransactionBody.Poown,
           }
           break
@@ -128,7 +131,7 @@ module.exports = class Transactions extends BaseController {
         Status: status,
         FeeConversion: util.zoobitConversion(item.Fee),
         Version: item.Version,
-        TransactionHash: item.TransactionHash,
+        TransactionHash: util.getZBCAdress(item.TransactionHash, 'ZTX'),
         TransactionBodyLength: item.TransactionBodyLength,
         TransactionBodyBytes: item.TransactionBodyBytes,
         TransactionIndex: item.TransactionIndex,
@@ -184,6 +187,7 @@ module.exports = class Transactions extends BaseController {
 
         /** update or insert data */
         const payloads = await this.mappingTransactions(res.Transactions)
+
         this.service.upserts(payloads, ['TransactionID', 'Height'], (err, res) => {
           /** send message telegram bot if available */
           if (err) return callback(response.sendBotMessage('Transactions', `[Transactions] Upsert - ${err}`))
