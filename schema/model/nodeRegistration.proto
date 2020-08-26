@@ -24,7 +24,7 @@ message GetNodeRegistrationsRequest {
         2 : will retrieve node registries that have been deleted
         1 : will retrieve node registries that still pending
         0: will retrieve node registries that already registered*/
-    uint32 RegistrationStatus = 1;
+    repeated uint32 RegistrationStatuses = 1;
     // Fetch Node Registries when registration height is greater than or equal to
     uint32 MinRegistrationHeight = 2;
     // Fetch Node Registries when registration height is less than or equal to
@@ -79,4 +79,12 @@ message GetNodeRegistrationsByNodePublicKeysResponse {
     uint64 Total = 1 [jstype = JS_STRING];
     // NodeRegistrations list of NodeRegistration
     repeated NodeRegistration NodeRegistrations = 2;
+}
+
+message GetPendingNodeRegistrationsRequest{
+    uint32 Limit = 1;
+}
+
+message GetPendingNodeRegistrationsResponse{
+    repeated NodeRegistration NodeRegistrations = 1;
 }

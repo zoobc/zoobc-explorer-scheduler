@@ -1,21 +1,28 @@
 const BaseController = require('./BaseController')
 const { response } = require('../utils')
-const { NodesService } = require('../services')
+const { BlocksService, NodesService, ParticipationScoresService } = require('../services')
 const { ParticipationScore } = require('../protos')
+const config = require('../config')
 
 module.exports = class ParticipationScores extends BaseController {
   constructor() {
     super(new NodesService())
+    this.participationScoresService = new ParticipationScoresService()
+    this.BlocksService = new BlocksService()
   }
 
   async update(callback) {
-    this.service.getRangeHeight((err, res) => {
+    this.BlocksService.getLastHeight((err, res) => {
       /** send message telegram bot if avaiable */
       if (err)
         return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Nodes Service - Get Range Height ${err}`))
       if (!res) return callback(response.setResult(false, '[Participation Score] No additional data'))
 
-      const params = { FromHeight: res.toHeight > 100 ? res.toHeight - 100 : 0, ToHeight: res.toHeight }
+      const params = {
+        FromHeight: res.Height > config.app.limitData ? res.Height - config.app.limitData : 0,
+        ToHeight: res.Height,
+      }
+
       ParticipationScore.GetParticipationScores(params, async (err, res) => {
         if (err)
           return callback(
@@ -32,9 +39,39 @@ module.exports = class ParticipationScores extends BaseController {
 
         const promises = res.ParticipationScores.map(item => {
           return new Promise(resolve => {
-            this.service.update({ NodeID: item.NodeID }, { ParticipationScore: item.Score.toString() }, (err, res) => {
-              if (err) return resolve({ err, res: null })
-              return resolve({ err: null, res })
+            //Calculate the Difference Scores between Height - 1 and Height
+            const payloads = {
+              NodeID: item.NodeID,
+              Score: item.Score,
+              Latest: item.Latest,
+              Height: item.Height,
+              DifferenceScores: 0,
+              DifferenceScorePercentage: 0,
+            }
+
+            this.participationScoresService.findnearestScorebyHeight(item.NodeID, item.Height, (eror, result) => {
+              if (eror) return resolve({ eror, res: null })
+
+              if (result) {
+                payloads.DifferenceScores = parseInt(item.Score) - parseInt(result.Score)
+                payloads.DifferenceScorePercentage = ((parseInt(item.Score) - parseInt(result.Score)) / parseInt(result.Score)) * 100
+              }
+
+              if (item.Height === 414 && item.NodeID === '-4342475941716306589') {
+                console.log('Current Score = ', parseInt(item.Score))
+                console.log('Before Score = ', parseInt(result.Score))
+              }
+
+              this.participationScoresService.updateOneScores(payloads, (error, ress) => {
+                if (error) return resolve({ error, res: null })
+
+                //Update Scored To Nodes
+                this.service.update({ NodeID: item.NodeID }, { ParticipationScore: item.Score.toString() }, (err, res) => {
+                  if (err) return resolve({ err, res: null })
+                  return resolve({ err: null, res })
+                })
+                //=========
+              })
             })
           })
         })

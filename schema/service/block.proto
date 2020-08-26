@@ -15,7 +15,7 @@ service BlockService {
         };
     }
 
-    rpc GetBlock(model.GetBlockRequest) returns (model.BlockExtendedInfo) {
+    rpc GetBlock(model.GetBlockRequest) returns (model.GetBlockResponse) {
         option (google.api.http) = {
             get: "/v1/block/GetBlock"
         };

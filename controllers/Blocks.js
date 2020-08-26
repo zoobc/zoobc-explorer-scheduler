@@ -143,42 +143,16 @@ module.exports = class Blocks extends BaseController {
             ToHeight: maxHeight.Height,
           }
 
-          // ParticipationScore.GetParticipationScores(param, async (err, res) => {
-          // 	if (err)
-          // 		return callback(
-          // 			response.sendBotMessage(
-          // 				"Blocks",
-          // 				`[Blocks - Participation Score] Upsert - ${err}`
-          // 			)
-          // 		);
+          ParticipationScore.GetParticipationScores(param, async (err, res) => {
+            if (err) return callback(response.sendBotMessage('Blocks', `[Blocks - Participation Score] Upsert - ${err}`))
 
-          // 	this.participationScoresService.upserts(
-          // 		res,
-          // 		["NodeID", "Height"],
-          // 		(error, ress) => {
-          // 			if (error)
-          // 				return callback(
-          // 					response.sendBotMessage(
-          // 						"Blocks",
-          // 						`[Blocks - Participation Score] Upsert - ${err}`
-          // 					)
-          // 				);
-          // 			if (ress && ress.result.ok !== 1)
-          // 				return callback(
-          // 					response.setError(
-          // 						"[Blocks - Participation Score] Upsert data failed"
-          // 					)
-          // 				);
+            this.participationScoresService.upserts(res.ParticipationScores, ['NodeID', 'Height'], (error, ress) => {
+              if (error) return callback(response.sendBotMessage('Blocks', `[Blocks - Participation Score] Upsert - ${err}`))
+              if (ress && ress.result.ok !== 1) return callback(response.setError('[Blocks - Participation Score] Upsert data failed'))
 
-          // 			return callback(
-          // 				response.setResult(
-          // 					true,
-          // 					`[Blocks - Participation Score] Upsert data successfully`
-          // 				)
-          // 			);
-          // 		}
-          // 	);
-          // });
+              return callback(response.setResult(true, `[Blocks - Participation Score] Upsert data successfully`))
+            })
+          })
 
           return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`))
         })
