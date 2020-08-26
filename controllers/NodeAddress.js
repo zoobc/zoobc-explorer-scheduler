@@ -57,8 +57,8 @@ module.exports = class NodeAddress extends BaseController {
         })
 
         const results = await Promise.all(promises)
-        const errors = results.filter(f => f.err !== null)
-        const updates = results.filter(f => f.res !== null)
+        const errors = results.filter(f => f.err !== null).map(i => i.err)
+        const updates = results.filter(f => f.res !== null).map(i => i.res)
 
         if (updates && updates.length < 1 && errors.length < 1)
           return callback(response.setResult(false, `[Node Address] No additional data`))

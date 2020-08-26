@@ -39,7 +39,7 @@ module.exports = class ParticipationScores extends BaseController {
 
         const promises = res.ParticipationScores.map(item => {
           return new Promise(resolve => {
-            //Calculate the Difference Scores between current height and height before based on nodeID
+            /** calculate the Difference Scores between current height and height before based on nodeID */
             const payloads = {
               NodeID: item.NodeID,
               Score: item.Score,
@@ -65,10 +65,10 @@ module.exports = class ParticipationScores extends BaseController {
                 }
               }
 
-              this.participationScoresService.updateOneScores(payloads, (error, ress) => {
-                if (error) return resolve({ error, res: null })
+              this.participationScoresService.updateOneScores(payloads, err => {
+                if (err) return resolve({ err, res: null })
 
-                //Update Scored To Nodes
+                /** update scored to nodes */
                 const PercentageScore = item.NodeID / (10 ^ 16)
                 this.service.update({ NodeID: item.NodeID }, { ParticipationScore: item.Score.toString(), PercentageScore }, (err, res) => {
                   if (err) return resolve({ err, res: null })
@@ -80,8 +80,8 @@ module.exports = class ParticipationScores extends BaseController {
         })
 
         const results = await Promise.all(promises)
-        const errors = results.filter(f => f.err !== null)
-        const updates = results.filter(f => f.res !== null)
+        const errors = results.filter(f => f.err !== null).map(i => i.err)
+        const updates = results.filter(f => f.res !== null).map(i => i.res)
 
         if (updates && updates.length < 1 && errors.length < 1)
           return callback(response.setResult(false, `[Participation Score] No additional data`))

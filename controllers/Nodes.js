@@ -39,7 +39,12 @@ module.exports = class Nodes extends BaseController {
       if (lastNodeHeight > 0 && lastNodeHeight >= lastCheck.Height) return callback(response.setResult(false, '[Nodes] No additional data'))
 
       /** checking total node to adding params limit request data */
-      let params = { MinRegistrationHeight: lastNodeHeight, MaxRegistrationHeight: lastCheck.Height, Pagination: { Limit: 100 } }
+      let params = {
+        MinRegistrationHeight: lastNodeHeight,
+        MaxRegistrationHeight: lastCheck.Height,
+        RegistrationStatuses: [0, 1, 2],
+        Pagination: { Limit: 100 },
+      }
       const totalNode = await getTotalNode(params)
       if (totalNode > params.Pagination.Limit) params.Pagination.Limit = totalNode
 
@@ -90,6 +95,7 @@ module.exports = class Nodes extends BaseController {
                   Longitude: null,
                   CountryFlagUrl: null,
                   CountryFlagEmoji: null,
+                  PercentageScore: null,
                   RegistrationTime: moment(res.Timestamp).valueOf(),
                 },
               })
