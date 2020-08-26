@@ -56,6 +56,17 @@ module.exports = class Blocks extends BaseController {
           }
         })
 
+      const skippedsMapped =
+        skippeds &&
+        skippeds.SkippedBlocksmiths &&
+        skippeds.SkippedBlocksmiths.length > 0 &&
+        skippeds.SkippedBlocksmiths.map(i => {
+          return {
+            ...i,
+            BlocksmithPublicKey: util.getZBCAdress(i.BlocksmithPublicKey, 'ZNK'),
+          }
+        })
+
       return {
         BlockID: item.ID,
         BlockHash: util.getZBCAdress(item.BlockHash, 'ZBL'),
