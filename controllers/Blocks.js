@@ -1,7 +1,7 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { Block, ParticipationScore, PublishedReceipt } = require('../protos')
+const { Block, ParticipationScore, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 const { util, msg, response } = require('../utils')
 const { BlocksService, GeneralsService, ParticipationScoresService } = require('../services')
 
@@ -92,7 +92,7 @@ module.exports = class Blocks extends BaseController {
         PopChange: null,
         ReceiptValue: null,
         BlocksmithAddress: null,
-        SkippedBlocksmiths: null,
+        SkippedBlocksmiths: skippedsMapped,
         /** Aggregate */
         TotalRewards,
         TotalRewardsConversion: util.zoobitConversion(TotalRewards),
