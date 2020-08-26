@@ -39,7 +39,8 @@ module.exports = class AccountLedgers extends BaseController {
             )
           )
 
-        if (result && result.AccountLedgers.length < 1) return callback(response.setResult(false, `[Account Ledgers] No additional data`))
+        if (result && result.AccountLedgers && result.AccountLedgers.length < 1)
+          return callback(response.setResult(false, `[Account Ledgers] No additional data`))
 
         const promises = result.AccountLedgers.map(item => {
           const AccAdd = item.AccountAddress
@@ -99,9 +100,17 @@ module.exports = class AccountLedgers extends BaseController {
           })
         }
 
-        this.service.upserts(result.AccountLedgers, ['AccountAddress', 'BlockHeight', 'TransactionID'], (erro, results) => {
-          if (erro) {
-            return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Upsert - ${JSON.stringify(erro)}`))
+        const payloads = result.AccountLedgers.map(i => {
+          return {
+            ...i,
+            BalanceChange: parseInt(i.BalanceChange),
+            BalanceChangeConversion: util.zoobitConversion(parseInt(i.BalanceChange)),
+          }
+        })
+
+        this.service.upserts(payloads, ['AccountAddress', 'BlockHeight', 'TransactionID'], (err, results) => {
+          if (err) {
+            return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Upsert - ${JSON.stringify(err)}`))
           }
 
           return callback(response.setResult(true, `[Account Ledgers] Upsert ${updates.length} data successfully`))
