@@ -18,12 +18,10 @@ module.exports = class AccountLedgers extends BaseController {
       if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Blocks Service - Get Last Timestamp ${err}`))
       if (!res) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
-      const TimestampEnd = moment(res.Timestamp).unix()
-
       const lastCheck = await this.generalsService.getSetLastCheck()
       if (!lastCheck) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
-      const params = { EventType: 'EventReward', TimestampStart: lastCheck.Timestamp, TimestampEnd: TimestampEnd }
+      const params = { EventType: 'EventReward', TimestampStart: lastCheck.Timestamp, TimestampEnd: moment(res.Timestamp).unix() }
       AccountLedger.GetAccountLedgers(params, async (err, res) => {
         if (err)
           return callback(
