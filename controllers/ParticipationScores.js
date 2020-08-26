@@ -69,10 +69,16 @@ module.exports = class ParticipationScores extends BaseController {
                 if (error) return resolve({ error, res: null })
 
                 //Update Scored To Nodes
-                this.service.update({ NodeID: item.NodeID }, { ParticipationScore: item.Score.toString() }, (err, res) => {
-                  if (err) return resolve({ err, res: null })
-                  return resolve({ err: null, res })
-                })
+
+                const PercentageScores = (item.NodeID / 10) ^ 16
+                this.service.update(
+                  { NodeID: item.NodeID },
+                  { ParticipationScore: item.Score.toString(), PercentageScore: PercentageScores },
+                  (err, res) => {
+                    if (err) return resolve({ err, res: null })
+                    return resolve({ err: null, res })
+                  }
+                )
               })
             })
           })
