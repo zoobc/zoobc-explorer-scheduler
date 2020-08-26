@@ -38,6 +38,8 @@ module.exports = class Blocks extends BaseController {
     const promises = blocks.map(async item => {
       const TotalRewards = parseFloat(item.TotalCoinBase) + parseFloat(item.TotalFee)
 
+      const skippeds = await getSkippedBlockSmiths(item.Block.Height)
+
       const receipts = await getPublishedReceipts(item.Height)
 
       const receiptsMapped =
