@@ -57,29 +57,29 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
           util.logMutation(`[GraphQL Mutation] ${result}`)
         }
 
-        // nodes.update(res => {
-        //   util.log(res)
+        nodes.update(res => {
+          util.log(res)
 
-        //   accounts.update(res => {
-        //     util.log(res)
+          accounts.update(res => {
+            util.log(res)
 
-        //     multiSignatures.update(res => {
-        //       util.log(res)
+            multiSignatures.update(res => {
+              util.log(res)
 
-        //       accountLedger.update(res => {
-        //         util.log(res)
+              accountLedger.update(res => {
+                util.log(res)
 
-        //         nodeAddress.update(res => {
-        //           util.log(res)
+                nodeAddress.update(res => {
+                  util.log(res)
 
-        //           participationScores.update(res => {
-        //             util.log(res)
-        //           })
-        //         })
-        //       })
-        //     })
-        //   })
-        // })
+                  participationScores.update(res => {
+                    util.log(res)
+                  })
+                })
+              })
+            })
+          })
+        })
       })
     })
   } catch (error) {
