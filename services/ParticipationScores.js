@@ -7,6 +7,10 @@ module.exports = class ParticipationScoresService extends BaseService {
     this.name = 'ParticipationScores'
   }
 
+  getLastHeight(callback) {
+    ParticipationScores.findOne().select('Height').sort('-Height').exec(callback)
+  }
+
   findnearestScorebyHeight(NodeId, Height, callback) {
     ParticipationScores.findOne({ NodeID: NodeId }).select('Score').where('Height').lt(Height).sort('-Height').exec(callback)
   }

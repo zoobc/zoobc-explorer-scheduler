@@ -1,9 +1,9 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { Block, ParticipationScore, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 const { util, msg, response } = require('../utils')
-const { BlocksService, GeneralsService, ParticipationScoresService } = require('../services')
+const { BlocksService, GeneralsService } = require('../services')
+const { Block, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 
 const formatDate = 'DD MMM YYYY hh:mm:ss'
 
@@ -11,16 +11,14 @@ module.exports = class Blocks extends BaseController {
   constructor() {
     super(new BlocksService())
     this.generalsService = new GeneralsService()
-    this.participationScoresService = new ParticipationScoresService()
   }
 
   async mappingBlocks(blocks) {
     const getPublishedReceipts = async BlockHeight => {
       return new Promise(resolve => {
         PublishedReceipt.GetPublishedReceipts({ FromHeight: BlockHeight, ToHeight: BlockHeight }, (err, res) => {
-          if (err) resolve(null)
-
-          resolve(res)
+          if (err) return resolve(null)
+          return resolve(res)
         })
       })
     }
@@ -28,18 +26,15 @@ module.exports = class Blocks extends BaseController {
     const getSkippedBlockSmiths = async BlockHeight => {
       return new Promise(resolve => {
         SkippedBlockSmiths.GetSkippedBlockSmiths({ BlockHeightStart: BlockHeight, BlockHeightEnd: BlockHeight }, (err, res) => {
-          if (err) resolve(null)
-
-          resolve(res)
+          if (err) return resolve(null)
+          return resolve(res)
         })
       })
     }
 
     const promises = blocks.map(async item => {
       const TotalRewards = parseFloat(item.TotalCoinBase) + parseFloat(item.TotalFee)
-
       const skippeds = await getSkippedBlockSmiths(item.Height)
-
       const receipts = await getPublishedReceipts(item.Height)
 
       const receiptsMapped =
@@ -148,24 +143,6 @@ module.exports = class Blocks extends BaseController {
           /** send message telegram bot if avaiable */
           if (err) return callback(response.sendBotMessage('Blocks', `[Blocks] Upsert - ${err}`))
           if (res && res.result.ok !== 1) return callback(response.setError('[Blocks] Upsert data failed'))
-
-          const minHeight = payloads.reduce((prev, current) => (prev.Height < current.Height ? prev : current), 0)
-          const maxHeight = payloads.reduce((prev, current) => (prev.Height > current.Height ? prev : current), 0)
-          const param = {
-            FromHeight: minHeight.Height,
-            ToHeight: maxHeight.Height,
-          }
-
-          ParticipationScore.GetParticipationScores(param, async (err, res) => {
-            if (err) return callback(response.sendBotMessage('Blocks', `[Blocks - Participation Score] Upsert - ${err}`))
-
-            this.participationScoresService.upserts(res.ParticipationScores, ['NodeID', 'Height'], (error, ress) => {
-              if (error) return callback(response.sendBotMessage('Blocks', `[Blocks - Participation Score] Upsert - ${err}`))
-              if (ress && ress.result.ok !== 1) return callback(response.setError('[Blocks - Participation Score] Upsert data failed'))
-
-              return callback(response.setResult(true, `[Blocks - Participation Score] Upsert data successfully`))
-            })
-          })
 
           return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`))
         })

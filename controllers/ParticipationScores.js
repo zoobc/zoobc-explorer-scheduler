@@ -1,99 +1,76 @@
 const BaseController = require('./BaseController')
 const { response } = require('../utils')
-const { BlocksService, NodesService, ParticipationScoresService } = require('../services')
 const { ParticipationScore } = require('../protos')
-const config = require('../config')
+const { BlocksService, NodesService, ParticipationScoresService } = require('../services')
 
 module.exports = class ParticipationScores extends BaseController {
   constructor() {
-    super(new NodesService())
-    this.participationScoresService = new ParticipationScoresService()
-    this.BlocksService = new BlocksService()
+    super(new ParticipationScoresService())
+    this.nodesService = new NodesService()
+    this.blocksService = new BlocksService()
   }
 
   async update(callback) {
-    this.BlocksService.getLastHeight((err, res) => {
-      /** send message telegram bot if avaiable */
+    /** getting last height node */
+    this.service.getLastHeight((err, res) => {
       if (err)
-        return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Nodes Service - Get Range Height ${err}`))
-      if (!res) return callback(response.setResult(false, '[Participation Score] No additional data'))
+        return callback(
+          response.sendBotMessage('ParticipationScores', `[Participation Score] Participation Score Service - Get Last Height ${err}`)
+        )
 
-      const params = {
-        FromHeight: res.Height > config.app.limitData ? res.Height - config.app.limitData : 0,
-        ToHeight: res.Height,
-      }
+      /** make default variable from height */
+      const FromHeight = res ? res.Height : 0
 
-      ParticipationScore.GetParticipationScores(params, async (err, res) => {
+      /** getting last height block */
+      this.blocksService.getLastHeight((err, res) => {
         if (err)
-          return callback(
-            /** send message telegram bot if avaiable */
-            response.sendBotMessage(
-              'ParticipationScores',
-              `[Participation Score] Proto Get Participation Scores - ${err}`,
-              `- Params : <pre>${JSON.stringify(params)}</pre>`
+          return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Block Service - Get Last Height ${err}`))
+
+        /** request participation score using params range height */
+        const ToHeight = res ? res.Height : 0
+        const params = { FromHeight, ToHeight: ToHeight - FromHeight > 400 ? 400 : ToHeight }
+        ParticipationScore.GetParticipationScores(params, async (err, res) => {
+          if (err)
+            return callback(
+              /** send message telegram bot if avaiable */
+              response.sendBotMessage(
+                'ParticipationScores',
+                `[Participation Score] Proto Get Participation Scores - ${err}`,
+                `- Params : <pre>${JSON.stringify(params)}</pre>`
+              )
             )
-          )
 
-        if (res && res.ParticipationScores.length < 1)
-          return callback(response.setResult(false, '[Participation Score] No additional data'))
+          if (res && res.ParticipationScores.length < 1)
+            return callback(response.setResult(false, '[Participation Score] No additional data'))
 
-        const promises = res.ParticipationScores.map(item => {
-          return new Promise(resolve => {
-            /** calculate the Difference Scores between current height and height before based on nodeID */
-            const payloads = {
-              NodeID: item.NodeID,
-              Score: item.Score,
-              Latest: item.Latest,
-              Height: item.Height,
-              DifferenceScores: 0,
-              DifferenceScorePercentage: 0,
-              Flag: '',
+          const participationScores = res.ParticipationScores
+          const payloads = participationScores.map(i => {
+            /** calculate different score base on node id and prev height */
+            const prevParticipations = participationScores.filter(f => f.NodeID === i.NodeID && f.Height === i.Height - 1)
+            const prevScore = prevParticipations.length > 0 ? parseInt(prevParticipations[0].Score) : null
+            const currScore = parseInt(i.Score)
+            const diffScore = prevScore ? prevScore - currScore : currScore
+
+            return {
+              NodeID: i.NodeID,
+              Score: i.Score,
+              Latest: i.Latest,
+              Height: i.Height,
+              DifferenceScores: diffScore,
+              DifferenceScorePercentage: diffScore / 10000000000000000,
+              Flag: prevScore ? (prevScore > currScore ? 'Down' : 'Up') : 'Flat',
             }
+          })
 
-            this.participationScoresService.findnearestScorebyHeight(item.NodeID, item.Height, (eror, result) => {
-              if (eror) return resolve({ eror, res: null })
+          /** update or insert data */
+          this.service.upserts(payloads, ['NodeID', 'Height'], (err, res) => {
+            /** send message telegram bot if avaiable */
+            if (err) return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Upsert - ${err}`))
+            if (res && res.result.ok !== 1) return callback(response.setError('[Participation Score] Upsert data failed'))
 
-              if (result) {
-                const differenceScore = parseInt(item.Score) - parseInt(result.Score)
-                payloads.DifferenceScores = differenceScore
-                payloads.DifferenceScorePercentage = (differenceScore / parseInt(result.Score)) * 100
-
-                if (differenceScore > 0) {
-                  payloads.Flag = 'Up'
-                } else if (differenceScore < 0) {
-                  payloads.Flag = 'Down'
-                }
-              }
-
-              this.participationScoresService.updateOneScores(payloads, err => {
-                if (err) return resolve({ err, res: null })
-
-                /** update scored to nodes */
-                const PercentageScore = item.NodeID / (10 ^ 16)
-                this.service.update({ NodeID: item.NodeID }, { ParticipationScore: item.Score.toString(), PercentageScore }, (err, res) => {
-                  if (err) return resolve({ err, res: null })
-                  return resolve({ err: null, res })
-                })
-              })
-            })
+            return callback(response.setResult(true, `[Participation Score] Upsert ${payloads.length} data successfully`))
           })
         })
-
-        const results = await Promise.all(promises)
-        const errors = results.filter(f => f.err !== null).map(i => i.err)
-        const updates = results.filter(f => f.res !== null).map(i => i.res)
-
-        if (updates && updates.length < 1 && errors.length < 1)
-          return callback(response.setResult(false, `[Participation Score] No additional data`))
-
-        if (errors && errors.length > 0) {
-          errors.forEach(err => {
-            /** send message telegram bot if avaiable */
-            return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Upsert - ${JSON.stringify(err)}`))
-          })
-        }
-
-        return callback(response.setResult(true, `[Participation Score] Upsert ${updates.length} data successfully`))
       })
     })
   }
