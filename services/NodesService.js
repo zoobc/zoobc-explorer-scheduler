@@ -58,4 +58,15 @@ module.exports = class NodesService extends BaseService {
       return callback(null, res)
     })
   }
+
+  getLastScores(NodeId, callback) {
+    Nodes.find({ NodeID: NodeId })
+      .select('ParticipationScore')
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, null)
+
+        return callback(null, res)
+      })
+  }
 }

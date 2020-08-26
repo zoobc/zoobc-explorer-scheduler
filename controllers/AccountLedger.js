@@ -45,8 +45,6 @@ module.exports = class AccountLedgers extends BaseController {
           const AccAdd = item.AccountAddress
           return new Promise(resolve => {
             this.accountService.getCurrentTotalRewardByAccountAddress(AccAdd, async (err, result) => {
-              let RewardBefore = 0
-
               const payload = {
                 FirstActive: item.Timestamp,
                 LastActive: item.Timestamp,

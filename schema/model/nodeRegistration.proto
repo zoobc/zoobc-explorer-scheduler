@@ -24,7 +24,7 @@ message GetNodeRegistrationsRequest {
         2 : will retrieve node registries that have been deleted
         1 : will retrieve node registries that still pending
         0: will retrieve node registries that already registered*/
-    uint32 RegistrationStatus = 1;
+    repeated uint32 RegistrationStatuses = 1;
     // Fetch Node Registries when registration height is greater than or equal to
     uint32 MinRegistrationHeight = 2;
     // Fetch Node Registries when registration height is less than or equal to
