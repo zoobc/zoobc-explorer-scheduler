@@ -1,4 +1,6 @@
 const CryptoJS = require('crypto-js')
+const { SHA3 } = require('sha3')
+const base32Encode = require('base32-encode')
 
 const msg = require('./msg')
 const config = require('../config')
@@ -111,6 +113,27 @@ const queryfy = obj => {
   return JSON.stringify(obj)
 }
 
+function getZBCAdress(publicKey, prefix) {
+  const bytes = Buffer.alloc(35)
+  for (let i = 0; i < 32; i++) bytes[i] = publicKey[i]
+  for (let i = 0; i < 3; i++) bytes[i + 32] = prefix.charCodeAt(i)
+  const checksum = hash(bytes, 'buffer')
+  for (let i = 0; i < 3; i++) bytes[i + 32] = Number(checksum[i])
+  const segs = [prefix]
+  const b32 = base32Encode(bytes, 'RFC4648')
+  for (let i = 0; i < 7; i++) segs.push(b32.substr(i * 8, 8))
+
+  return segs.join('_')
+}
+
+function hash(str, format) {
+  const h = new SHA3(256)
+  h.update(str)
+  const b = h.digest()
+  if (format === 'buffer') return b
+  return b.toString(format)
+}
+
 module.exports = util = {
   encrypt,
   decrypt,
@@ -122,4 +145,5 @@ module.exports = util = {
   logMutation,
   queryfy,
   hmacEncrypt,
+  getZBCAdress,
 }
