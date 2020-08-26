@@ -39,7 +39,7 @@ module.exports = class ParticipationScores extends BaseController {
 
         const promises = res.ParticipationScores.map(item => {
           return new Promise(resolve => {
-            //Calculate the Difference Scores between Height - 1 and Height
+            //Calculate the Difference Scores between current height and height before based on nodeID
             const payloads = {
               NodeID: item.NodeID,
               Score: item.Score,
@@ -70,7 +70,6 @@ module.exports = class ParticipationScores extends BaseController {
                   if (err) return resolve({ err, res: null })
                   return resolve({ err: null, res })
                 })
-                //=========
               })
             })
           })
