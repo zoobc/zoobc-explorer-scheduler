@@ -25,6 +25,16 @@ module.exports = class Blocks extends BaseController {
       })
     }
 
+    const getSkippedBlockSmiths = async BlockHeight => {
+      return new Promise(resolve => {
+        SkippedBlockSmiths.GetSkippedBlockSmiths({ BlockHeightStart: BlockHeight, BlockHeightEnd: BlockHeight }, (err, res) => {
+          if (err) resolve(null)
+
+          resolve(res)
+        })
+      })
+    }
+
     const promises = blocks.map(async item => {
       const TotalRewards = parseFloat(item.TotalCoinBase) + parseFloat(item.TotalFee)
 

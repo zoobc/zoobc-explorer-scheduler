@@ -47,19 +47,22 @@ module.exports = class ParticipationScores extends BaseController {
               Height: item.Height,
               DifferenceScores: 0,
               DifferenceScorePercentage: 0,
+              Flag: '',
             }
 
             this.participationScoresService.findnearestScorebyHeight(item.NodeID, item.Height, (eror, result) => {
               if (eror) return resolve({ eror, res: null })
 
               if (result) {
-                payloads.DifferenceScores = parseInt(item.Score) - parseInt(result.Score)
-                payloads.DifferenceScorePercentage = ((parseInt(item.Score) - parseInt(result.Score)) / parseInt(result.Score)) * 100
-              }
+                const differenceScore = parseInt(item.Score) - parseInt(result.Score)
+                payloads.DifferenceScores = differenceScore
+                payloads.DifferenceScorePercentage = (differenceScore / parseInt(result.Score)) * 100
 
-              if (item.Height === 414 && item.NodeID === '-4342475941716306589') {
-                console.log('Current Score = ', parseInt(item.Score))
-                console.log('Before Score = ', parseInt(result.Score))
+                if (differenceScore > 0) {
+                  payloads.Flag = 'Up'
+                } else if (differenceScore < 0) {
+                  payloads.Flag = 'Down'
+                }
               }
 
               this.participationScoresService.updateOneScores(payloads, (error, ress) => {

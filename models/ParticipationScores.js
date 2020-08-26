@@ -9,6 +9,7 @@ const schema = new mongoose.Schema(
     Height: { type: Number },
     DifferenceScores: { type: Number },
     DifferenceScorePercentage: { type: Number },
+    Flag: { type: String },
   },
   {
     toJSON: { virtuals: true },

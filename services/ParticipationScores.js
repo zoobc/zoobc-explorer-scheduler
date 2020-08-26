@@ -33,6 +33,7 @@ module.exports = class ParticipationScoresService extends BaseService {
       {
         DifferenceScores: payload.DifferenceScores,
         DifferenceScorePercentage: payload.DifferenceScorePercentage,
+        Flag: payload.Flag,
       },
       { new: false, upsert: false }
     ).exec((err, res) => {
