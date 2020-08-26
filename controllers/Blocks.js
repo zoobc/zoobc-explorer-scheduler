@@ -1,9 +1,9 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { Block, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
+const { Block, ParticipationScore, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 const { util, msg, response } = require('../utils')
-const { BlocksService, GeneralsService } = require('../services')
+const { BlocksService, GeneralsService, ParticipationScoresService } = require('../services')
 
 const formatDate = 'DD MMM YYYY hh:mm:ss'
 
@@ -11,6 +11,7 @@ module.exports = class Blocks extends BaseController {
   constructor() {
     super(new BlocksService())
     this.generalsService = new GeneralsService()
+    this.participationScoresService = new ParticipationScoresService()
   }
 
   async mappingBlocks(blocks) {
@@ -35,11 +36,9 @@ module.exports = class Blocks extends BaseController {
     }
 
     const promises = blocks.map(async item => {
-      const TotalRewards = parseFloat(item.Block.TotalCoinBase) + parseFloat(item.Block.TotalFee)
+      const TotalRewards = parseFloat(item.TotalCoinBase) + parseFloat(item.TotalFee)
 
-      const receipts = await getPublishedReceipts(item.Block.Height)
-
-      const skippeds = await getSkippedBlockSmiths(item.Block.Height)
+      const receipts = await getPublishedReceipts(item.Height)
 
       const receiptsMapped =
         receipts &&
@@ -57,43 +56,32 @@ module.exports = class Blocks extends BaseController {
           }
         })
 
-      const skippedsMapped =
-        skippeds &&
-        skippeds.SkippedBlocksmiths &&
-        skippeds.SkippedBlocksmiths.length > 0 &&
-        skippeds.SkippedBlocksmiths.map(i => {
-          return {
-            ...i,
-            BlocksmithPublicKey: util.bufferStr(i.BlocksmithPublicKey),
-          }
-        })
-
       return {
-        BlockID: item.Block.ID,
-        BlockHash: item.Block.BlockHash,
-        PreviousBlockID: item.Block.PreviousBlockHash,
-        Height: item.Block.Height,
-        Timestamp: new Date(moment.unix(item.Block.Timestamp).valueOf()),
-        BlockSeed: item.Block.BlockSeed,
-        BlockSignature: item.Block.BlockSignature,
-        CumulativeDifficulty: item.Block.CumulativeDifficulty,
-        SmithScale: item.Block.SmithScale,
-        BlocksmithID: util.bufferStr(item.Block.BlocksmithPublicKey),
-        TotalAmount: item.Block.TotalAmount,
-        TotalAmountConversion: util.zoobitConversion(item.Block.TotalAmount),
-        TotalFee: item.Block.TotalFee,
-        TotalFeeConversion: util.zoobitConversion(item.Block.TotalFee),
-        TotalCoinBase: item.Block.TotalCoinBase,
-        TotalCoinBaseConversion: util.zoobitConversion(item.Block.TotalCoinBase),
-        Version: item.Block.Version,
-        PayloadLength: item.Block.PayloadLength,
-        PayloadHash: item.Block.PayloadHash,
+        BlockID: item.ID,
+        BlockHash: item.BlockHash,
+        PreviousBlockID: item.PreviousBlockHash,
+        Height: item.Height,
+        Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
+        BlockSeed: item.BlockSeed,
+        BlockSignature: item.BlockSignature,
+        CumulativeDifficulty: item.CumulativeDifficulty,
+        SmithScale: null,
+        BlocksmithID: util.bufferStr(item.BlocksmithPublicKey),
+        TotalAmount: item.TotalAmount,
+        TotalAmountConversion: util.zoobitConversion(item.TotalAmount),
+        TotalFee: item.TotalFee,
+        TotalFeeConversion: util.zoobitConversion(item.TotalFee),
+        TotalCoinBase: item.TotalCoinBase,
+        TotalCoinBaseConversion: util.zoobitConversion(item.TotalCoinBase),
+        Version: item.Version,
+        PayloadLength: item.PayloadLength,
+        PayloadHash: item.PayloadHash,
         /** BlockExtendedInfo */
-        TotalReceipts: item.TotalReceipts,
-        PopChange: item.PopChange,
-        ReceiptValue: item.ReceiptValue,
-        BlocksmithAddress: item.BlocksmithAccountAddress,
-        SkippedBlocksmiths: skippedsMapped,
+        TotalReceipts: null,
+        PopChange: null,
+        ReceiptValue: null,
+        BlocksmithAddress: null,
+        SkippedBlocksmiths: null,
         /** Aggregate */
         TotalRewards,
         TotalRewardsConversion: util.zoobitConversion(TotalRewards),
@@ -147,6 +135,50 @@ module.exports = class Blocks extends BaseController {
           /** send message telegram bot if avaiable */
           if (err) return callback(response.sendBotMessage('Blocks', `[Blocks] Upsert - ${err}`))
           if (res && res.result.ok !== 1) return callback(response.setError('[Blocks] Upsert data failed'))
+
+          const minHeight = payloads.reduce((prev, current) => (prev.Height < current.Height ? prev : current), 0)
+          const maxHeight = payloads.reduce((prev, current) => (prev.Height > current.Height ? prev : current), 0)
+          const param = {
+            FromHeight: minHeight.Height,
+            ToHeight: maxHeight.Height,
+          }
+
+          // ParticipationScore.GetParticipationScores(param, async (err, res) => {
+          // 	if (err)
+          // 		return callback(
+          // 			response.sendBotMessage(
+          // 				"Blocks",
+          // 				`[Blocks - Participation Score] Upsert - ${err}`
+          // 			)
+          // 		);
+
+          // 	this.participationScoresService.upserts(
+          // 		res,
+          // 		["NodeID", "Height"],
+          // 		(error, ress) => {
+          // 			if (error)
+          // 				return callback(
+          // 					response.sendBotMessage(
+          // 						"Blocks",
+          // 						`[Blocks - Participation Score] Upsert - ${err}`
+          // 					)
+          // 				);
+          // 			if (ress && ress.result.ok !== 1)
+          // 				return callback(
+          // 					response.setError(
+          // 						"[Blocks - Participation Score] Upsert data failed"
+          // 					)
+          // 				);
+
+          // 			return callback(
+          // 				response.setResult(
+          // 					true,
+          // 					`[Blocks - Participation Score] Upsert data successfully`
+          // 				)
+          // 			);
+          // 		}
+          // 	);
+          // });
 
           return callback(response.setResult(true, `[Blocks] Upsert ${payloads.length} data successfully`))
         })
