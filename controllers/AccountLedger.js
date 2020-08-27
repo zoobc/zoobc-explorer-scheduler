@@ -84,10 +84,10 @@ module.exports = class AccountLedgers extends BaseController {
         if (errors && errors.length > 0) return callback(response.sendBotMessage('AccountLedger', errors[0]))
 
         /** update or insert account ledger */
-
         const payloads = res.AccountLedgers.map(i => {
           return {
             ...i,
+            Timestamp: new Date(moment.unix(i.Timestamp).valueOf()),
             BalanceChange: parseInt(i.BalanceChange),
             BalanceChangeConversion: util.zoobitConversion(parseInt(i.BalanceChange)),
           }
