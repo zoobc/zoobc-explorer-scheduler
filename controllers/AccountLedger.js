@@ -84,7 +84,14 @@ module.exports = class AccountLedgers extends BaseController {
         if (errors && errors.length > 0) return callback(response.sendBotMessage('AccountLedger', errors[0]))
 
         /** update or insert account ledger */
-        const payloads = res.AccountLedgers
+
+        const payloads = res.AccountLedgers.map(i => {
+          return {
+            ...i,
+            BalanceChange: parseInt(i.BalanceChange),
+            BalanceChangeConversion: util.zoobitConversion(parseInt(i.BalanceChange)),
+          }
+        })
         this.service.upserts(payloads, ['AccountAddress', 'BlockHeight', 'TransactionID'], (err, res) => {
           /** send message telegram bot if avaiable */
           if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledger] Upsert - ${err}`))
