@@ -66,7 +66,8 @@ module.exports = class Nodes extends BaseController {
         const promises = res.NodeRegistrations.map(item => {
           return new Promise(resolve => {
             this.blocksService.getTimestampByHeight({ Height: item.RegistrationHeight }, (err, res) => {
-              if (err) return resolve({ err, res: null })
+              if (err) return resolve({ err: `[Nodes] Block Service - Get Timestamp By Height ${err}`, res: null })
+
               return resolve({
                 err: null,
                 res: {
@@ -109,12 +110,7 @@ module.exports = class Nodes extends BaseController {
 
         if (payloads && payloads.length < 1 && errors.length < 1) return callback(response.setResult(false, `[Nodes] No additional data`))
 
-        if (errors && errors.length > 0) {
-          errors.forEach(i => {
-            /** send message telegram bot if avaiable */
-            return callback(response.sendBotMessage('Nodes', `[Nodes] Upsert - ${JSON.stringify(i.err)}`))
-          })
-        }
+        if (errors && errors.length > 0) return callback(response.sendBotMessage('Nodes', errors[0]))
 
         this.service.upserts(payloads, ['NodeID', 'NodePublicKey'], (err, res) => {
           /** send message telegram bot if avaiable */

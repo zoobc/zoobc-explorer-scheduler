@@ -50,7 +50,7 @@ module.exports = class NodeAddress extends BaseController {
             }
 
             this.service.findAndUpdate(payload, (err, res) => {
-              if (err) return resolve({ err, res: null })
+              if (err) return resolve({ err: `[Node Address] Node - Find And Update ${err}`, res: null })
               return resolve({ err: null, res })
             })
           })
@@ -63,12 +63,7 @@ module.exports = class NodeAddress extends BaseController {
         if (updates && updates.length < 1 && errors.length < 1)
           return callback(response.setResult(false, `[Node Address] No additional data`))
 
-        if (errors && errors.length > 0) {
-          errors.forEach(err => {
-            /** send message telegram bot if avaiable */
-            return callback(response.sendBotMessage('NodeAddress', `[Node Address] Upsert - ${JSON.stringify(err)}`))
-          })
-        }
+        if (errors && errors.length > 0) return callback(response.sendBotMessage('NodeAddress', errors[0]))
 
         return callback(response.setResult(true, `[Node Address] Upsert ${updates.length} data successfully`))
       })
