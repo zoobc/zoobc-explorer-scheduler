@@ -3,6 +3,8 @@ const { response } = require('../utils')
 const { ParticipationScore } = require('../protos')
 const { BlocksService, NodesService, ParticipationScoresService } = require('../services')
 
+const billion = 10000000000000000
+
 module.exports = class ParticipationScores extends BaseController {
   constructor() {
     super(new ParticipationScoresService())
@@ -57,12 +59,34 @@ module.exports = class ParticipationScores extends BaseController {
               Latest: i.Latest,
               Height: i.Height,
               DifferenceScores: diffScore,
-              DifferenceScorePercentage: diffScore / 10000000000000000,
+              DifferenceScorePercentage: diffScore / billion,
               Flag: prevScore ? (prevScore > currScore ? 'Down' : 'Up') : 'Flat',
             }
           })
 
-          /** update or insert data */
+          /** update node score */
+          const promises = payloads.map(i => {
+            return new Promise(resolve => {
+              const key = { NodeID: i.NodeID }
+              const payload = { ParticipationScore: i.Score, PercentageScore: parseInt(i.Score) / billion }
+
+              this.nodesService.update(key, payload, (err, res) => {
+                if (err) return resolve({ err: `[Participation Score] Node Service - Update ${err}`, res: null })
+                return resolve({ err: null, res })
+              })
+            })
+          })
+
+          const results = await Promise.all(promises)
+          const errors = results.filter(f => f.err !== null).map(i => i.err)
+          const updates = results.filter(f => f.res !== null).map(i => i.res)
+
+          if (updates && updates.length < 1 && errors.length < 1)
+            return callback(response.setResult(false, `[Participation Score] No additional data`))
+
+          if (errors && errors.length > 0) return callback(response.sendBotMessage('ParticipationScores', errors[0]))
+
+          /** update or insert participation score */
           this.service.upserts(payloads, ['NodeID', 'Height'], (err, res) => {
             /** send message telegram bot if avaiable */
             if (err) return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Upsert - ${err}`))
