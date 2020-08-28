@@ -80,7 +80,6 @@ module.exports = class Nodes extends BaseController {
                   Latest: item.Latest,
                   Height: item.Height,
                   NodeAddressInfo: item.NodeAddressInfo,
-                  ParticipationScore: null,
                   /** waiting core */
                   BlocksFunds: null,
                   RewardsPaid: null,
@@ -97,6 +96,7 @@ module.exports = class Nodes extends BaseController {
                   CountryFlagUrl: null,
                   CountryFlagEmoji: null,
                   PercentageScore: null,
+                  ParticipationScore: null,
                   RegistrationTime: moment(res.Timestamp).valueOf(),
                 },
               })
