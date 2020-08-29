@@ -11,6 +11,11 @@ module.exports = class ParticipationScoresService extends BaseService {
     ParticipationScores.findOne().select('Height').sort('-Height').exec(callback)
   }
 
+  //To get the highest Height of every Participation Scores in DB to compare
+  getLatestScore(callback) {
+    ParticipationScores.find({ Status: 'True' }).exec(callback)
+  }
+
   findnearestScorebyHeight(NodeId, Height, callback) {
     ParticipationScores.findOne({ NodeID: NodeId }).select('Score').where('Height').lt(Height).sort('-Height').exec(callback)
   }
