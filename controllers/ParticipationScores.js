@@ -1,59 +1,187 @@
 const BaseController = require('./BaseController')
 const { response } = require('../utils')
-const { NodesService } = require('../services')
 const { ParticipationScore } = require('../protos')
+const { BlocksService, NodesService, ParticipationScoresService } = require('../services')
+
+const billion = 10000000000000000
 
 module.exports = class ParticipationScores extends BaseController {
   constructor() {
-    super(new NodesService())
+    super(new ParticipationScoresService())
+    this.nodesService = new NodesService()
+    this.blocksService = new BlocksService()
   }
 
   async update(callback) {
-    this.service.getRangeHeight((err, res) => {
-      /** send message telegram bot if avaiable */
+    /** getting last height node */
+    this.service.getLastHeight((err, res) => {
       if (err)
-        return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Nodes Service - Get Range Height ${err}`))
-      if (!res) return callback(response.setResult(false, '[Participation Score] No additional data'))
+        return callback(
+          response.sendBotMessage('ParticipationScores', `[Participation Score] Participation Score Service - Get Last Height ${err}`)
+        )
 
-      const params = { FromHeight: res.toHeight > 100 ? res.toHeight - 100 : 0, ToHeight: res.toHeight }
-      ParticipationScore.GetParticipationScores(params, async (err, res) => {
+      /** make default variable from height */
+      const FromHeight = res ? res.Height : 0
+
+      /** getting last height block */
+      this.blocksService.getLastHeight((err, res) => {
         if (err)
-          return callback(
-            /** send message telegram bot if avaiable */
-            response.sendBotMessage(
-              'ParticipationScores',
-              `[Participation Score] Proto Get Participation Scores - ${err}`,
-              `- Params : <pre>${JSON.stringify(params)}</pre>`
+          return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Block Service - Get Last Height ${err}`))
+
+        /** request participation score using params range height */
+        const ToHeight = res ? res.Height : 0
+        const Limit = 400
+
+        const params = {
+          FromHeight,
+          ToHeight: ToHeight - FromHeight > Limit ? FromHeight + Limit : ToHeight,
+        }
+        ParticipationScore.GetParticipationScores(params, async (err, res) => {
+          if (err)
+            return callback(
+              /** send message telegram bot if avaiable */
+              response.sendBotMessage(
+                'ParticipationScores',
+                `[Participation Score] Proto Get Participation Scores - ${err}`,
+                `- Params : <pre>${JSON.stringify(params)}</pre>`
+              )
             )
-          )
 
-        if (res && res.ParticipationScores.length < 1)
-          return callback(response.setResult(false, '[Participation Score] No additional data'))
+          if (res && res.ParticipationScores.length < 1)
+            return callback(response.setResult(false, '[Participation Score] No additional data'))
 
-        const promises = res.ParticipationScores.map(item => {
-          return new Promise(resolve => {
-            this.service.update({ NodeID: item.NodeID }, { ParticipationScore: item.Score.toString() }, (err, res) => {
-              if (err) return resolve({ err, res: null })
-              return resolve({ err: null, res })
+          const participationScores = res.ParticipationScores
+
+          this.service.getLatestScore((error, result) => {
+            if (error)
+              return callback(
+                /** send message telegram bot if avaiable */
+                response.sendBotMessage(
+                  'ParticipationScores',
+                  `[Participation Score] Proto Get Participation Scores - ${error}`,
+                  `- Params : <pre>${JSON.stringify(params)}</pre>`
+                )
+              )
+
+            let toBeUpdated = []
+
+            //=================]
+            const payloads = participationScores.map(i => {
+              let stat = 'False'
+              //Looking if theres available NodeID in DB and set the status to False
+              const matchedObj = result ? result.filter(f => f.NodeID === i.NodeID) : null
+
+              //CHECK IF THE PREVIOUS TRUE IS ALREADY USED OR NOT
+              //ex: LATEST 99, THE RANGE THAT GETS IS FROM 99-199 AND THERE'S NO NEW DATA
+              //SO THE 99 IS LATEST AND THE VALUE MUST NOT BE UPDATED
+              const found = matchedObj.some(el => el.NodeID === i.NodeID && el.Height === i.Height)
+
+              if (!found && matchedObj[0]) {
+                toBeUpdated.push({
+                  NodeID: matchedObj[0].NodeID,
+                  Height: matchedObj[0].Height,
+                  Score: matchedObj[0].Score,
+                  Latest: matchedObj[0].Latest,
+                  DifferenceScores: matchedObj[0].DifferenceScore,
+                  DifferenceScorePercentage: matchedObj[0].DifferenceScorePercentage,
+                  Flag: matchedObj[0].Flag,
+                  Status: 'False',
+                })
+              }
+
+              /** calculate different score base on node id and prev height */
+
+              //Calculate the nearest Height from selected NodeID(i)
+              const prevParticipations = participationScores.filter(f => f.NodeID === i.NodeID && f.Height < i.Height)
+              const nearHeight =
+                prevParticipations.length !== 0
+                  ? prevParticipations.reduce((prev, current) => {
+                      return prev.Height > current.Height ? prev : current
+                    }, 0)
+                  : null
+
+              const usedObj = matchedObj[0]
+                ? nearHeight && matchedObj[0].Height < nearHeight.Height
+                  ? nearHeight
+                  : matchedObj[0]
+                : nearHeight
+
+              const prevScore = usedObj ? parseInt(usedObj.Score) : null
+              const currScore = parseInt(i.Score)
+              let diffScore = prevScore ? currScore - prevScore : 0
+
+              //check if the
+              if (matchedObj[0] && matchedObj[0].Height === i.Height) {
+                diffScore = matchedObj[0].DifferenceScores
+              }
+
+              //Calculate the max Height of a certain NodeID From ProtoArray
+              const maxHeightFromProto = participationScores.filter(f => f.NodeID === i.NodeID)
+              const maxHeight = maxHeightFromProto
+                ? maxHeightFromProto.reduce((prev, current) => {
+                    return prev.Height > current.Height ? prev : current
+                  }, 0)
+                : {}
+
+              if (i.Height === maxHeight.Height) {
+                stat = 'True'
+              }
+
+              return {
+                NodeID: i.NodeID,
+                Score: i.Score,
+                Latest: i.Latest,
+                Height: i.Height,
+                DifferenceScores: diffScore,
+                DifferenceScorePercentage: diffScore / billion,
+                Flag: prevScore ? (prevScore > currScore ? 'Down' : 'Up') : 'Flat',
+                Status: stat,
+              }
             })
+
+            this.service.upserts(toBeUpdated, ['NodeID', 'Height'], async (err, res) => {
+              const promises = payloads.map(i => {
+                return new Promise(resolve => {
+                  const key = { NodeID: i.NodeID }
+                  const payload = {
+                    ParticipationScore: i.Score,
+                    PercentageScore: parseInt(i.Score) / billion,
+                  }
+
+                  this.nodesService.update(key, payload, (err, res) => {
+                    if (err)
+                      return resolve({
+                        err: `[Participation Score] Node Service - Update ${err}`,
+                        res: null,
+                      })
+                    return resolve({ err: null, res })
+                  })
+                })
+              })
+
+              /** update node score */
+
+              const results = await Promise.all(promises)
+              const errors = results.filter(f => f.err !== null).map(i => i.err)
+              const updates = results.filter(f => f.res !== null).map(i => i.res)
+
+              if (updates && updates.length < 1 && errors.length < 1)
+                return callback(response.setResult(false, `[Participation Score] No additional data`))
+
+              if (errors && errors.length > 0) return callback(response.sendBotMessage('ParticipationScores', errors[0]))
+
+              /** update or insert participation score */
+              this.service.upserts(payloads, ['NodeID', 'Height'], (err, res) => {
+                /** send message telegram bot if avaiable */
+                if (err) return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Upsert - ${err}`))
+                if (res && res.result.ok !== 1) return callback(response.setError('[Participation Score] Upsert data failed'))
+
+                return callback(response.setResult(true, `[Participation Score] Upsert ${payloads.length} data successfully`))
+              })
+            })
+            //=================]
           })
         })
-
-        const results = await Promise.all(promises)
-        const errors = results.filter(f => f.err !== null)
-        const updates = results.filter(f => f.res !== null)
-
-        if (updates && updates.length < 1 && errors.length < 1)
-          return callback(response.setResult(false, `[Participation Score] No additional data`))
-
-        if (errors && errors.length > 0) {
-          errors.forEach(err => {
-            /** send message telegram bot if avaiable */
-            return callback(response.sendBotMessage('ParticipationScores', `[Participation Score] Upsert - ${JSON.stringify(err)}`))
-          })
-        }
-
-        return callback(response.setResult(true, `[Participation Score] Upsert ${updates.length} data successfully`))
       })
     })
   }

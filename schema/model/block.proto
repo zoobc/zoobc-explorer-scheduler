@@ -54,6 +54,13 @@ message GetBlockRequest {
   uint32 Height = 3;
 }
 
+message GetBlockResponse {
+  // Number indicating chaintype
+  int32 ChainType = 1;
+   // Block returned
+  Block Block = 2;
+}
+
 // GetBlocksRequest create request to get a list block
 message GetBlocksRequest {
   // Number indicating chaintype
@@ -72,7 +79,7 @@ message GetBlocksResponse {
   // Blocks height returned from
   uint32 Height = 3;
   // Blocks returned
-  repeated BlockExtendedInfo Blocks = 4;
+  repeated Block Blocks = 4;
 }
 
 message GetNextBlockIdsRequest {

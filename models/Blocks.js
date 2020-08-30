@@ -5,8 +5,8 @@ const schema = new mongoose.Schema(
   {
     /** Block */
     BlockID: { type: String } /** ID */,
-    BlockHash: { type: Buffer },
-    PreviousBlockID: { type: Buffer } /** PreviousBlockHash */,
+    BlockHash: { type: String },
+    PreviousBlockID: { type: String } /** PreviousBlockHash */,
     Height: { type: Number },
     Timestamp: { type: Date },
     BlockSeed: { type: Buffer },

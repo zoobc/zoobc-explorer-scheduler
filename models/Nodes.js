@@ -12,6 +12,7 @@ const schema = new mongoose.Schema(
     Latest: { type: Boolean },
     Height: { type: Number },
     ParticipationScore: { type: String },
+    PercentageScore: { type: Number },
     BlocksFunds: { type: Number } /** not implemented in core */,
     RewardsPaid: { type: Number } /** not implemented in core */,
     RewardsPaidConversion: { type: String } /** not implemented in core */,
@@ -25,6 +26,7 @@ const schema = new mongoose.Schema(
       Signature: { type: Buffer },
     },
     /** additional detail node address */
+    RegistrationTime: { type: Date },
     IpAddress: { type: String },
     CountryCode: { type: String },
     CountryName: { type: String },
