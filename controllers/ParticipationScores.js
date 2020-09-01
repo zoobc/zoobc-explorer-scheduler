@@ -127,7 +127,7 @@ module.exports = class ParticipationScores extends BaseController {
                 stat = 'True'
               }
 
-              const flag = prevScore ? (prevScore > currScore ? 'Down' : prevScore < currScore ? 'Up' : 'Flat') : 'Flat'
+              const flag = diffScore ? (diffScore < 0 ? 'Down' : diffScore > 0 ? 'Up' : 'Flat') : 'Flat'
 
               return {
                 NodeID: i.NodeID,
