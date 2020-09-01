@@ -82,7 +82,7 @@ module.exports = class ParticipationScores extends BaseController {
                   Height: matchedObj[0].Height,
                   Score: matchedObj[0].Score,
                   Latest: matchedObj[0].Latest,
-                  DifferenceScores: matchedObj[0].DifferenceScore,
+                  DifferenceScores: matchedObj[0].DifferenceScores,
                   DifferenceScorePercentage: matchedObj[0].DifferenceScorePercentage,
                   Flag: matchedObj[0].Flag,
                   Status: 'False',
@@ -127,6 +127,8 @@ module.exports = class ParticipationScores extends BaseController {
                 stat = 'True'
               }
 
+              const flag = prevScore ? (prevScore > currScore ? 'Down' : prevScore < currScore ? 'Up' : 'Flat') : 'Flat'
+
               return {
                 NodeID: i.NodeID,
                 Score: i.Score,
@@ -134,7 +136,7 @@ module.exports = class ParticipationScores extends BaseController {
                 Height: i.Height,
                 DifferenceScores: diffScore,
                 DifferenceScorePercentage: diffScore / billion,
-                Flag: prevScore ? (prevScore > currScore ? 'Down' : 'Up') : 'Flat',
+                Flag: flag,
                 Status: stat,
               }
             })
