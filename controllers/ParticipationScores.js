@@ -127,6 +127,8 @@ module.exports = class ParticipationScores extends BaseController {
                 stat = 'True'
               }
 
+              const flag = prevScore ? (prevScore > currScore ? 'Down' : prevScore < currScore ? 'Up' : 'Flat') : 'Flat'
+
               return {
                 NodeID: i.NodeID,
                 Score: i.Score,
@@ -134,7 +136,7 @@ module.exports = class ParticipationScores extends BaseController {
                 Height: i.Height,
                 DifferenceScores: diffScore,
                 DifferenceScorePercentage: diffScore / billion,
-                Flag: prevScore ? (prevScore > currScore ? 'Down' : prevScore < currScore ? 'Up' : 'Flat') : 'Flat',
+                Flag: flag,
                 Status: stat,
               }
             })
