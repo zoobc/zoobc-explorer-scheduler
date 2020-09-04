@@ -67,6 +67,7 @@ module.exports = class Nodes extends BaseController {
           return new Promise(resolve => {
             this.blocksService.getTimestampByHeight({ Height: item.RegistrationHeight }, (err, res) => {
               if (err) return resolve({ err: `[Nodes] Block Service - Get Timestamp By Height ${err}`, res: null })
+              if (!res) return resolve({ err: null, res: null })
 
               return resolve({
                 err: null,
