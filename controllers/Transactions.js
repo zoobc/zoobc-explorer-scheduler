@@ -53,7 +53,8 @@ module.exports = class Transactions extends BaseController {
         case 2:
           transactionTypeName = 'Node Registration'
           nodeRegistration = {
-            NodePublicKey: item.nodeRegistrationTransactionBody
+            NodePublicKey: item.nodeRegistrationTransactionBody ? item.nodeRegistrationTransactionBody.NodePublicKey : null,
+            NodePublicKeyFormatted: item.nodeRegistrationTransactionBody
               ? util.getZBCAdress(item.nodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
             AccountAddress: item.nodeRegistrationTransactionBody.AccountAddress,
@@ -97,7 +98,8 @@ module.exports = class Transactions extends BaseController {
         case 258:
           transactionTypeName = 'Update Node Registration'
           updateNodeRegistration = {
-            NodePublicKey: item.updateNodeRegistrationTransactionBody
+            NodePublicKey: item.updateNodeRegistrationTransactionBody ? item.updateNodeRegistrationTransactionBody.NodePublicKey : null,
+            NodePublicKeyFormatted: item.updateNodeRegistrationTransactionBody
               ? util.getZBCAdress(item.updateNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
             NodeAddress: item.updateNodeRegistrationTransactionBody.NodeAddress,
@@ -115,7 +117,8 @@ module.exports = class Transactions extends BaseController {
         case 514:
           transactionTypeName = 'Remove Node Registration'
           removeNodeRegistration = {
-            NodePublicKey: item.removeNodeRegistrationTransactionBody
+            NodePublicKey: item.removeNodeRegistrationTransactionBody ? item.removeNodeRegistrationTransactionBody.NodePublicKey : null,
+            NodePublicKeyFormatted: item.removeNodeRegistrationTransactionBody
               ? util.getZBCAdress(item.removeNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
           }
@@ -123,7 +126,8 @@ module.exports = class Transactions extends BaseController {
         case 770:
           transactionTypeName = 'Claim Node Registration'
           claimNodeRegistration = {
-            NodePublicKey: item.claimNodeRegistrationTransactionBody
+            NodePublicKey: item.claimNodeRegistrationTransactionBody ? item.claimNodeRegistrationTransactionBody.NodePublicKey : null,
+            NodePublicKeyFormatted: item.claimNodeRegistrationTransactionBody
               ? util.getZBCAdress(item.claimNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
             ProofOfOwnership: item.claimNodeRegistrationTransactionBody.Poown,

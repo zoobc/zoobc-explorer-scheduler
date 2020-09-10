@@ -12,11 +12,15 @@ message ParticipationScore {
     uint32 Height = 4;
 }
 
-message GetParticipationScoresRequest{
+message GetParticipationScoresRequest {
     uint32 FromHeight = 1;
     uint32 ToHeight = 2;
 }
 
-message GetParticipationScoresResponse{
+message GetParticipationScoresResponse {
     repeated ParticipationScore ParticipationScores = 1;
+}
+
+message GetLatestParticipationScoreByNodeIDRequest {
+    int64 NodeID = 1 [jstype = JS_STRING];
 }

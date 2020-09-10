@@ -4,7 +4,8 @@ const { upserts } = require('../utils')
 const schema = new mongoose.Schema(
   {
     NodeID: { type: String },
-    NodePublicKey: { type: String },
+    NodePublicKey: { type: Buffer },
+    NodePublicKeyFormatted: { type: String },
     OwnerAddress: { type: String } /** AccountAddress */,
     RegisteredBlockHeight: { type: Number } /** RegistrationHeight */,
     LockedFunds: { type: String } /** LockedBalance */,

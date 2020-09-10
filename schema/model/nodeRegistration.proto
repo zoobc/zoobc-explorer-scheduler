@@ -88,3 +88,7 @@ message GetPendingNodeRegistrationsRequest{
 message GetPendingNodeRegistrationsResponse{
     repeated NodeRegistration NodeRegistrations = 1;
 }
+
+message GetMyNodePublicKeyResponse {
+    bytes NodePublicKey = 1;
+}
