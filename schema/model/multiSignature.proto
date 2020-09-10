@@ -106,3 +106,15 @@ message GetMultisigAddressByParticipantAddressResponse {
     // content of the request
     repeated string MultiSignAddresses = 2; 
 }
+
+message GetPendingTransactionsByHeightRequest {
+    // Starting Height (inclusive) of request
+    uint32 FromHeight = 1;
+    // Ending Height (inclusive) of request
+    uint32 ToHeight = 2;
+}
+
+message GetPendingTransactionsByHeightResponse {
+    // List of pending transaction within requested height
+    repeated PendingTransaction PendingTransactions = 1;
+}

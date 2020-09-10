@@ -32,4 +32,11 @@ service MultisigService {
             get: "/v1/multisig/GetMultisigAddressByParticipantAddress"
         };
     }
+
+    // GetPendingTransactionsByHeight fetch list of pending transactions (latest = 1 and latest = 0) within `fromHeight` and `toHeight`
+    rpc GetPendingTransactionsByHeight(model.GetPendingTransactionsByHeightRequest) returns (model.GetPendingTransactionsByHeightResponse) {
+        option (google.api.http) = {
+            get: "/v1/multisig/GetPendingTransactionsByHeight"
+        };
+    }
 }
