@@ -42,7 +42,7 @@ module.exports = class Transactions extends BaseController {
 
       switch (item.TransactionType) {
         case 1:
-          transactionTypeName = 'Send Money'
+          transactionTypeName = 'ZBC Transfer'
           sendMoney = {
             Amount: item.sendMoneyTransactionBody.Amount,
             AmountConversion: item.sendMoneyTransactionBody ? util.zoobitConversion(item.sendMoneyTransactionBody.Amount) : null,
