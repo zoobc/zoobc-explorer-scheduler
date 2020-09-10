@@ -27,9 +27,9 @@ service MultisigService {
         };
     }
     
-    rpc GetMultisigAddressByParticipantAddresses(model.GetMultisigAddressByParticipantAddressesRequest) returns (model.GetMultisigAddressByParticipantAddressesResponse) {
+    rpc GetMultisigAddressByParticipantAddress(model.GetMultisigAddressByParticipantAddressRequest) returns (model.GetMultisigAddressByParticipantAddressResponse) {
         option (google.api.http) = {
-            get: "/v1/multisig/GetMultisigAddressByParticipantAddresses"
+            get: "/v1/multisig/GetMultisigAddressByParticipantAddress"
         };
     }
 }
