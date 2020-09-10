@@ -20,8 +20,8 @@ module.exports = class NodeStatuses extends BaseController {
         if (err)
           return callback(
             response.sendBotMessage(
-              'NodeAddress',
-              `[Node Address] Proto Get Get Node Registrations By NodePublicKeys - ${err}`,
+              'NodePendingStatus',
+              `[Node Pending Status] Proto Get Get Node Registrations By NodePublicKeys - ${err}`,
               `- Params : <pre>${JSON.stringify(params)}</pre>`
             )
           )
