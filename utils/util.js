@@ -2,6 +2,8 @@ const CryptoJS = require('crypto-js')
 const { SHA3 } = require('sha3')
 const base32Encode = require('base32-encode')
 
+const { Int64LE } = require('int64-buffer')
+
 const msg = require('./msg')
 const config = require('../config')
 
@@ -50,6 +52,12 @@ const bufferStr = buff => {
   const result = Buffer.from(buff).toString('base64')
   if (result === 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=') return null
   return result
+}
+
+const hashToInt64 = buff => {
+  const SlashBuffer = buff.slice(0, 8)
+  const bigInt = new Int64LE(SlashBuffer) + ''
+  return bigInt
 }
 
 const zoobitConversion = curr => {
@@ -146,4 +154,5 @@ module.exports = util = {
   queryfy,
   hmacEncrypt,
   getZBCAdress,
+  hashToInt64,
 }

@@ -1,7 +1,7 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { util, msg, response } = require('../utils')
+const { store, util, msg, response } = require('../utils')
 const { BlocksService, GeneralsService } = require('../services')
 const { Block, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 
@@ -124,6 +124,10 @@ module.exports = class Blocks extends BaseController {
         msg.blue(
           `[Info] Last check timestamp transaction height ${lastCheck.Height} is ${moment.unix(lastCheck.Timestamp).format(formatDate)}`
         )
+
+      // const payloadHeightBefore = {HeightBefore: blockHeight}
+
+      this.generalsService.setHeightBeforeByKey(store.keyLastCheck, blockHeight)
 
       const params = { Limit: config.app.limitData, Height: blockHeight }
       Block.GetBlocks(params, async (err, res) => {
