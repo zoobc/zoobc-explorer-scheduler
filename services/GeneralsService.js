@@ -26,7 +26,7 @@ module.exports = class GeneralsService extends BaseService {
               if (!res) return resolve(null)
               const result = await this.setValueByKey(
                 store.keyLastCheck,
-                JSON.stringify({ Height: res.Height, Timestamp: moment(res.Timestamp).unix() })
+                JSON.stringify({ Height: res.Height, Timestamp: moment(res.Timestamp).unix(), HeightBefore: 0 })
               )
               return resolve(JSON.parse(result.Value))
             })
@@ -61,8 +61,6 @@ module.exports = class GeneralsService extends BaseService {
       Generals.findOne({ Key: key })
         .select('Value HeightBefore')
         .exec((err, result) => {
-          // console.log("err = ", err)
-          // console.log(res)
           if (err) return reject({ err: err, res: null })
           return resolve({ err: null, res: result })
         })

@@ -19,13 +19,18 @@ module.exports = class MultiSignatures extends BaseController {
 
     this.blocksService.getLastHeight(async (error, results) => {
       const storeValue = await this.generalsService.getValueByKey(store.keyLastCheck)
-      const fromHeight = storeValue ? storeValue.res.HeightBefore - 1 : 0
+      const parsedLastCheck = storeValue ? JSON.parse(storeValue.res.Value) : null
+      const fromHeight = parsedLastCheck ? parsedLastCheck.HeightBefore - 1 : 0
       const toHeight = results.Height
       const param = { FromHeight: fromHeight, ToHeight: toHeight }
+
       MultiSignature.GetPendingTransactionsByHeight(param, (errors, result) => {
         if (errors)
           return callback(
-            response.sendBotMessage('Multi Signatures', `[Multi Signatures] Transaction Service - Get Pending Transaction By Height ${err}`)
+            response.sendBotMessage(
+              'Multi Signatures',
+              `[Multi Signatures] Transaction Service - Get Pending Transaction By Height ${errors}`
+            )
           )
         const onlyLatestTrue = result.PendingTransactions.filter(i => i.Latest === true)
         onlyLatestTrue.map(i => {

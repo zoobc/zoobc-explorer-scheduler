@@ -69,4 +69,8 @@ module.exports = class NodesService extends BaseService {
         return callback(null, res)
       })
   }
+
+  getPendingNodePKs(callback) {
+    Nodes.find({ RegistrationStatus: 1 }).select('NodePublicKey').exec(callback)
+  }
 }
