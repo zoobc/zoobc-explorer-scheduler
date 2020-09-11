@@ -12,11 +12,6 @@ module.exports = class MultiSignatures extends BaseController {
     this.blocksService = new BlocksService()
   }
 
-  readInt64(buff, offset = 0) {
-    const buffer = buff.slice(offset, offset + 7)
-    return new Int64LE(buffer) + ''
-  }
-
   async update(callback) {
     //Get The Last Height for the ToHeight Value
 

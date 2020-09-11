@@ -125,8 +125,6 @@ module.exports = class Blocks extends BaseController {
           `[Info] Last check timestamp transaction height ${lastCheck.Height} is ${moment.unix(lastCheck.Timestamp).format(formatDate)}`
         )
 
-      // const payloadHeightBefore = {HeightBefore: blockHeight}
-
       this.generalsService.setHeightBeforeByKey(store.keyLastCheck, blockHeight)
 
       const params = { Limit: config.app.limitData, Height: blockHeight }
