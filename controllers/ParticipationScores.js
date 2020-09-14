@@ -14,14 +14,14 @@ module.exports = class ParticipationScores extends BaseController {
 
   async update(callback) {
     /** getting last height node */
-    this.service.getLastHeight((err, res) => {
+    this.service.getLastHeight((err, result) => {
       if (err)
         return callback(
           response.sendBotMessage('ParticipationScores', `[Participation Score] Participation Score Service - Get Last Height ${err}`)
         )
 
       /** make default variable from height */
-      const FromHeight = res ? res.Height : 0
+      const FromHeight = result ? result.Height : 0
 
       /** getting last height block */
       this.blocksService.getLastHeight((err, res) => {

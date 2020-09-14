@@ -181,9 +181,9 @@ module.exports = class Transactions extends BaseController {
       if (!res) return callback(response.setResult(false, '[Transactions] No additional data'))
 
       const TimestampEnd = moment(res.Timestamp).unix()
-      const payloadLastCheck = JSON.stringify({ Height: res.Height, Timestamp: TimestampEnd })
 
       const lastCheck = await this.generalsService.getSetLastCheck()
+      const payloadLastCheck = JSON.stringify({ ...lastCheck, Height: res.Height, Timestamp: TimestampEnd })
       /** return message if nothing */
       if (!lastCheck) return callback(response.setResult(false, '[Accounts] No additional data'))
 

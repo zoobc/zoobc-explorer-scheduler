@@ -12,7 +12,7 @@ module.exports = class GeneralsService extends BaseService {
   getSetLastCheck() {
     return new Promise((resolve, reject) => {
       Generals.findOne({ Key: store.keyLastCheck })
-        .select('Value')
+        .select('Value HeightBefore')
         .exec((err, res) => {
           if (err) return reject(err)
           if (res) return resolve(JSON.parse(res.Value))
@@ -26,7 +26,7 @@ module.exports = class GeneralsService extends BaseService {
               if (!res) return resolve(null)
               const result = await this.setValueByKey(
                 store.keyLastCheck,
-                JSON.stringify({ Height: res.Height, Timestamp: moment(res.Timestamp).unix() })
+                JSON.stringify({ Height: res.Height, Timestamp: moment(res.Timestamp).unix(), HeightBefore: 0 })
               )
               return resolve(JSON.parse(result.Value))
             })
@@ -59,10 +59,10 @@ module.exports = class GeneralsService extends BaseService {
   getValueByKey(key) {
     return new Promise((resolve, reject) => {
       Generals.findOne({ Key: key })
-        .select('Value')
-        .exec((err, res) => {
-          if (err) return reject(err)
-          return resolve(res ? res.Value : null)
+        .select('Value HeightBefore')
+        .exec((err, result) => {
+          if (err) return reject({ err: err, res: null })
+          return resolve({ err: null, res: result })
         })
     })
   }
@@ -73,6 +73,20 @@ module.exports = class GeneralsService extends BaseService {
         if (err) return reject(err)
         return resolve(res)
       })
+    })
+  }
+
+  setHeightBeforeByKey(key, value) {
+    return new Promise((resolve, reject) => {
+      Generals.findOneAndUpdate(
+        { Key: key },
+        { HeightBefore: value },
+        { upsert: false, new: false, setDefaultsOnInsert: true },
+        (err, res) => {
+          if (err) return reject(err)
+          return resolve(res)
+        }
+      )
     })
   }
 

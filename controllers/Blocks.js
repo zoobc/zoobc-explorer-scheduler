@@ -1,7 +1,7 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { util, msg, response } = require('../utils')
+const { store, util, msg, response } = require('../utils')
 const { BlocksService, GeneralsService } = require('../services')
 const { Block, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 
@@ -112,6 +112,8 @@ module.exports = class Blocks extends BaseController {
 
       /** getting value last check timestamp transaction */
       const lastCheck = await this.generalsService.getSetLastCheck()
+      console.log(lastCheck)
+      this.generalsService.setValueByKey(store.keyLastCheck, JSON.stringify({ ...lastCheck, HeightBefore: blockHeight }))
 
       /** log information */
       if (res && res.Timestamp)

@@ -57,6 +57,14 @@ module.exports = class TransactionsService extends BaseService {
     })
   }
 
+  findAndUpdate(payload, callback) {
+    Transactions.findOneAndUpdate({ TransactionID: payload.TransactionID }, payload, { new: true, upsert: true }).exec((err, res) => {
+      if (err) return callback(err, null)
+      if (res && res.length < 1) return callback(null, null)
+      return callback(null, res)
+    })
+  }
+
   getSendersByHeights(heightStart, heightEnd, callback) {
     Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, TransactionType: 1, Sender: { $ne: null } })
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Sender: { $ne: null } }, { Sender: { $ne: '' } }] })
@@ -95,7 +103,7 @@ module.exports = class TransactionsService extends BaseService {
   }
 
   getTransactionMultisigChild(callback) {
-    Transactions.find({ MultisigChild: true, Status: { $ne: 'Approved' } })
+    Transactions.find({ MultisigChild: true, Status: 'Approved' })
       .select('TransactionHash BlockID')
       .exec((err, res) => {
         if (err) return callback(err, null)
