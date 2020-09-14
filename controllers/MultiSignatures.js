@@ -39,7 +39,6 @@ module.exports = class MultiSignatures extends BaseController {
               return callback(
                 response.sendBotMessage('Multi Signatures', `[Multi Signatures] Transaction Service - Get Transaction Parents ${err}`)
               )
-            console.log(res)
             if (res) {
               toBeUpdated.push({
                 ...res,
@@ -59,23 +58,6 @@ module.exports = class MultiSignatures extends BaseController {
             }
           })
         })
-
-        // const onlyLatestTrue = result.PendingTransactions.filter(i => i.Latest === true)
-        // onlyLatestTrue.map(i => {
-        //   const sliceTx = util.hashToInt64(i.TransactionHash)
-        //   Transaction.GetTransaction({ ID: sliceTx }, (err, res) => {
-        //     if (err)
-        //       return callback(
-        //         response.sendBotMessage('Multi Signatures', `[Multi Signatures] Transaction Service - Get Transaction Parents ${err}`)
-        //       )
-
-        //     let status = 'Pending'
-        //     const childStatus = onlyLatestTrue.filter(i => i.TransactionHash === res.TransactionHash)
-        //     switch (childStatus.Status) {
-        //       case 'PendingTransactionExecuted':
-        //         status = 'Executed'
-        //         break
-        //       case 'PendingTransactionNoOp':
         const promises = toBeUpdated
           .filter(f => f !== undefined || f !== null)
           .map(i => {
