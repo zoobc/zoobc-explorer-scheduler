@@ -52,7 +52,7 @@ module.exports = class AccountLedgers extends BaseController {
               const payloadAccount = {
                 Balance,
                 TotalRewards,
-                FirstActive: res ? res.FirstActive : item.Timestamp,
+                FirstActive: res ? res.FirstActive : new Date(moment.unix(item.Timestamp).valueOf()),
                 LastActive: new Date(moment.unix(item.Timestamp).valueOf()),
                 TransactionHeight: res ? res.TransactionHeight : null,
                 TotalFeesPaid: res ? res.TotalFeesPaid : 0,
