@@ -112,7 +112,6 @@ module.exports = class Blocks extends BaseController {
 
       /** getting value last check timestamp transaction */
       const lastCheck = await this.generalsService.getSetLastCheck()
-      console.log(lastCheck)
       this.generalsService.setValueByKey(store.keyLastCheck, JSON.stringify({ ...lastCheck, HeightBefore: blockHeight }))
 
       /** log information */
