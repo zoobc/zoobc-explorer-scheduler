@@ -94,6 +94,61 @@ module.exports = class Transactions extends BaseController {
                 util.getZBCAdress(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash, 'ZTX'),
             },
           }
+
+          /** get parent if minimun signatures already full field */
+          if (
+            item.multiSignatureTransactionBody &&
+            item.multiSignatureTransactionBody.SignatureInfo &&
+            item.multiSignatureTransactionBody.SignatureInfo.TransactionHash
+          ) {
+            Transaction.GetTransaction(
+              { ID: util.hashToInt64(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash) },
+              (err, res) => {
+                if (err) util.log({ error: null, result: { success: false, message: '[Multi Signature Parent] No additional data' } })
+                if (res) {
+                  const payload = {
+                    TransactionID: res.ID,
+                    Timestamp: new Date(moment.unix(res.Timestamp).valueOf()),
+                    TransactionType: res.TransactionType,
+                    BlockID: res.BlockID,
+                    Height: res.Height,
+                    Sender: res.SenderAccountAddress,
+                    Recipient: res.RecipientAccountAddress,
+                    Fee: res.Fee,
+                    FeeConversion: res ? util.zoobitConversion(res.Fee) : 0,
+                    Status: 'Pending',
+                    Version: res.Version,
+                    TransactionHash: res.TransactionHash,
+                    TransactionHashFormatted: util.getZBCAdress(res.TransactionHash, 'ZTX'),
+                    TransactionBodyLength: res.TransactionBodyLength,
+                    TransactionBodyBytes: res.TransactionBodyBytes,
+                    TransactionIndex: res.TransactionIndex,
+                    Signature: res.Signature,
+                    TransactionBody: res.TransactionBody,
+                    TransactionTypeName: 'ZBC Transfer',
+                    MultisigChild: res.MultisigChild,
+                    SendMoney: {
+                      Amount: res.sendMoneyTransactionBody.Amount,
+                      AmountConversion: res.sendMoneyTransactionBody ? util.zoobitConversion(res.sendMoneyTransactionBody.Amount) : null,
+                    },
+                  }
+                  this.service.findAndUpdate(payload, (err, res) => {
+                    util.log({
+                      error: err,
+                      result: !err
+                        ? {
+                            success: res ? true : false,
+                            message: res
+                              ? '[Multi Signature Parent] Upsert 1 data successfully'
+                              : '[Multi Signature Parent] No additional data',
+                          }
+                        : null,
+                    })
+                  })
+                }
+              }
+            )
+          }
           break
         case 258:
           transactionTypeName = 'Update Node Registration'
