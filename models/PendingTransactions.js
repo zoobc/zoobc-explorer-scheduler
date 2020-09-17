@@ -17,4 +17,4 @@ const schema = new mongoose.Schema(
 
 schema.plugin(upserts)
 
-module.exports = mongoose.model('Pending_Transaction', schema)
+module.exports = mongoose.model('PendingTransaction', schema)
