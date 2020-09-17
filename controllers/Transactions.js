@@ -1,6 +1,6 @@
 const moment = require('moment')
 const BaseController = require('./BaseController')
-const { Transaction, Escrow } = require('../protos')
+const { Transaction, Escrow, MultiSignature } = require('../protos')
 const { store, util, response } = require('../utils')
 const { BlocksService, TransactionsService, GeneralsService } = require('../services')
 
@@ -87,6 +87,7 @@ module.exports = class Transactions extends BaseController {
               ...item.multiSignatureTransactionBody.MultiSignatureInfo,
             },
             SignatureInfo: {
+              TransactionHash: null,
               ...item.multiSignatureTransactionBody.SignatureInfo,
               TransactionHashFormatted:
                 item.multiSignatureTransactionBody.SignatureInfo &&
@@ -148,6 +149,22 @@ module.exports = class Transactions extends BaseController {
                 }
               }
             )
+          }
+
+          /** if signature is null so that get pending transaction by height to height + 1, update signature info */
+          if (!item.multiSignatureTransactionBody.SignatureInfo) {
+            const pendingPromise = new Promise(resolve => {
+              MultiSignature.GetPendingTransactionsByHeight({ FromHeight: item.Height, ToHeight: item.Height + 1 }, (err, res) => {
+                if (err) return resolve(null)
+                if (res) return resolve(res.PendingTransactions.find(f => f.BlockHeight === item.Height))
+              })
+            })
+
+            const pendingTransaction = await pendingPromise
+            if (pendingTransaction) {
+              multiSignature.SignatureInfo.TransactionHash = pendingTransaction.TransactionHash
+              multiSignature.SignatureInfo.TransactionHashFormatted = util.getZBCAdress(pendingTransaction.TransactionHash, 'ZTX')
+            }
           }
           break
         case 258:
