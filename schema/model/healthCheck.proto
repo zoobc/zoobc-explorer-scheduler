@@ -8,3 +8,15 @@ option go_package = "github.com/zoobc/zoobc-core/common/model";
 message HealthCheckResponse {
   string Reply = 1;
 }
+// HealthCheckResponse represent the response body of health check request
+message GetNodeStatusResponse {
+  uint32 LastMainBlockHeight = 1;
+  string LastMainBlockHash = 2;
+  uint32 LastSpineBlockHeight = 3;
+  string LastSpineBlockHash = 4;
+  string Version = 5;
+  string NodePublicKey = 6;
+  uint32 UnresolvedPeers = 7;
+  uint32 ResolvedPeers = 8;
+  int32 BlocksmithIndex = 9;
+}

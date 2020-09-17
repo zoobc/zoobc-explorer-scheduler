@@ -38,7 +38,7 @@ module.exports = class Transactions extends BaseController {
       let multiSignature = null
       let transactionTypeName = ''
       let escrow = null
-      let status = item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Approved'
+      let status = item.TransactionType === 4 ? 'Pending' : 'Approved'
 
       switch (item.TransactionType) {
         case 1:

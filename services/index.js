@@ -7,6 +7,7 @@ const TransactionsService = require('./TransactionsService')
 const MultiSignatureService = require('./MultiSignatureService')
 const AccountLedgerService = require('./AccountLedgersService')
 const ParticipationScoresService = require('./ParticipationScores')
+const PendingTransactionService = require('./PendingTransaction')
 
 module.exports = {
   BaseService,
@@ -18,4 +19,5 @@ module.exports = {
   TransactionsService,
   MultiSignatureService,
   ParticipationScoresService,
+  PendingTransactionService,
 }

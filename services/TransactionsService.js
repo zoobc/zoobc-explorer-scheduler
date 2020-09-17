@@ -65,6 +65,14 @@ module.exports = class TransactionsService extends BaseService {
     })
   }
 
+  findAndUpdateStatus(TransactionId, status, callback) {
+    Transactions.findOneAndUpdate({ TransactionID: TransactionId }, { Status: status }, { new: false, upsert: false }).exec((err, res) => {
+      if (err) return callback(err, null)
+      if (res && res.length < 1) return callback(null, null)
+      return callback(null, res)
+    })
+  }
+
   getSendersByHeights(heightStart, heightEnd, callback) {
     Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, TransactionType: 1, Sender: { $ne: null } })
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Sender: { $ne: null } }, { Sender: { $ne: '' } }] })
