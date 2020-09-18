@@ -26,6 +26,15 @@ module.exports = class Transactions extends BaseController {
       })
     }
 
+    const getMultiSignature = height => {
+      return new Promise(resolve => {
+        MultiSignature.GetPendingTransactionsByHeight({ FromHeight: height, ToHeight: height + 1 }, (err, res) => {
+          if (err) return resolve(null)
+          if (res) return resolve(res.PendingTransactions.find(f => f.BlockHeight === height))
+        })
+      })
+    }
+
     const promises = transactions.map(async item => {
       let sendMoney = null
       let claimNodeRegistration = null
@@ -38,7 +47,7 @@ module.exports = class Transactions extends BaseController {
       let multiSignature = null
       let transactionTypeName = ''
       let escrow = null
-      let status = item.TransactionType === 4 ? 'Pending' : 'Approved'
+      let status = item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Approved'
 
       switch (item.TransactionType) {
         case 1:
@@ -103,9 +112,18 @@ module.exports = class Transactions extends BaseController {
             item.multiSignatureTransactionBody.SignatureInfo.TransactionHash
           ) {
             Transaction.GetTransaction(
-              { ID: util.hashToInt64(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash) },
+              {
+                ID: util.hashToInt64(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash),
+              },
               (err, res) => {
-                if (err) util.log({ error: null, result: { success: false, message: '[Multi Signature Parent] No additional data' } })
+                if (err)
+                  util.log({
+                    error: null,
+                    result: {
+                      success: false,
+                      message: '[Multi Signature Parent] No additional data',
+                    },
+                  })
                 if (res) {
                   const payload = {
                     TransactionID: res.ID,
@@ -117,7 +135,7 @@ module.exports = class Transactions extends BaseController {
                     Recipient: res.RecipientAccountAddress,
                     Fee: res.Fee,
                     FeeConversion: res ? util.zoobitConversion(res.Fee) : 0,
-                    Status: 'Pending',
+                    Status: 'Approved',
                     Version: res.Version,
                     TransactionHash: res.TransactionHash,
                     TransactionHashFormatted: util.getZBCAdress(res.TransactionHash, 'ZTX'),
@@ -133,6 +151,7 @@ module.exports = class Transactions extends BaseController {
                       AmountConversion: res.sendMoneyTransactionBody ? util.zoobitConversion(res.sendMoneyTransactionBody.Amount) : null,
                     },
                   }
+
                   this.service.findAndUpdate(payload, (err, res) => {
                     util.log({
                       error: err,
@@ -149,21 +168,46 @@ module.exports = class Transactions extends BaseController {
                 }
               }
             )
-          }
-
-          /** if signature is null so that get pending transaction by height to height + 1, update signature info */
-          if (!item.multiSignatureTransactionBody.SignatureInfo) {
-            const pendingPromise = new Promise(resolve => {
-              MultiSignature.GetPendingTransactionsByHeight({ FromHeight: item.Height, ToHeight: item.Height + 1 }, (err, res) => {
-                if (err) return resolve(null)
-                if (res) return resolve(res.PendingTransactions.find(f => f.BlockHeight === item.Height))
+            /** update all child status after get parents approved by TxHash */
+            const condition = {
+              'MultiSignature.SignatureInfo.TransactionHash': item.multiSignatureTransactionBody.SignatureInfo.TransactionHash,
+            }
+            this.service.findAndUpdateStatus(condition, (err, res) => {
+              util.log({
+                error: err,
+                result: !err
+                  ? {
+                      success: res ? true : false,
+                      message: res
+                        ? `[Multi Signature Status] Upsert ${res.ok} data successfully`
+                        : '[Multi Signature Status] No additional data',
+                    }
+                  : null,
               })
             })
+          }
 
-            const pendingTransaction = await pendingPromise
+          /** if signature is null so that get pending transaction by height to height + 1 and then update signature info */
+          if (!item.multiSignatureTransactionBody.SignatureInfo) {
+            const pendingTransaction = await getMultiSignature(item.Height)
             if (pendingTransaction) {
               multiSignature.SignatureInfo.TransactionHash = pendingTransaction.TransactionHash
               multiSignature.SignatureInfo.TransactionHashFormatted = util.getZBCAdress(pendingTransaction.TransactionHash, 'ZTX')
+            }
+          } else {
+            const pendingTransaction = await getMultiSignature(item.Height)
+            if (pendingTransaction) {
+              switch (pendingTransaction.Status) {
+                case 'PendingTransactionExecuted':
+                  status = 'Approved'
+                  break
+                case 'PendingTransactionExpired':
+                  status = 'Expired'
+                  break
+                default:
+                  status = 'Pending'
+                  break
+              }
             }
           }
           break
@@ -255,7 +299,11 @@ module.exports = class Transactions extends BaseController {
       const TimestampEnd = moment(res.Timestamp).unix()
 
       const lastCheck = await this.generalsService.getSetLastCheck()
-      const payloadLastCheck = JSON.stringify({ ...lastCheck, Height: res.Height, Timestamp: TimestampEnd })
+      const payloadLastCheck = JSON.stringify({
+        ...lastCheck,
+        Height: res.Height,
+        Timestamp: TimestampEnd,
+      })
       /** return message if nothing */
       if (!lastCheck) return callback(response.setResult(false, '[Accounts] No additional data'))
 
@@ -266,8 +314,7 @@ module.exports = class Transactions extends BaseController {
             /** send message telegram bot if avaiable */
             response.sendBotMessage(
               'Transactions',
-              `[Transactions] Proto Get Transactions - ${err}`,
-              `- Params : <pre>${JSON.stringify(params)}</pre>`
+              `[Transactions] Proto Get Transactions - ${err},- Params : <pre>${JSON.stringify(params)}</pre>`
             )
           )
 
