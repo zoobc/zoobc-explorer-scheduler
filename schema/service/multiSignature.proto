@@ -27,9 +27,16 @@ service MultisigService {
         };
     }
     
-    rpc GetMultisigAddressByParticipantAddresses(model.GetMultisigAddressByParticipantAddressesRequest) returns (model.GetMultisigAddressByParticipantAddressesResponse) {
+    rpc GetMultisigAddressByParticipantAddress(model.GetMultisigAddressByParticipantAddressRequest) returns (model.GetMultisigAddressByParticipantAddressResponse) {
         option (google.api.http) = {
-            get: "/v1/multisig/GetMultisigAddressByParticipantAddresses"
+            get: "/v1/multisig/GetMultisigAddressByParticipantAddress"
+        };
+    }
+
+    // GetPendingTransactionsByHeight fetch list of pending transactions (latest = 1 and latest = 0) within `fromHeight` and `toHeight`
+    rpc GetPendingTransactionsByHeight(model.GetPendingTransactionsByHeightRequest) returns (model.GetPendingTransactionsByHeightResponse) {
+        option (google.api.http) = {
+            get: "/v1/multisig/GetPendingTransactionsByHeight"
         };
     }
 }

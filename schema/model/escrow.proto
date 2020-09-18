@@ -41,7 +41,8 @@ message GetEscrowTransactionsRequest {
     repeated EscrowStatus  Statuses = 5;
     uint32 BlockHeightStart = 6;
     uint32 BlockHeightEnd = 7;
-    Pagination Pagination = 8;
+    bool Latest = 8;
+    Pagination Pagination = 9;
 }
 // GetEscrowTransactionsResponse returns fields of GetEscrowTransactionsRequest
 message GetEscrowTransactionsResponse {

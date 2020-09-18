@@ -29,14 +29,16 @@ const schema = new mongoose.Schema(
       AmountConversion: { type: String },
     },
     ClaimNodeRegistration: {
-      NodePublicKey: { type: String },
+      NodePublicKey: { type: Buffer },
+      NodePublicKeyFormatted: { type: String },
       ProofOfOwnership: {
         MessageBytes: { type: Buffer },
         Signature: { type: Buffer },
       },
     },
     NodeRegistration: {
-      NodePublicKey: { type: String },
+      NodePublicKey: { type: Buffer },
+      NodePublicKeyFormatted: { type: String },
       AccountAddress: { type: String },
       NodeAddress: {
         Address: { type: String },
@@ -50,10 +52,12 @@ const schema = new mongoose.Schema(
       },
     },
     RemoveNodeRegistration: {
-      NodePublicKey: { type: String },
+      NodePublicKey: { type: Buffer },
+      NodePublicKeyFormatted: { type: String },
     },
     UpdateNodeRegistration: {
-      NodePublicKey: { type: String },
+      NodePublicKey: { type: Buffer },
+      NodePublicKeyFormatted: { type: String },
       NodeAddress: {
         Address: { type: String },
         Port: { type: Number },

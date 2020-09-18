@@ -5,6 +5,7 @@ const schema = new mongoose.Schema(
   {
     Key: { type: String },
     Value: { type: String },
+    HeightBefore: { type: Number },
   },
   {
     toJSON: { virtuals: true },

@@ -19,6 +19,7 @@ const {
   AccountLedgers,
   MultiSignatures,
   ParticipationScores,
+  NodeStatuses,
 } = require('./controllers')
 
 const nodes = new Nodes()
@@ -30,6 +31,7 @@ const transactions = new Transactions()
 const accountLedger = new AccountLedgers()
 const multiSignatures = new MultiSignatures()
 const participationScores = new ParticipationScores()
+const nodeStatuses = new NodeStatuses()
 
 /** cron job */
 const event = config.app.scheduleEvent
@@ -63,16 +65,16 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
           accounts.update(res => {
             util.log(res)
 
-            multiSignatures.update(res => {
+            accountLedger.update(res => {
               util.log(res)
 
-              accountLedger.update(res => {
+              nodeAddress.update(res => {
                 util.log(res)
 
-                nodeAddress.update(res => {
+                participationScores.update(res => {
                   util.log(res)
 
-                  participationScores.update(res => {
+                  nodeStatuses.update(res => {
                     util.log(res)
                   })
                 })

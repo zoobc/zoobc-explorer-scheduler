@@ -8,6 +8,7 @@ const Transactions = require('./Transactions')
 const AccountLedgers = require('./AccountLedger')
 const MultiSignatures = require('./MultiSignatures')
 const ParticipationScores = require('./ParticipationScores')
+const NodeStatuses = require('./NodeStatuses')
 
 module.exports = {
   Nodes,
@@ -20,4 +21,5 @@ module.exports = {
   AccountLedgers,
   MultiSignatures,
   ParticipationScores,
+  NodeStatuses,
 }

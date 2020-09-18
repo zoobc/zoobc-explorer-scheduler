@@ -1,7 +1,7 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { util, msg, response } = require('../utils')
+const { store, util, msg, response } = require('../utils')
 const { BlocksService, GeneralsService } = require('../services')
 const { Block, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 
@@ -34,14 +34,15 @@ module.exports = class Blocks extends BaseController {
 
     const promises = blocks.map(async item => {
       const TotalRewards = parseFloat(item.TotalCoinBase) + parseFloat(item.TotalFee)
+
+      let skippedsMapped = []
+      let receiptsMapped = []
+
       const skippeds = await getSkippedBlockSmiths(item.Height)
       const receipts = await getPublishedReceipts(item.Height)
 
-      const receiptsMapped =
-        receipts &&
-        receipts.PublishedReceipts &&
-        receipts.PublishedReceipts.length > 0 &&
-        receipts.PublishedReceipts.map(i => {
+      if (receipts && receipts.PublishedReceipts && receipts.PublishedReceipts.length > 0) {
+        receiptsMapped = receipts.PublishedReceipts.map(i => {
           return {
             ...i,
             IntermediateHashes: util.bufferStr(i.IntermediateHashes),
@@ -52,17 +53,16 @@ module.exports = class Blocks extends BaseController {
             },
           }
         })
+      }
 
-      const skippedsMapped =
-        skippeds &&
-        skippeds.SkippedBlocksmiths &&
-        skippeds.SkippedBlocksmiths.length > 0 &&
-        skippeds.SkippedBlocksmiths.map(i => {
+      if (skippeds && skippeds.SkippedBlocksmiths && skippeds.SkippedBlocksmiths.length > 0) {
+        skippedsMapped = skippeds.SkippedBlocksmiths.map(i => {
           return {
             ...i,
             BlocksmithPublicKey: util.getZBCAdress(i.BlocksmithPublicKey, 'ZNK'),
           }
         })
+      }
 
       return {
         BlockID: item.ID,
@@ -112,6 +112,7 @@ module.exports = class Blocks extends BaseController {
 
       /** getting value last check timestamp transaction */
       const lastCheck = await this.generalsService.getSetLastCheck()
+      this.generalsService.setValueByKey(store.keyLastCheck, JSON.stringify({ ...lastCheck, HeightBefore: blockHeight }))
 
       /** log information */
       if (res && res.Timestamp)
