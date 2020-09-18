@@ -65,25 +65,25 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
           accounts.update(res => {
             util.log(res)
 
-            multiSignatures.update(res => {
+            // multiSignatures.update(res => {
+            //   util.log(res)
+
+            accountLedger.update(res => {
               util.log(res)
 
-              accountLedger.update(res => {
+              nodeAddress.update(res => {
                 util.log(res)
 
-                nodeAddress.update(res => {
+                participationScores.update(res => {
                   util.log(res)
 
-                  participationScores.update(res => {
+                  nodeStatuses.update(res => {
                     util.log(res)
-
-                    nodeStatuses.update(res => {
-                      util.log(res)
-                    })
                   })
                 })
               })
             })
+            // })
           })
         })
       })

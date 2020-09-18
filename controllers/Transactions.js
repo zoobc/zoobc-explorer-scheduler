@@ -1,6 +1,6 @@
 const moment = require('moment')
 const BaseController = require('./BaseController')
-const { Transaction, Escrow } = require('../protos')
+const { Transaction, Escrow, MultiSignature } = require('../protos')
 const { store, util, response } = require('../utils')
 const { BlocksService, TransactionsService, GeneralsService } = require('../services')
 
@@ -87,12 +87,84 @@ module.exports = class Transactions extends BaseController {
               ...item.multiSignatureTransactionBody.MultiSignatureInfo,
             },
             SignatureInfo: {
+              TransactionHash: null,
               ...item.multiSignatureTransactionBody.SignatureInfo,
               TransactionHashFormatted:
                 item.multiSignatureTransactionBody.SignatureInfo &&
                 item.multiSignatureTransactionBody.SignatureInfo.TransactionHash &&
                 util.getZBCAdress(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash, 'ZTX'),
             },
+          }
+
+          /** get parent if minimun signatures already full field */
+          if (
+            item.multiSignatureTransactionBody &&
+            item.multiSignatureTransactionBody.SignatureInfo &&
+            item.multiSignatureTransactionBody.SignatureInfo.TransactionHash
+          ) {
+            Transaction.GetTransaction(
+              { ID: util.hashToInt64(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash) },
+              (err, res) => {
+                if (err) util.log({ error: null, result: { success: false, message: '[Multi Signature Parent] No additional data' } })
+                if (res) {
+                  const payload = {
+                    TransactionID: res.ID,
+                    Timestamp: new Date(moment.unix(res.Timestamp).valueOf()),
+                    TransactionType: res.TransactionType,
+                    BlockID: res.BlockID,
+                    Height: res.Height,
+                    Sender: res.SenderAccountAddress,
+                    Recipient: res.RecipientAccountAddress,
+                    Fee: res.Fee,
+                    FeeConversion: res ? util.zoobitConversion(res.Fee) : 0,
+                    Status: 'Pending',
+                    Version: res.Version,
+                    TransactionHash: res.TransactionHash,
+                    TransactionHashFormatted: util.getZBCAdress(res.TransactionHash, 'ZTX'),
+                    TransactionBodyLength: res.TransactionBodyLength,
+                    TransactionBodyBytes: res.TransactionBodyBytes,
+                    TransactionIndex: res.TransactionIndex,
+                    Signature: res.Signature,
+                    TransactionBody: res.TransactionBody,
+                    TransactionTypeName: 'ZBC Transfer',
+                    MultisigChild: res.MultisigChild,
+                    SendMoney: {
+                      Amount: res.sendMoneyTransactionBody.Amount,
+                      AmountConversion: res.sendMoneyTransactionBody ? util.zoobitConversion(res.sendMoneyTransactionBody.Amount) : null,
+                    },
+                  }
+                  this.service.findAndUpdate(payload, (err, res) => {
+                    util.log({
+                      error: err,
+                      result: !err
+                        ? {
+                            success: res ? true : false,
+                            message: res
+                              ? '[Multi Signature Parent] Upsert 1 data successfully'
+                              : '[Multi Signature Parent] No additional data',
+                          }
+                        : null,
+                    })
+                  })
+                }
+              }
+            )
+          }
+
+          /** if signature is null so that get pending transaction by height to height + 1, update signature info */
+          if (!item.multiSignatureTransactionBody.SignatureInfo) {
+            const pendingPromise = new Promise(resolve => {
+              MultiSignature.GetPendingTransactionsByHeight({ FromHeight: item.Height, ToHeight: item.Height + 1 }, (err, res) => {
+                if (err) return resolve(null)
+                if (res) return resolve(res.PendingTransactions.find(f => f.BlockHeight === item.Height))
+              })
+            })
+
+            const pendingTransaction = await pendingPromise
+            if (pendingTransaction) {
+              multiSignature.SignatureInfo.TransactionHash = pendingTransaction.TransactionHash
+              multiSignature.SignatureInfo.TransactionHashFormatted = util.getZBCAdress(pendingTransaction.TransactionHash, 'ZTX')
+            }
           }
           break
         case 258:
