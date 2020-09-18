@@ -168,6 +168,7 @@ module.exports = class Transactions extends BaseController {
                 }
               }
             )
+
             /** update all child status after get parents approved by TxHash */
             this.service.findAndUpdateStatus(
               {
