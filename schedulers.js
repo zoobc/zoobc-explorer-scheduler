@@ -65,9 +65,6 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
           accounts.update(res => {
             util.log(res)
 
-            // multiSignatures.update(res => {
-            //   util.log(res)
-
             accountLedger.update(res => {
               util.log(res)
 
@@ -83,7 +80,6 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
                 })
               })
             })
-            // })
           })
         })
       })

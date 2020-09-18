@@ -18,7 +18,10 @@ module.exports = class TransactionsService extends BaseService {
   }
 
   getNodePublicKeysByHeights(heightStart, heightEnd, callback) {
-    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, NodeRegistration: { $ne: null } })
+    Transactions.find({
+      Height: { $gte: heightStart, $lte: heightEnd },
+      NodeRegistration: { $ne: null },
+    })
       .select('NodeRegistration')
       .sort('-Height')
       .exec((err, res) => {
@@ -36,13 +39,27 @@ module.exports = class TransactionsService extends BaseService {
     const sender = await this.asyncSendersByHeights(heightStart, heightEnd)
     if (sender.error) return { error: sender.error, data: [] }
     const senders = sender.data.map(i => {
-      return { SendMoney: i.SendMoney, Timestamp: i.Timestamp, Height: i.Height, Account: i.Sender, Fee: i.Fee, Type: 'Sender' }
+      return {
+        SendMoney: i.SendMoney,
+        Timestamp: i.Timestamp,
+        Height: i.Height,
+        Account: i.Sender,
+        Fee: i.Fee,
+        Type: 'Sender',
+      }
     }, [])
 
     const recipient = await this.asyncRecipientsByHeights(heightStart, heightEnd)
     if (recipient.error) return { error: recipient.error, data: [] }
     const recipients = recipient.data.map(i => {
-      return { SendMoney: i.SendMoney, Timestamp: i.Timestamp, Height: i.Height, Account: i.Recipient, Fee: i.Fee, Type: 'Recipient' }
+      return {
+        SendMoney: i.SendMoney,
+        Timestamp: i.Timestamp,
+        Height: i.Height,
+        Account: i.Recipient,
+        Fee: i.Fee,
+        Type: 'Recipient',
+      }
     }, [])
 
     return { error: null, data: [...senders, ...recipients] }
@@ -65,8 +82,20 @@ module.exports = class TransactionsService extends BaseService {
     })
   }
 
+  findAndUpdateStatus(conditions, callback) {
+    Transactions.updateMany(conditions, { $set: { Status: 'Approved' } }, { created: false }).exec((err, res) => {
+      if (err) return callback(err, null)
+      if (res && res.length < 1) return callback(null, null)
+      return callback(null, res)
+    })
+  }
+
   getSendersByHeights(heightStart, heightEnd, callback) {
-    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, TransactionType: 1, Sender: { $ne: null } })
+    Transactions.find({
+      Height: { $gte: heightStart, $lte: heightEnd },
+      TransactionType: 1,
+      Sender: { $ne: null },
+    })
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Sender: { $ne: null } }, { Sender: { $ne: '' } }] })
       .select('Sender Height Fee Timestamp SendMoney')
       .sort('Height')
@@ -89,7 +118,11 @@ module.exports = class TransactionsService extends BaseService {
   }
 
   getRecipientsByHeights(heightStart, heightEnd, callback) {
-    Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, TransactionType: 1, Recipient: { $ne: null } })
+    Transactions.find({
+      Height: { $gte: heightStart, $lte: heightEnd },
+      TransactionType: 1,
+      Recipient: { $ne: null },
+    })
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Recipient: { $ne: null } }, { Recipient: { $ne: '' } }] })
       .select('Recipient Height Fee Timestamp SendMoney')
       .sort('Height')
@@ -99,17 +132,6 @@ module.exports = class TransactionsService extends BaseService {
 
         const results = _.uniqBy(res, 'Recipient').filter(f => util.isNotNullAccountAddress(f.Recipient))
         return callback(null, results)
-      })
-  }
-
-  getTransactionMultisigChild(callback) {
-    Transactions.find({ MultisigChild: true, Status: 'Approved' })
-      .select('TransactionHash BlockID')
-      .exec((err, res) => {
-        if (err) return callback(err, null)
-        if (res.length < 1) return callback(null, null)
-
-        return callback(null, res)
       })
   }
 }
