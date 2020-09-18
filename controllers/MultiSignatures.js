@@ -40,12 +40,9 @@ module.exports = class MultiSignatures extends BaseController {
             return callback(response.sendBotMessage('MultiSignatures', `[Multi Signatures] Insert Pending Transactions error - ${error}`))
         })
 
-        console.log('Pending Tx = ', result.PendingTransactions)
-
         const promises = result.PendingTransactions.filter(f => f.Latest === true).map(i => {
           return new Promise(resolve => {
             // if (i.BlockHeight === 29586) console.log(util.bufferStr(i.TransactionHash))
-            console.log(util.bufferStr(i.TransactionHash))
 
             /** update header transaction */
             const ID = util.hashToInt64(i.TransactionHash)

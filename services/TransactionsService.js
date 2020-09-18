@@ -84,8 +84,6 @@ module.exports = class TransactionsService extends BaseService {
 
   findAndUpdateStatus(conditions, callback) {
     Transactions.updateMany(conditions, { $set: { Status: 'Approved' } }, { created: false }).exec((err, res) => {
-      console.log('err: ', err)
-      console.log('res: ', res)
       if (err) return callback(err, null)
       if (res && res.length < 1) return callback(null, null)
       return callback(null, res)
