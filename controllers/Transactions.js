@@ -169,22 +169,24 @@ module.exports = class Transactions extends BaseController {
               }
             )
             /** update all child status after get parents approved by TxHash */
-            const condition = {
-              'MultiSignature.SignatureInfo.TransactionHash': item.multiSignatureTransactionBody.SignatureInfo.TransactionHash,
-            }
-            this.service.findAndUpdateStatus(condition, (err, res) => {
-              util.log({
-                error: err,
-                result: !err
-                  ? {
-                      success: res ? true : false,
-                      message: res
-                        ? `[Multi Signature Status] Upsert ${res.ok} data successfully`
-                        : '[Multi Signature Status] No additional data',
-                    }
-                  : null,
-              })
-            })
+            this.service.findAndUpdateStatus(
+              {
+                'MultiSignature.SignatureInfo.TransactionHash': item.multiSignatureTransactionBody.SignatureInfo.TransactionHash,
+              },
+              (err, res) => {
+                util.log({
+                  error: err,
+                  result: !err
+                    ? {
+                        success: res ? true : false,
+                        message: res
+                          ? `[Multi Signature Status] Upsert ${res.nModified} data successfully`
+                          : '[Multi Signature Status] No additional data',
+                      }
+                    : null,
+                })
+              }
+            )
           }
 
           /** if signature is null so that get pending transaction by height to height + 1 and then update signature info */
