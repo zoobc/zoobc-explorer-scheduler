@@ -5,10 +5,9 @@ const Rollback = require('./Rollback')
 const ResetData = require('./ResetData')
 const NodeAddress = require('./NodeAddress')
 const Transactions = require('./Transactions')
-const AccountLedgers = require('./AccountLedger')
-const MultiSignatures = require('./MultiSignatures')
-const ParticipationScores = require('./ParticipationScores')
 const NodeStatuses = require('./NodeStatuses')
+const AccountLedgers = require('./AccountLedger')
+const ParticipationScores = require('./ParticipationScores')
 
 module.exports = {
   Nodes,
@@ -18,8 +17,7 @@ module.exports = {
   ResetData,
   NodeAddress,
   Transactions,
-  AccountLedgers,
-  MultiSignatures,
-  ParticipationScores,
   NodeStatuses,
+  AccountLedgers,
+  ParticipationScores,
 }

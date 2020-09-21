@@ -16,10 +16,9 @@ const {
   ResetData,
   NodeAddress,
   Transactions,
-  AccountLedgers,
-  MultiSignatures,
-  ParticipationScores,
   NodeStatuses,
+  AccountLedgers,
+  ParticipationScores,
 } = require('./controllers')
 
 const nodes = new Nodes()
@@ -28,10 +27,9 @@ const reset = new ResetData()
 const accounts = new Accounts()
 const nodeAddress = new NodeAddress()
 const transactions = new Transactions()
-const accountLedger = new AccountLedgers()
-const multiSignatures = new MultiSignatures()
-const participationScores = new ParticipationScores()
 const nodeStatuses = new NodeStatuses()
+const accountLedger = new AccountLedgers()
+const participationScores = new ParticipationScores()
 
 /** cron job */
 const event = config.app.scheduleEvent
