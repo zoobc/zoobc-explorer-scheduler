@@ -57,7 +57,7 @@ module.exports = class Transactions extends BaseController {
             AmountConversion: item.sendMoneyTransactionBody ? util.zoobitConversion(item.sendMoneyTransactionBody.Amount) : null,
           }
           escrow = await getEscrow(item.ID)
-          status = item.MultisigChild ? 'Pending' : escrow && escrow.Status ? escrow.Status : 'Approved'
+          status = escrow && escrow.Status ? escrow.Status : 'Approved'
           break
         case 2:
           transactionTypeName = 'Node Registration'
@@ -164,28 +164,27 @@ module.exports = class Transactions extends BaseController {
                           }
                         : null,
                     })
+                    /** update all child status after get parents approved by TxHash */
+                    this.service.findAndUpdateStatus(
+                      {
+                        'MultiSignature.SignatureInfo.TransactionHash': item.multiSignatureTransactionBody.SignatureInfo.TransactionHash,
+                      },
+                      (err, res) => {
+                        util.log({
+                          error: err,
+                          result: !err
+                            ? {
+                                success: res ? true : false,
+                                message: res
+                                  ? `[Multi Signature Status] Upsert ${res.nModified} data successfully`
+                                  : '[Multi Signature Status] No additional data',
+                              }
+                            : null,
+                        })
+                      }
+                    )
                   })
                 }
-              }
-            )
-
-            /** update all child status after get parents approved by TxHash */
-            this.service.findAndUpdateStatus(
-              {
-                'MultiSignature.SignatureInfo.TransactionHash': item.multiSignatureTransactionBody.SignatureInfo.TransactionHash,
-              },
-              (err, res) => {
-                util.log({
-                  error: err,
-                  result: !err
-                    ? {
-                        success: res ? true : false,
-                        message: res
-                          ? `[Multi Signature Status] Upsert ${res.nModified} data successfully`
-                          : '[Multi Signature Status] No additional data',
-                      }
-                    : null,
-                })
               }
             )
           }
