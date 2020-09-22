@@ -70,7 +70,7 @@ module.exports = class NodesService extends BaseService {
       })
   }
 
-  getPendingNodePKs(callback) {
-    Nodes.find({ RegistrationStatus: 1 }).select('NodePublicKey').exec(callback)
+  getNodePKs(callback) {
+    Nodes.find().select('NodePublicKey').exec(callback)
   }
 }
