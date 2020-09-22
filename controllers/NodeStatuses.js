@@ -10,6 +10,8 @@ module.exports = class NodeStatuses extends BaseController {
 
   async update(callback) {
     this.service.getNodePKs((err, res) => {
+      console.log('LOCAL LENGTH => ', res.length)
+
       if (err)
         return callback(response.sendBotMessage('NodePendingStatus', `[Node Pending Status] Nodes Service - Get Pending Node PKs ${err}`))
       if (res && res.length < 1) return callback(response.setResult(false, '[Node Pending Status] No additional data'))
