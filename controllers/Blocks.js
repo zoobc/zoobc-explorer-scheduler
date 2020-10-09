@@ -1,7 +1,7 @@
 const moment = require('moment')
 const config = require('../config')
 const BaseController = require('./BaseController')
-const { store, util, msg, response } = require('../utils')
+const { util, msg, response } = require('../utils')
 const { BlocksService, GeneralsService } = require('../services')
 const { Block, PublishedReceipt, SkippedBlockSmiths } = require('../protos')
 
