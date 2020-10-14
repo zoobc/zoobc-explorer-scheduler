@@ -118,3 +118,32 @@ message GetPendingTransactionsByHeightResponse {
     // List of pending transaction within requested height
     repeated PendingTransaction PendingTransactions = 1;
 }
+
+message GetMultisigAddressesByBlockHeightRangeRequest {
+    uint32 FromBlockHeight = 1;
+    uint32 ToBlockHeight = 2;
+    Pagination Pagination = 3;
+}
+
+message GetMultisigAddressesByBlockHeightRangeResponse {
+    // Number of item in current page
+    uint32 Count = 1;
+    // Starting page
+    uint32 Page = 2;
+    // content of the request
+    repeated MultiSignatureInfo MultisignatureInfo = 3;
+}
+
+message GetParticipantsByMultisigAddressesRequest {
+    repeated string MultisigAddresses = 1;
+    Pagination Pagination = 2;
+}
+
+message MultiSignatureParticipants {
+    repeated MultiSignatureParticipant MultiSignatureParticipants = 1;
+}
+
+message GetParticipantsByMultisigAddressesResponse {
+    uint32 Total = 1;
+    map<string, MultiSignatureParticipants> MultiSignatureParticipants = 2;
+}

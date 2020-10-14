@@ -16,4 +16,5 @@ service HealthCheckService {
             get: "/v1/health/check"
         };
     }
+
 }
