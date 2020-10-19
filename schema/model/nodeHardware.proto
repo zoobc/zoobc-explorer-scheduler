@@ -11,6 +11,11 @@ message GetNodeHardwareResponse {
 message GetNodeHardwareRequest {
 }
 
+// Get Node Current Time Based on UTC
+message GetNodeTimeResponse {
+    int64 NodeTime = 1 [ jstype = JS_STRING ];
+}
+
 message NodeHardware {
     repeated CPUInformation CPUInformation = 1;
     MemoryInformation MemoryInformation = 2;
