@@ -1,0 +1,19 @@
+name: Deploy Development
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # if: github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v1
+      - name: Deploy to Server Development
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          script: pm2 deploy ecosystem.config.js scheduler update --force
