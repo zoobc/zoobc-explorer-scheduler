@@ -12,7 +12,7 @@ module.exports = class GeneralsService extends BaseService {
   getSetLastCheck() {
     return new Promise((resolve, reject) => {
       Generals.findOne({ Key: store.keyLastCheck })
-        .select('Value HeightBefore')
+        .select('Value')
         .exec((err, res) => {
           if (err) return reject(err)
           if (res) return resolve(JSON.parse(res.Value))
@@ -59,7 +59,7 @@ module.exports = class GeneralsService extends BaseService {
   getValueByKey(key) {
     return new Promise((resolve, reject) => {
       Generals.findOne({ Key: key })
-        .select('Value HeightBefore')
+        .select('Value')
         .exec((err, result) => {
           if (err) return reject({ err: err, res: null })
           return resolve({ err: null, res: result })

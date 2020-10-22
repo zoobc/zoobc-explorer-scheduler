@@ -20,4 +20,5 @@ enum EventType {
     EventLiquidPaymentTransaction = 13;
     EventLiquidPaymentPaidTransaction = 14;
     EventLiquidPaymentStopTransaction = 15;
+    EventEscrowedTransaction = 16;
 }

@@ -1,4 +1,4 @@
-name: Deploy Staging
+name: Deploy Development
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       - name: Deploy to Server Development
         uses: appleboy/ssh-action@master
         with:
-          key: ${{ secrets.SSH_KEY_TESTNET }}
-          host: ${{ secrets.SSH_HOST_TESTNET }}
-          username: ${{ secrets.SSH_USER_TESTNET }}
+          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
           script: pm2 deploy ecosystem.config.js scheduler update --force
