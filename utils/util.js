@@ -122,6 +122,8 @@ const queryfy = obj => {
 }
 
 function getZBCAdress(publicKey, prefix) {
+  if (!publicKey) return null
+
   const bytes = Buffer.alloc(35)
   for (let i = 0; i < 32; i++) bytes[i] = publicKey[i]
   for (let i = 0; i < 3; i++) bytes[i + 32] = prefix.charCodeAt(i)
