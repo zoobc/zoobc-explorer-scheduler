@@ -21,6 +21,7 @@ const schema = new mongoose.Schema(
     TransactionIndex: { type: Number } /** additional */,
     MultisigChild: { type: Boolean } /** additional */,
     Signature: { type: Buffer } /** additional */,
+    Message: { type: Buffer } /** additional */,
     TransactionBody: { type: String },
     /** convertion by transaction body */
     TransactionTypeName: { type: String },
