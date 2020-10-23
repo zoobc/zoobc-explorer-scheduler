@@ -4,7 +4,7 @@ package model;
 option go_package = "github.com/zoobc/zoobc-core/common/model";
 
 import "model/transaction.proto";
-import "model/batchReceipt.proto";
+import "model/receipt.proto";
 import "model/publishedReceipt.proto";
 import "model/skippedBlocksmith.proto";
 import "model/spine.proto";
@@ -27,11 +27,14 @@ message Block {
   uint32 Version = 13;
   uint32 PayloadLength = 14;
   bytes PayloadHash = 15;
-  repeated Transaction Transactions = 16;
-  repeated PublishedReceipt PublishedReceipts = 17;
-  repeated SpinePublicKey SpinePublicKeys = 18;
-  repeated SpineBlockManifest SpineBlockManifests = 19;
-  repeated int64 TransactionIDs = 20;
+  bytes MerkleRoot = 16;
+  bytes MerkleTree = 17;
+  uint32 ReferenceBlockHeight = 18;
+  repeated Transaction Transactions = 19;
+  repeated PublishedReceipt PublishedReceipts = 20;
+  repeated SpinePublicKey SpinePublicKeys = 21;
+  repeated SpineBlockManifest SpineBlockManifests = 22;
+  repeated int64 TransactionIDs = 23;
 }
 
 // BlockExtendedInfo represent the Block data plus part of block data not to be persisted to database
@@ -39,7 +42,7 @@ message BlockExtendedInfo {
   Block Block = 1;
   int64 TotalReceipts = 2 [ jstype = JS_STRING ];
   int64 ReceiptValue = 3 [ jstype = JS_STRING ];
-  string BlocksmithAccountAddress = 4;
+  bytes BlocksmithAccountAddress = 4;
   int64 PopChange = 5 [ jstype = JS_STRING ];
   repeated SkippedBlocksmith SkippedBlocksmiths = 6;
 }
@@ -105,5 +108,5 @@ message SendBlockRequest {
     bytes SenderPublicKey = 3;
 }
 message SendBlockResponse {
-    BatchReceipt BatchReceipt = 1;
+    Receipt Receipt = 1;
 }

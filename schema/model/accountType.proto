@@ -1,0 +1,20 @@
+syntax="proto3";
+
+package model;
+
+option go_package = "github.com/zoobc/zoobc-core/common/model";
+
+// AccountType represent transcoding table for account addresses
+// It transcode a full account address (bytes) into its components and keeps a reference to the encoded (string) representation of the account
+message AccountAddress {
+    bytes AccountAddress = 1;
+    int32 AccountType = 2;
+    bytes AccountPublicKey = 3;
+    string EncodedAccount = 4;
+}
+
+enum AccountType {
+    ZbcAccountType = 0; // Default account type
+    BTCAccountType = 1;
+    EmptyAccountType = 2; // To facilitate parsing transactions that allow empty account address
+}

@@ -9,12 +9,12 @@ import "model/nodeAddressInfo.proto";
 message NodeRegistration {
     int64   NodeID = 1 [jstype = JS_STRING];
     bytes   NodePublicKey = 2;
-    string  AccountAddress = 3;
+    bytes   AccountAddress = 3;
     uint32  RegistrationHeight = 4;
     int64   LockedBalance = 5 [jstype = JS_STRING];
     uint32  RegistrationStatus = 6;
-    bool Latest = 7;
-    uint32 Height = 8;
+    bool    Latest = 7;
+    uint32  Height = 8;
     NodeAddressInfo NodeAddressInfo = 9;
 }
 
@@ -43,7 +43,7 @@ message GetNodeRegistrationsResponse {
 // GetNodeRegistrationRequest create request for single node register
 message GetNodeRegistrationRequest {
     bytes   NodePublicKey = 1;
-    string AccountAddress = 2;
+    bytes   AccountAddress = 2;
     uint32  RegistrationHeight = 3;
 }
 
