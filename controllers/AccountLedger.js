@@ -58,6 +58,7 @@ module.exports = class AccountLedgers extends BaseController {
                 TotalFeesPaid: res ? res.TotalFeesPaid : 0,
                 TotalFeesPaidConversion: res ? res.TotalFeesPaidConversion : 0,
                 AccountAddress: item.AccountAddress,
+                AccountAddressFormatted: util.parseAccountAddress(item.AccountAddress),
                 BalanceConversion: util.zoobitConversion(Balance),
                 SpendableBalance: res ? res.SpendableBalance : 0,
                 SpendableBalanceConversion: res ? res.SpendableBalanceConversion : 0,
@@ -87,6 +88,7 @@ module.exports = class AccountLedgers extends BaseController {
         const payloads = res.AccountLedgers.map(i => {
           return {
             ...i,
+            AccountAddressFormatted: util.parseAccountAddress(i.AccountAddress),
             Timestamp: new Date(moment.unix(i.Timestamp).valueOf()),
             BalanceChange: parseInt(i.BalanceChange),
             BalanceChangeConversion: util.zoobitConversion(parseInt(i.BalanceChange)),

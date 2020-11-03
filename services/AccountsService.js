@@ -47,6 +47,7 @@ module.exports = class AccountsService extends BaseService {
         TotalFeesPaid: payloads.TotalFeesPaid,
         TotalFeesPaidConversion: payloads.TotalFeesPaid,
         AccountAddress: payloads.AccountAddress,
+        AccountAddressFormatted: payloads.AccountAddressFormatted,
         Balance: payloads.Balance,
         BalanceConversion: payloads.Balance,
         SpendableBalance: payloads.SpendableBalance,

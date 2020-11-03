@@ -1,11 +1,18 @@
 const CryptoJS = require('crypto-js')
 const { SHA3 } = require('sha3')
-const base32Encode = require('base32-encode')
+const B32Enc = require('base32-encode')
+const B32Dec = require('base32-decode')
 
 const { Int64LE } = require('int64-buffer')
 
 const msg = require('./msg')
 const config = require('../config')
+
+var AccountType = {
+  ZbcAccountType: 0,
+  BTCAccountType: 1,
+  EmptyAccountType: 2,
+}
 
 const keySize = 256
 const iterations = 100
@@ -121,27 +128,107 @@ const queryfy = obj => {
   return JSON.stringify(obj)
 }
 
-function getZBCAdress(publicKey, prefix) {
-  if (!publicKey) return null
-
-  const bytes = Buffer.alloc(35)
-  for (let i = 0; i < 32; i++) bytes[i] = publicKey[i]
-  for (let i = 0; i < 3; i++) bytes[i + 32] = prefix.charCodeAt(i)
-  const checksum = hash(bytes, 'buffer')
-  for (let i = 0; i < 3; i++) bytes[i + 32] = Number(checksum[i])
-  const segs = [prefix]
-  const b32 = base32Encode(bytes, 'RFC4648')
-  for (let i = 0; i < 7; i++) segs.push(b32.substr(i * 8, 8))
-
-  return segs.join('_')
-}
-
 function hash(str, format) {
+  format = format || 'buffer'
+
   const h = new SHA3(256)
   h.update(str)
   const b = h.digest()
   if (format === 'buffer') return b
   return b.toString(format)
+}
+
+function writeInt32(number) {
+  let byte = Buffer.alloc(4)
+  byte.writeUInt32LE(number, 0)
+  return byte
+}
+
+function getZBCAdress(publicKey, prefix) {
+  if (!publicKey) return null
+
+  prefix = prefix || 'ZBC'
+
+  const prefixDefault = ['ZBC', 'ZNK', 'ZBL', 'ZTX']
+  const valid = prefixDefault.indexOf(prefix) > -1
+  if (valid) {
+    const bytes = Buffer.alloc(35)
+    for (let i = 0; i < 32; i++) bytes[i] = publicKey[i]
+    for (let i = 0; i < 3; i++) bytes[i + 32] = prefix.charCodeAt(i)
+    const checksum = hash(bytes)
+    for (let i = 0; i < 3; i++) bytes[i + 32] = Number(checksum[i])
+    const segs = [prefix]
+    const b32 = B32Enc(bytes, 'RFC4648')
+    for (let i = 0; i < 7; i++) segs.push(b32.substr(i * 8, 8))
+
+    return segs.join('_')
+  } else {
+    throw new Error('The Prefix not available!')
+  }
+}
+
+function ZBCAddressToBytes(address) {
+  const segs = address.split('_')
+  segs.shift()
+  const b32 = segs.join('')
+  const buffer = Buffer.from(B32Dec(b32, 'RFC4648'))
+  return buffer.slice(0, 32)
+}
+
+function isZBCAddressValid(address) {
+  if (address.length != 66) return false
+  const segs = address.split('_')
+  const prefix = segs[0]
+  segs.shift()
+  if (segs.length != 7) return false
+  for (let i = 0; i < segs.length; i++) if (!/[A-Z2-7]{8}/.test(segs[i])) return false
+  const b32 = segs.join('')
+  const buffer = Buffer.from(B32Dec(b32, 'RFC4648'))
+  const inputChecksum = []
+  for (let i = 0; i < 3; i++) inputChecksum.push(buffer[i + 32])
+  for (let i = 0; i < 3; i++) buffer[i + 32] = prefix.charCodeAt(i)
+  const checksum = hash(buffer)
+  for (let i = 0; i < 3; i++) if (checksum[i] != inputChecksum[i]) return false
+  return true
+}
+
+function parseAccountAddress(accountBytes) {
+  let address = null
+
+  const bufferLength = Buffer.byteLength(accountBytes)
+
+  if (accountBytes != null && Buffer.isBuffer(accountBytes) && bufferLength > 0) {
+    const type = accountBytes.readInt32LE(0)
+    switch (type) {
+      case AccountType.ZbcAccountType:
+        address = getZBCAdress(accountBytes.slice(4, 36))
+        return address
+      case AccountType.BTCAccountType:
+        return address
+      default:
+        return address
+    }
+  }
+
+  return address
+}
+
+function accountToBytes(account) {
+  const { address, type } = account
+
+  let bytes
+  let typeBytes
+
+  switch (type) {
+    case AccountType.ZbcAccountType:
+      bytes = ZBCAddressToBytes(address)
+      typeBytes = writeInt32(type)
+      return Buffer.from([...typeBytes, ...bytes])
+    case AccountType.BTCACCOUNTTYPE:
+      return Buffer.from([])
+    default:
+      return Buffer.from([])
+  }
 }
 
 module.exports = util = {
@@ -155,6 +242,10 @@ module.exports = util = {
   logMutation,
   queryfy,
   hmacEncrypt,
-  getZBCAdress,
   hashToInt64,
+  getZBCAdress,
+  ZBCAddressToBytes,
+  isZBCAddressValid,
+  parseAccountAddress,
+  accountToBytes,
 }
