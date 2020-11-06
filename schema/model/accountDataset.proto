@@ -8,8 +8,8 @@ import "model/pagination.proto";
 
 // AccountDataset represent the account dataset structure stored in the database
 message AccountDataset {
-    string SetterAccountAddress = 1;
-    string RecipientAccountAddress = 2;
+    bytes SetterAccountAddress = 1;
+    bytes RecipientAccountAddress = 2;
     string Property = 3;
     string Value = 4;
     bool IsActive = 5;
@@ -26,8 +26,8 @@ enum AccountDatasetProperty {
 message GetAccountDatasetsRequest {
     string Property = 1;
     string Value = 2;
-    string RecipientAccountAddress = 3;
-    string SetterAccountAddress = 4;
+    bytes RecipientAccountAddress = 3;
+    bytes SetterAccountAddress = 4;
     uint32 Height = 5;
     Pagination Pagination = 6;
 }
@@ -39,5 +39,5 @@ message GetAccountDatasetsResponse {
 
 message GetAccountDatasetRequest {
     string Property = 1;
-    string RecipientAccountAddress = 2;
+    bytes RecipientAccountAddress = 2;
 }

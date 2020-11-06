@@ -18,8 +18,11 @@ module.exports = class Transactions extends BaseController {
           if (err) resolve(null)
           const escrow = res && {
             ...res,
-            AmountConversion: res ? util.zoobitConversion(res.Amount) : 0,
-            CommissionConversion: res ? util.zoobitConversion(res.Commission) : 0,
+            SenderAddress: util.parseAccountAddress(res.SenderAddress),
+            RecipientAddress: util.parseAccountAddress(res.RecipientAddress),
+            ApproverAddress: util.parseAccountAddress(res.ApproverAddress),
+            AmountConversion: util.zoobitConversion(res.Amount),
+            CommissionConversion: util.zoobitConversion(res.Commission),
           }
           resolve(escrow)
         })
@@ -52,48 +55,48 @@ module.exports = class Transactions extends BaseController {
       switch (item.TransactionType) {
         case 1:
           transactionTypeName = 'ZBC Transfer'
-          sendMoney = {
-            Amount: item.sendMoneyTransactionBody.Amount,
-            AmountConversion: item.sendMoneyTransactionBody ? util.zoobitConversion(item.sendMoneyTransactionBody.Amount) : null,
+          sendMoney = item.sendMoneyTransactionBody && {
+            ...item.sendMoneyTransactionBody,
+            AmountConversion: util.zoobitConversion(item.sendMoneyTransactionBody.Amount),
           }
           escrow = await getEscrow(item.ID)
           status = escrow && escrow.Status ? escrow.Status : 'Approved'
           break
         case 2:
           transactionTypeName = 'Node Registration'
-          nodeRegistration = {
-            NodePublicKey: item.nodeRegistrationTransactionBody ? item.nodeRegistrationTransactionBody.NodePublicKey : null,
-            NodePublicKeyFormatted: item.nodeRegistrationTransactionBody
-              ? util.getZBCAdress(item.nodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
-              : null,
-            AccountAddress: item.nodeRegistrationTransactionBody.AccountAddress,
-            NodeAddress: item.nodeRegistrationTransactionBody.NodeAddress,
-            LockedBalance: item.nodeRegistrationTransactionBody.LockedBalance,
-            LockedBalanceConversion: item.nodeRegistrationTransactionBody
-              ? util.zoobitConversion(item.nodeRegistrationTransactionBody.LockedBalance)
-              : 0,
+          nodeRegistration = item.nodeRegistrationTransactionBody && {
+            ...item.nodeRegistrationTransactionBody,
+            NodePublicKeyFormatted: util.getZBCAdress(item.nodeRegistrationTransactionBody.NodePublicKey, 'ZNK'),
+            AccountAddress: util.parseAccountAddress(item.nodeRegistrationTransactionBody.AccountAddress),
+            LockedBalanceConversion: util.zoobitConversion(item.nodeRegistrationTransactionBody.LockedBalance),
             ProofOfOwnership: item.nodeRegistrationTransactionBody.Poown,
           }
+
           break
         case 3:
           transactionTypeName = 'Setup Account'
-          setupAccount = item.setupAccountDatasetTransactionBody
+          setupAccount = item.setupAccountDatasetTransactionBody && item.setupAccountDatasetTransactionBody
           break
         case 4:
           transactionTypeName = 'Escrow'
-          approvalEscrow = {
+          approvalEscrow = item.approvalEscrowTransactionBody && {
             Approval: item.approvalEscrowTransactionBody.Approval,
             TransactionID: item.approvalEscrowTransactionBody.TransactionID,
           }
-          escrow = await getEscrow(item.approvalEscrowTransactionBody.TransactionID)
+          escrow = item.approvalEscrowTransactionBody && (await getEscrow(item.approvalEscrowTransactionBody.TransactionID))
           status = escrow && escrow.Status ? escrow.Status : 'Pending'
           break
         case 5:
           transactionTypeName = 'Multisignature'
-          multiSignature = {
+          multiSignature = item.multiSignatureTransactionBody && {
             ...item.multiSignatureTransactionBody,
-            MultiSignatureInfo: {
+            MultiSignatureInfo: item.multiSignatureTransactionBody.MultiSignatureInfo && {
               ...item.multiSignatureTransactionBody.MultiSignatureInfo,
+              MultisigAddress: util.parseAccountAddress(item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress),
+              Addresses:
+                item.multiSignatureTransactionBody.MultiSignatureInfo.Addresses &&
+                item.multiSignatureTransactionBody.MultiSignatureInfo.Addresses.length > 0 &&
+                item.multiSignatureTransactionBody.MultiSignatureInfo.Addresses.map(address => util.parseAccountAddress(address)),
             },
             SignatureInfo: {
               TransactionHash: null,
@@ -105,7 +108,7 @@ module.exports = class Transactions extends BaseController {
             },
           }
 
-          /** get parent if minimun signatures already full field */
+          /** get parent if minimum signatures already full field */
           if (
             item.multiSignatureTransactionBody &&
             item.multiSignatureTransactionBody.SignatureInfo &&
@@ -126,29 +129,18 @@ module.exports = class Transactions extends BaseController {
                   })
                 if (res) {
                   const payload = {
+                    ...res,
                     TransactionID: res.ID,
                     Timestamp: new Date(moment.unix(res.Timestamp).valueOf()),
-                    TransactionType: res.TransactionType,
-                    BlockID: res.BlockID,
-                    Height: res.Height,
-                    Sender: res.SenderAccountAddress,
-                    Recipient: res.RecipientAccountAddress,
-                    Fee: res.Fee,
-                    FeeConversion: res ? util.zoobitConversion(res.Fee) : 0,
+                    Sender: util.parseAccountAddress(res.SenderAccountAddress),
+                    Recipient: util.parseAccountAddress(res.RecipientAccountAddress),
+                    FeeConversion: util.zoobitConversion(res.Fee),
                     Status: 'Approved',
-                    Version: res.Version,
-                    TransactionHash: res.TransactionHash,
                     TransactionHashFormatted: util.getZBCAdress(res.TransactionHash, 'ZTX'),
-                    TransactionBodyLength: res.TransactionBodyLength,
-                    TransactionBodyBytes: res.TransactionBodyBytes,
-                    TransactionIndex: res.TransactionIndex,
-                    Signature: res.Signature,
-                    TransactionBody: res.TransactionBody,
                     TransactionTypeName: 'ZBC Transfer',
-                    MultisigChild: res.MultisigChild,
                     SendMoney: {
-                      Amount: res.sendMoneyTransactionBody.Amount,
-                      AmountConversion: res.sendMoneyTransactionBody ? util.zoobitConversion(res.sendMoneyTransactionBody.Amount) : null,
+                      ...res.sendMoneyTransactionBody,
+                      AmountConversion: util.zoobitConversion(res.sendMoneyTransactionBody.Amount),
                     },
                   }
 
@@ -215,39 +207,29 @@ module.exports = class Transactions extends BaseController {
           break
         case 258:
           transactionTypeName = 'Update Node Registration'
-          updateNodeRegistration = {
-            NodePublicKey: item.updateNodeRegistrationTransactionBody ? item.updateNodeRegistrationTransactionBody.NodePublicKey : null,
-            NodePublicKeyFormatted: item.updateNodeRegistrationTransactionBody
-              ? util.getZBCAdress(item.updateNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
-              : null,
-            NodeAddress: item.updateNodeRegistrationTransactionBody.NodeAddress,
-            LockedBalance: item.updateNodeRegistrationTransactionBody.LockedBalance,
-            LockedBalanceConversion: item.updateNodeRegistrationTransactionBody
-              ? util.zoobitConversion(item.updateNodeRegistrationTransactionBody.LockedBalance)
-              : 0,
+          updateNodeRegistration = item.updateNodeRegistrationTransactionBody && {
+            ...item.updateNodeRegistrationTransactionBody,
+            NodePublicKeyFormatted: util.getZBCAdress(item.updateNodeRegistrationTransactionBody.NodePublicKey, 'ZNK'),
+            LockedBalanceConversion: util.zoobitConversion(item.updateNodeRegistrationTransactionBody.LockedBalance),
             ProofOfOwnership: item.updateNodeRegistrationTransactionBody.Poown,
           }
           break
         case 259:
           transactionTypeName = 'Remove Account'
-          removeAccount = item.removeAccountDatasetTransactionBody
+          removeAccount = item.removeAccountDatasetTransactionBody && item.removeAccountDatasetTransactionBody
           break
         case 514:
           transactionTypeName = 'Remove Node Registration'
-          removeNodeRegistration = {
-            NodePublicKey: item.removeNodeRegistrationTransactionBody ? item.removeNodeRegistrationTransactionBody.NodePublicKey : null,
-            NodePublicKeyFormatted: item.removeNodeRegistrationTransactionBody
-              ? util.getZBCAdress(item.removeNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
-              : null,
+          removeNodeRegistration = item.removeNodeRegistrationTransactionBody && {
+            ...item.removeNodeRegistrationTransactionBody,
+            NodePublicKeyFormatted: util.getZBCAdress(item.removeNodeRegistrationTransactionBody.NodePublicKey, 'ZNK'),
           }
           break
         case 770:
           transactionTypeName = 'Claim Node Registration'
-          claimNodeRegistration = {
-            NodePublicKey: item.claimNodeRegistrationTransactionBody ? item.claimNodeRegistrationTransactionBody.NodePublicKey : null,
-            NodePublicKeyFormatted: item.claimNodeRegistrationTransactionBody
-              ? util.getZBCAdress(item.claimNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
-              : null,
+          claimNodeRegistration = item.claimNodeRegistrationTransactionBody && {
+            ...item.claimNodeRegistrationTransactionBody,
+            NodePublicKeyFormatted: util.getZBCAdress(item.claimNodeRegistrationTransactionBody.NodePublicKey, 'ZNK'),
             ProofOfOwnership: item.claimNodeRegistrationTransactionBody.Poown,
           }
           break
@@ -257,24 +239,16 @@ module.exports = class Transactions extends BaseController {
       }
 
       return {
+        ...item,
         TransactionID: item.ID,
         Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
-        TransactionType: item.TransactionType,
-        BlockID: item.BlockID,
-        Height: item.Height,
         Sender: item.SenderAccountAddress,
+        SenderFormatted: util.parseAccountAddress(item.SenderAccountAddress),
         Recipient: item.RecipientAccountAddress,
-        Fee: item.Fee,
+        RecipientFormatted: util.parseAccountAddress(item.RecipientAccountAddress),
         Status: status,
-        FeeConversion: item ? util.zoobitConversion(item.Fee) : 0,
-        Version: item.Version,
-        TransactionHash: item.TransactionHash,
+        FeeConversion: util.zoobitConversion(item.Fee),
         TransactionHashFormatted: util.getZBCAdress(item.TransactionHash, 'ZTX'),
-        TransactionBodyLength: item.TransactionBodyLength,
-        TransactionBodyBytes: item.TransactionBodyBytes,
-        TransactionIndex: item.TransactionIndex,
-        Signature: item.Signature,
-        TransactionBody: item.TransactionBody,
         TransactionTypeName: transactionTypeName,
         SendMoney: sendMoney,
         ClaimNodeRegistration: claimNodeRegistration,
@@ -285,7 +259,6 @@ module.exports = class Transactions extends BaseController {
         RemoveAccount: removeAccount,
         MultiSignature: multiSignature,
         ApprovalEscrow: approvalEscrow,
-        MultisigChild: item.MultisigChild,
         Escrow: escrow,
       }
     })

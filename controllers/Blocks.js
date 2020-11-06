@@ -46,10 +46,10 @@ module.exports = class Blocks extends BaseController {
           return {
             ...i,
             IntermediateHashes: util.bufferStr(i.IntermediateHashes),
-            BatchReceipt: {
-              ...i.BatchReceipt,
-              SenderPublicKey: util.getZBCAdress(i.BatchReceipt.SenderPublicKey, 'ZNK'),
-              RecipientPublicKey: util.getZBCAdress(i.BatchReceipt.RecipientPublicKey, 'ZNK'),
+            Receipt: {
+              ...i.Receipt,
+              SenderPublicKey: util.getZBCAdress(i.Receipt.SenderPublicKey, 'ZNK'),
+              RecipientPublicKey: util.getZBCAdress(i.Receipt.RecipientPublicKey, 'ZNK'),
             },
           }
         })
@@ -84,6 +84,9 @@ module.exports = class Blocks extends BaseController {
         Version: item.Version,
         PayloadLength: item.PayloadLength,
         PayloadHash: item.PayloadHash,
+        MerkleRoot: item.MerkleRoot,
+        MerkleTree: item.MerkleTree,
+        ReferenceBlockHeight: item.ReferenceBlockHeight,
         /** BlockExtendedInfo */
         TotalReceipts: null,
         PopChange: null,

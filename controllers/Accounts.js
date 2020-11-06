@@ -40,6 +40,7 @@ module.exports = class Accounts extends BaseController {
 
       /** get account balances core */
       const params = { AccountAddresses: account.data.map(i => i.Account) }
+
       AccountBalance.GetAccountBalances(params, (err, res) => {
         if (err)
           return callback(
@@ -58,20 +59,20 @@ module.exports = class Accounts extends BaseController {
           const accounts = account.data.filter(o => o.Account === i.AccountAddress)
 
           /** get first active */
-          const FirstActive = _.sortBy(accounts, ['Height'])[0].Timestamp
+          const FirstActive = accounts.length > 0 && _.sortBy(accounts, ['Height'])[0].Timestamp
 
           /** get last active */
-          const LastActive = _.sortBy(accounts, ['Height'])[accounts.length - 1].Timestamp
+          const LastActive = accounts.length > 0 && _.sortBy(accounts, ['Height'])[accounts.length - 1].Timestamp
 
           /** get last transaction height */
-          const TransactionHeight = _.sortBy(accounts, ['Height'])[accounts.length - 1].Height
+          const TransactionHeight = accounts.length > 0 && _.sortBy(accounts, ['Height'])[accounts.length - 1].Height
 
           /** get fee paid recipient */
-          const feeRecipients = accounts.filter(o => o.Type === 'Recipient')
+          const feeRecipients = accounts.length > 0 && accounts.filter(o => o.Type === 'Recipient')
           let TotalFeesPaid = feeRecipients.length > 0 ? _.sortBy(feeRecipients, ['Height'])[feeRecipients.length - 1].Fee : 0
 
           /** summary fee if sender */
-          const feeSenders = accounts.filter(o => o.Type === 'Sender')
+          const feeSenders = accounts.length > 0 && accounts.filter(o => o.Type === 'Sender')
           if (feeSenders.length > 0) {
             TotalFeesPaid = _.sumBy(feeSenders, 'Fee')
           }
@@ -83,6 +84,7 @@ module.exports = class Accounts extends BaseController {
             TotalFeesPaid: parseInt(TotalFeesPaid),
             TotalFeesPaidConversion: util.zoobitConversion(parseInt(TotalFeesPaid)),
             AccountAddress: i.AccountAddress,
+            AccountAddressFormatted: util.parseAccountAddress(i.AccountAddress),
             Balance: parseInt(i.Balance),
             BalanceConversion: util.zoobitConversion(parseInt(i.Balance)),
             SpendableBalance: parseInt(i.SpendableBalance),

@@ -10,7 +10,7 @@ message ProofOfOwnership {
 }
 
 message ProofOfOwnershipMessage {
-    string AccountAddress = 1;
+    bytes AccountAddress = 1;
     bytes BlockHash = 2;
     uint32 BlockHeight = 3;
 }
