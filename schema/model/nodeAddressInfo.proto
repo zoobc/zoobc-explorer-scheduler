@@ -37,5 +37,5 @@ message GetNodeAddressesInfoResponse {
 }
 
 message SendNodeAddressInfoRequest {
-	repeated NodeAddressInfo NodeAddressInfoMessage =1;
+	NodeAddressInfo NodeAddressInfoMessage =1;
 }
