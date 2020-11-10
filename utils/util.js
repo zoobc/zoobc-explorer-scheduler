@@ -1,11 +1,9 @@
 const CryptoJS = require('crypto-js')
 const { SHA3 } = require('sha3')
-const B32Enc = require('base32-encode')
-const B32Dec = require('base32-decode')
-
 const { Int64LE } = require('int64-buffer')
 
 const msg = require('./msg')
+const base32 = require('./base32')
 const config = require('../config')
 
 var AccountType = {
@@ -158,7 +156,7 @@ function getZBCAdress(publicKey, prefix) {
     const checksum = hash(bytes)
     for (let i = 0; i < 3; i++) bytes[i + 32] = Number(checksum[i])
     const segs = [prefix]
-    const b32 = B32Enc(bytes, 'RFC4648')
+    const b32 = base32.encode(bytes, 'RFC4648')
     for (let i = 0; i < 7; i++) segs.push(b32.substr(i * 8, 8))
 
     return segs.join('_')
@@ -171,7 +169,7 @@ function ZBCAddressToBytes(address) {
   const segs = address.split('_')
   segs.shift()
   const b32 = segs.join('')
-  const buffer = Buffer.from(B32Dec(b32, 'RFC4648'))
+  const buffer = Buffer.from(base32.decode(b32, 'RFC4648'))
   return buffer.slice(0, 32)
 }
 
@@ -183,7 +181,7 @@ function isZBCAddressValid(address) {
   if (segs.length != 7) return false
   for (let i = 0; i < segs.length; i++) if (!/[A-Z2-7]{8}/.test(segs[i])) return false
   const b32 = segs.join('')
-  const buffer = Buffer.from(B32Dec(b32, 'RFC4648'))
+  const buffer = Buffer.from(base32.decode(b32, 'RFC4648'))
   const inputChecksum = []
   for (let i = 0; i < 3; i++) inputChecksum.push(buffer[i + 32])
   for (let i = 0; i < 3; i++) buffer[i + 32] = prefix.charCodeAt(i)
