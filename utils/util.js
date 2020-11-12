@@ -1,10 +1,9 @@
 const CryptoJS = require('crypto-js')
 const { SHA3 } = require('sha3')
-const base32Encode = require('base32-encode')
-
 const { Int64LE } = require('int64-buffer')
 
 const msg = require('./msg')
+const base32 = require('./base32')
 const config = require('../config')
 
 const keySize = 256
@@ -128,7 +127,7 @@ function getZBCAdress(publicKey, prefix) {
   const checksum = hash(bytes, 'buffer')
   for (let i = 0; i < 3; i++) bytes[i + 32] = Number(checksum[i])
   const segs = [prefix]
-  const b32 = base32Encode(bytes, 'RFC4648')
+  const b32 = base32.encode(bytes, 'RFC4648')
   for (let i = 0; i < 7; i++) segs.push(b32.substr(i * 8, 8))
 
   return segs.join('_')

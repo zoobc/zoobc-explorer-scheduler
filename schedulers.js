@@ -5,7 +5,6 @@ const express = require('express')
 const fetch = require('node-fetch')
 const saslprep = require('saslprep')
 const mongoose = require('mongoose')
-const { UI } = require('bull-board')
 
 const config = require('./config')
 const { msg, util, response } = require('./utils')
@@ -163,12 +162,11 @@ const graphqlMutation = async type => {
   }
 }
 
-/** dashboard queue */
+/** starting server */
 const port = config.app.port
 const app = express().set('port', port)
 const http = require('http').Server(app)
-app.use('/admin/queues', UI)
-http.listen(port, () => msg.green(`Dashboard queue is listening on port ${port}`))
+http.listen(port, () => msg.green(`Scheduler listening on port ${port}`))
 
 /** starting app */
 initApp()
