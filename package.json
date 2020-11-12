@@ -27,7 +27,6 @@
     "eslint:fix": "eslint --fix ."
   },
   "dependencies": {
-    "base32-decode": "^1.0.0",
     "base32-encode": "^1.1.1",
     "bull": "^3.14.0",
     "bull-board": "^0.8.0",

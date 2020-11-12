@@ -23,9 +23,6 @@ const schema = new mongoose.Schema(
     Version: { type: Number },
     PayloadLength: { type: Number },
     PayloadHash: { type: Buffer },
-    MerkleRoot: { type: Buffer },
-    MerkleTree: { type: Buffer },
-    ReferenceBlockHeight: { type: Number },
 
     /** BlockExtendedInfo */
     TotalReceipts: { type: Number },
@@ -55,7 +52,7 @@ const schema = new mongoose.Schema(
         BlockHeight: { type: Number },
         ReceiptIndex: { type: Number },
         PublishedIndex: { type: Number },
-        Receipt: {
+        BatchReceipt: {
           SenderPublicKey: { type: String },
           RecipientPublicKey: { type: String },
           DatumType: { type: Number },
