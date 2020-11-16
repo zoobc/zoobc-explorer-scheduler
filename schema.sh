@@ -18,7 +18,12 @@ if [ -d "./zoobc-schema" ]; then
   rm -rf zoobc-schema
 fi
 # git clone -b experimental git@github.com:zoobc/zoobc-schema.git
+# git clone -b develop git@github.com:zoobc/zoobc-schema.git
+
 git clone -b develop git@github.com:zoobc/zoobc-schema.git
+cd ./zoobc-schema
+git checkout tags/v0.0.1-beta
+cd ..
 
 # 2. copy repo zoobc-schema
 if [ -d "./schema" ]; then
