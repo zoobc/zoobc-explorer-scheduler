@@ -65,7 +65,6 @@ module.exports = class ParticipationScores extends BaseController {
 
             let toBeUpdated = []
 
-            //=================]
             const payloads = participationScores.map(i => {
               let stat = 'False'
               //Looking if theres available NodeID in DB and set the status to False
@@ -89,9 +88,10 @@ module.exports = class ParticipationScores extends BaseController {
                 })
               }
 
-              /** calculate different score base on node id and prev height */
-
-              //Calculate the nearest Height from selected NodeID(i)
+              /**
+               * calculate different score base on node id and prev height
+               * Calculate the nearest Height from selected NodeID(i)
+               * */
               const prevParticipations = participationScores.filter(f => f.NodeID === i.NodeID && f.Height < i.Height)
               const nearHeight =
                 prevParticipations.length !== 0
@@ -162,7 +162,6 @@ module.exports = class ParticipationScores extends BaseController {
               })
 
               /** update node score */
-
               const results = await Promise.all(promises)
               const errors = results.filter(f => f.err !== null).map(i => i.err)
               const updates = results.filter(f => f.res !== null).map(i => i.res)
@@ -181,7 +180,6 @@ module.exports = class ParticipationScores extends BaseController {
                 return callback(response.setResult(true, `[Participation Score] Upsert ${payloads.length} data successfully`))
               })
             })
-            //=================]
           })
         })
       })

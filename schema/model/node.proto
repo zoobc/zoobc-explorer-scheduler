@@ -9,13 +9,14 @@ import "model/nodeAddressInfo.proto";
 // NodeInfo represent the node information data structure
 message Node {
 	int64 ID = 1;
-	string SharedAddress = 2;
-	string Address       = 3;
-	uint32 Port          = 4;
+	bytes PublicKey = 2;
+	string SharedAddress = 3;
+	string Address       = 4;
+	uint32 Port          = 5;
 	// AddressStatus the pending/confirmed status of node address
-	NodeAddressStatus AddressStatus = 5;
-	string Version	= 6;
-	string CodeName = 7;
+	NodeAddressStatus AddressStatus = 6;
+	string Version	= 7;
+	string CodeName = 8;
 }
 
 message NodeKey {
