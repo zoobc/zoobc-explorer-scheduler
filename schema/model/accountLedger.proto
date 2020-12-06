@@ -7,7 +7,7 @@ import "model/event.proto";
 import "model/pagination.proto";
 
 message AccountLedger {
-    string AccountAddress = 1;
+    bytes AccountAddress = 1;
     int64 BalanceChange = 2;
     uint32 BlockHeight = 3;
     int64 TransactionID = 4 [ jstype = JS_STRING ];
@@ -16,7 +16,7 @@ message AccountLedger {
 }
 
 message GetAccountLedgersRequest {
-    string AccountAddress = 1;
+    bytes AccountAddress = 1;
     EventType EventType = 2;
     int64 TransactionID = 3 [ jstype = JS_STRING ];
     uint64 TimestampStart = 4;

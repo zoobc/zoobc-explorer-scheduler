@@ -35,7 +35,8 @@ const event = config.app.scheduleEvent
 const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
   try {
     /** reset all data */
-    const logResets = config.app.resetData === 'true' ? await reset.resetAllByHeight(0) : null
+    const height = 0
+    const logResets = config.app.resetData === 'true' ? await reset.resetAllByHeight(height) : null
     if (logResets && logResets.length > 0) {
       logResets.forEach(log => util.log(log))
     }

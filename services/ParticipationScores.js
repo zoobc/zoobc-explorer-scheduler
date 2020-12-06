@@ -4,7 +4,7 @@ const { ParticipationScores } = require('../models')
 module.exports = class ParticipationScoresService extends BaseService {
   constructor() {
     super(ParticipationScores)
-    this.name = 'ParticipationScores'
+    this.name = 'ParticipationScoresService'
   }
 
   getLastHeight(callback) {

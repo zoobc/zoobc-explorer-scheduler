@@ -1,6 +1,14 @@
 const BaseController = require('./BaseController')
 const { store } = require('../utils')
-const { BlocksService, TransactionsService, NodesService, AccountsService, GeneralsService } = require('../services')
+const {
+  NodesService,
+  BlocksService,
+  AccountsService,
+  GeneralsService,
+  TransactionsService,
+  AccountLedgerService,
+  ParticipationScoresService,
+} = require('../services')
 
 module.exports = class ResetData extends BaseController {
   constructor() {
@@ -10,6 +18,8 @@ module.exports = class ResetData extends BaseController {
     this.accountsService = new AccountsService()
     this.generalsService = new GeneralsService()
     this.transactionsService = new TransactionsService()
+    this.accountLedgerService = new AccountLedgerService()
+    this.participationScoresService = new ParticipationScoresService()
   }
 
   static getServiceName(service) {
@@ -22,6 +32,10 @@ module.exports = class ResetData extends BaseController {
         return 'Reset Nodes'
       case 'AccountsService':
         return 'Reset Accounts'
+      case 'ParticipationScoresService':
+        return 'Reset Participation Scores'
+      case 'AccountLedgersService':
+        return 'Reset Account Ledgers'
       default:
         return 'Reset Unknow Service'
     }
@@ -65,6 +79,18 @@ module.exports = class ResetData extends BaseController {
             return resolve({ error, result })
           })
         })
+      case 'ParticipationScoresService':
+        return new Promise(resolve => {
+          ResetData.resetter(this.participationScoresService, { Height: { $gte: height } }, (error, result) => {
+            return resolve({ error, result })
+          })
+        })
+      case 'AccountLedgersService':
+        return new Promise(resolve => {
+          ResetData.resetter(this.accountLedgerService, { BlockHeight: { $gte: height } }, (error, result) => {
+            return resolve({ error, result })
+          })
+        })
       default:
         return { error: '[Reset] Unknow service name', result: { success: false, message: null } }
     }
@@ -98,7 +124,26 @@ module.exports = class ResetData extends BaseController {
       })
     })
 
-    return Promise.all([promiseBlocks, promiseTransactions, promiseNodes, promiseAccounts])
+    const promiseParticipationScores = new Promise(resolve => {
+      ResetData.resetter(this.participationScoresService, { Height: { $gte: height } }, (error, result) => {
+        return resolve({ error, result })
+      })
+    })
+
+    const promiseAccountLedgers = new Promise(resolve => {
+      ResetData.resetter(this.accountLedgerService, { BlockHeight: { $gte: height } }, (error, result) => {
+        return resolve({ error, result })
+      })
+    })
+
+    return Promise.all([
+      promiseNodes,
+      promiseBlocks,
+      promiseAccounts,
+      promiseTransactions,
+      promiseAccountLedgers,
+      promiseParticipationScores,
+    ])
   }
 
   resetAll() {
