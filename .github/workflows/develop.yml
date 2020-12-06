@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v1
       - name: Deploy Development
@@ -16,4 +15,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          script: pm2 deploy ecosystem.config.js scheduler update --force
+          script: pm2 deploy ecosystem.config.js dev_scheduler update --force
