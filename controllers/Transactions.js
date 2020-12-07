@@ -1,7 +1,7 @@
 const moment = require('moment')
 const BaseController = require('./BaseController')
-const { Transaction, Escrow, MultiSignature } = require('../protos')
 const { store, util, response } = require('../utils')
+const { Transaction, Escrow, MultiSignature } = require('../protos')
 const { BlocksService, TransactionsService, GeneralsService } = require('../services')
 
 module.exports = class Transactions extends BaseController {
