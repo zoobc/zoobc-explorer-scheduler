@@ -35,7 +35,8 @@ const event = config.app.scheduleEvent
 const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
   try {
     /** reset all data */
-    const logResets = config.app.resetData === 'true' ? await reset.resetAllByHeight(0) : null
+    const height = 0
+    const logResets = config.app.resetData === 'true' ? await reset.resetAllByHeight(height) : null
     if (logResets && logResets.length > 0) {
       logResets.forEach(log => util.log(log))
     }
@@ -71,7 +72,7 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
                 participationScores.update(res => {
                   util.log(res)
 
-                  nodeStatuses.update(res => {
+                  nodeStatuses.update(async res => {
                     util.log(res)
                   })
                 })
@@ -88,6 +89,8 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
 
 /** init app */
 function initApp() {
+  msg.green(`GRPC host connection ${config.proto.host}`)
+
   /** connecting mongo db */
   const uris = `mongodb://${config.mongodb.host}:${config.mongodb.port}/${config.mongodb.database}`
   const options = {
