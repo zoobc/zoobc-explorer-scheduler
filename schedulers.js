@@ -74,11 +74,6 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
 
                   nodeStatuses.update(async res => {
                     util.log(res)
-
-                    if (res && res.result && res.result.success && res.result.success === true) {
-                      const result = await graphqlMutation('nodes')
-                      util.logMutation(`[GraphQL Mutation] ${result}`)
-                    }
                   })
                 })
               })
@@ -153,7 +148,7 @@ const graphqlMutation = async type => {
   }
 
   const query = JSON.stringify({
-    query: type === 'blocks' ? `mutation { blocks }` : type === 'transactions' ? `mutation { transactions }` : `mutation { nodes }`,
+    query: type === 'blocks' ? `mutation { blocks }` : `mutation { transactions }`,
   })
 
   try {
@@ -164,7 +159,7 @@ const graphqlMutation = async type => {
     })
     const responseJson = await response.json()
 
-    return type === 'blocks' ? responseJson.data.blocks : type === 'transactions' ? responseJson.data.transactions : responseJson.data.nodes
+    return type === 'blocks' ? responseJson.data.blocks : responseJson.data.transactions
   } catch (error) {
     return error
   }
