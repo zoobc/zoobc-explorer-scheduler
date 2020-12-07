@@ -89,6 +89,8 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
 
 /** init app */
 function initApp() {
+  msg.green(`GRPC host connection ${config.proto.host}`)
+
   /** connecting mongo db */
   const uris = `mongodb://${config.mongodb.host}:${config.mongodb.port}/${config.mongodb.database}`
   const options = {
