@@ -11,6 +11,8 @@ enum SignatureType {
     BitcoinSignature = 1;
     // in bytes: []byte{2,0,0,0} for multisig validation purpose only
     MultisigSignature = 2;
+    // in bytes: []byte{3,0,0,0} for estonian eID validation purpose only
+    EstoniaEidSignature = 3;
 }
 
 // BitcoinPrivateKeyBytesLength represent the length of private key that can use

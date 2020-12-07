@@ -5,7 +5,7 @@ option go_package = "github.com/zoobc/zoobc-core/common/model";
 
 import "model/proofOfOwnership.proto";
 import "model/pagination.proto";
-import "model/batchReceipt.proto";
+import "model/receipt.proto";
 import "model/nodeRegistration.proto";
 import "model/escrow.proto";
 import "model/multiSignature.proto";
@@ -17,8 +17,8 @@ message Transaction {
     int64 ID = 2 [ jstype = JS_STRING ];
     int64 BlockID = 3 [ jstype = JS_STRING ];
     uint32 Height = 4;
-    string SenderAccountAddress = 5;
-    string RecipientAccountAddress = 6;
+    bytes SenderAccountAddress = 5;
+    bytes RecipientAccountAddress = 6;
     uint32 TransactionType = 7;
     int64 Fee = 8 [ jstype = JS_STRING ];
     int64 Timestamp = 9 [ jstype = JS_STRING ];
@@ -29,24 +29,25 @@ message Transaction {
     bool MultisigChild = 14;
     // transactionbody
     oneof TransactionBody {
-        EmptyTransactionBody emptyTransactionBody = 15;
-        SendMoneyTransactionBody sendMoneyTransactionBody = 16;
-        NodeRegistrationTransactionBody nodeRegistrationTransactionBody = 17;
-        UpdateNodeRegistrationTransactionBody updateNodeRegistrationTransactionBody = 18;
-        RemoveNodeRegistrationTransactionBody removeNodeRegistrationTransactionBody = 19;
-        ClaimNodeRegistrationTransactionBody claimNodeRegistrationTransactionBody = 20;
-        SetupAccountDatasetTransactionBody setupAccountDatasetTransactionBody = 21;
-        RemoveAccountDatasetTransactionBody removeAccountDatasetTransactionBody = 22;
-        ApprovalEscrowTransactionBody approvalEscrowTransactionBody = 23;
-        MultiSignatureTransactionBody multiSignatureTransactionBody = 24;
-        FeeVoteCommitTransactionBody feeVoteCommitTransactionBody = 25;
-        FeeVoteRevealTransactionBody feeVoteRevealTransactionBody = 26;
-        LiquidPaymentTransactionBody liquidPaymentTransactionBody = 27;
-        LiquidPaymentStopTransactionBody liquidPaymentStopTransactionBody = 28;
+        EmptyTransactionBody emptyTransactionBody = 17;
+        SendMoneyTransactionBody sendMoneyTransactionBody = 18;
+        NodeRegistrationTransactionBody nodeRegistrationTransactionBody = 19;
+        UpdateNodeRegistrationTransactionBody updateNodeRegistrationTransactionBody = 20;
+        RemoveNodeRegistrationTransactionBody removeNodeRegistrationTransactionBody = 21;
+        ClaimNodeRegistrationTransactionBody claimNodeRegistrationTransactionBody = 22;
+        SetupAccountDatasetTransactionBody setupAccountDatasetTransactionBody = 23;
+        RemoveAccountDatasetTransactionBody removeAccountDatasetTransactionBody = 24;
+        ApprovalEscrowTransactionBody approvalEscrowTransactionBody = 25;
+        MultiSignatureTransactionBody multiSignatureTransactionBody = 26;
+        FeeVoteCommitTransactionBody feeVoteCommitTransactionBody = 27;
+        FeeVoteRevealTransactionBody feeVoteRevealTransactionBody = 28;
+        LiquidPaymentTransactionBody liquidPaymentTransactionBody = 29;
+        LiquidPaymentStopTransactionBody liquidPaymentStopTransactionBody = 30;
     }
-    bytes Signature = 29;
+    bytes Signature = 31;
     // nullable
-    Escrow Escrow = 30;
+    Escrow Escrow = 32;
+    bytes Message = 33;
 }
 
 enum TransactionType {
@@ -70,6 +71,10 @@ enum TransactionType {
     ApprovalEscrowTransaction = 4;
     // in bytes: []byte{5,0,0,0}
     MultiSignatureTransaction = 5;
+    // in bytes: []byte{6,0,0,0}
+    LiquidPaymentTransaction = 6;
+    // in bytes: []byte{6,1,0,0}
+    LiquidPaymentStopTransaction = 262;
     // in bytes: []byte{7,0,0,0}
     FeeVoteCommitmentVoteTransaction  = 7;
     // in bytes: []byte{7,1,0,0}
@@ -85,7 +90,7 @@ message SendMoneyTransactionBody {
 
 message NodeRegistrationTransactionBody {
     bytes NodePublicKey = 1;
-    string AccountAddress = 2;
+    bytes AccountAddress = 2;
     // Funds to be locked to register the node
     int64 LockedBalance = 3 [ jstype = JS_STRING ];
     // Proof of ownership (message + signature)
@@ -167,7 +172,7 @@ message GetTransactionRequest {
 
 // GetTransactions return GetTransactionsResponse
 message GetTransactionsRequest {
-    string AccountAddress = 1;
+    bytes AccountAddress = 1;
     uint32 Height = 2;
     int64 TimestampStart = 3 [ jstype = JS_STRING ];
     int64 TimestampEnd = 4 [ jstype = JS_STRING ];
@@ -196,7 +201,7 @@ message SendTransactionRequest {
     bytes SenderPublicKey = 3;
 }
 // SendTransactionResponse a model response of send a transaction in p2pCommunication service
-message SendTransactionResponse { BatchReceipt BatchReceipt = 1; }
+message SendTransactionResponse { Receipt Receipt = 1; }
 
 
 
@@ -216,7 +221,7 @@ message SendBlockTransactionsRequest {
 
 // SendBlockTransactionsResponse a model response of a process sending block's transactions
 message SendBlockTransactionsResponse {
-    repeated BatchReceipt BatchReceipts = 1;
+    repeated Receipt Receipts = 1;
 }
 
 // GetTransactionMinimumFeeRequest a model request for getting minimum fee required to post the transaction

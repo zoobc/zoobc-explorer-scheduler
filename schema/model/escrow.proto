@@ -7,9 +7,9 @@ import "model/pagination.proto";
 
 message Escrow {
     int64 ID = 1 [ jstype = JS_STRING ];
-    string SenderAddress = 2;
-    string RecipientAddress = 3;
-    string ApproverAddress = 4;
+    bytes SenderAddress = 2;
+    bytes RecipientAddress = 3;
+    bytes ApproverAddress = 4;
     int64 Amount = 5 [ jstype = JS_STRING ];
     int64 Commission = 6 [ jstype = JS_STRING ];
     // Timeout is BlockHeight gap 
@@ -34,9 +34,9 @@ enum EscrowApproval {
 
 // GetEscrowTransactionsRequest message for get escrow transactions
 message GetEscrowTransactionsRequest {
-    string ApproverAddress = 1;
-    string SenderAddress = 2;
-    string RecipientAddress = 3;
+    bytes ApproverAddress = 1;
+    bytes SenderAddress = 2;
+    bytes RecipientAddress = 3;
     int64 ID = 4 [jstype = JS_STRING];
     repeated EscrowStatus  Statuses = 5;
     uint32 BlockHeightStart = 6;

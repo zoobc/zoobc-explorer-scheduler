@@ -1,18 +1,18 @@
-name: Deploy Development
+name: Deploy Beta
 
 on:
   push:
-    branches: [develop]
+    branches: [beta]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Deploy Development
+      - name: Deploy Beta Release
         uses: appleboy/ssh-action@master
         with:
           key: ${{ secrets.SSH_KEY }}
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          script: pm2 deploy ecosystem.config.js dev_scheduler update --force
+          script: pm2 deploy ecosystem.config.js beta_scheduler update --force
