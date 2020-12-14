@@ -57,7 +57,7 @@ module.exports = class AccountLedgers extends BaseController {
                 TransactionHeight: res ? res.TransactionHeight : null,
                 TotalFeesPaid: res ? res.TotalFeesPaid : 0,
                 TotalFeesPaidConversion: res ? res.TotalFeesPaidConversion : 0,
-                AccountAddress: item.AccountAddress,
+                AccountAddress: util.getZBCAdress(item.AccountAddress, 'ZBC'),
                 BalanceConversion: util.zoobitConversion(Balance),
                 SpendableBalance: res ? res.SpendableBalance : 0,
                 SpendableBalanceConversion: res ? res.SpendableBalanceConversion : 0,
