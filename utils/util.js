@@ -133,6 +133,25 @@ function getZBCAdress(publicKey, prefix) {
   return segs.join('_')
 }
 
+function parseAddress(account) {
+  if (account === '' || account === undefined) return ''
+
+  let accountBytes
+  if (typeof account === 'string') accountBytes = Buffer.from(account.toString(), 'base64')
+  else accountBytes = Buffer.from(account)
+
+  const type = accountBytes.readInt32LE(0)
+
+  switch (type) {
+    case 0 /** ZBCACCOUNTTYPE */:
+      return getZBCAdress(accountBytes.slice(4, 36), 'ZBC')
+    case 1 /** BTCACCOUNTTYPE */:
+      return ''
+    default:
+      return ''
+  }
+}
+
 function hash(str, format) {
   const h = new SHA3(256)
   h.update(str)
@@ -154,4 +173,5 @@ module.exports = util = {
   hmacEncrypt,
   getZBCAdress,
   hashToInt64,
+  parseAddress,
 }
