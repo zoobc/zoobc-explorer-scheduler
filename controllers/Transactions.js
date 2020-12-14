@@ -66,7 +66,7 @@ module.exports = class Transactions extends BaseController {
             NodePublicKeyFormatted: item.nodeRegistrationTransactionBody
               ? util.getZBCAdress(item.nodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
-            AccountAddress: item.nodeRegistrationTransactionBody.AccountAddress,
+            AccountAddress: util.parseAddress(item.nodeRegistrationTransactionBody.AccountAddress),
             NodeAddress: item.nodeRegistrationTransactionBody.NodeAddress,
             LockedBalance: item.nodeRegistrationTransactionBody.LockedBalance,
             LockedBalanceConversion: item.nodeRegistrationTransactionBody
@@ -131,8 +131,8 @@ module.exports = class Transactions extends BaseController {
                     TransactionType: res.TransactionType,
                     BlockID: res.BlockID,
                     Height: res.Height,
-                    Sender: util.getZBCAdress(res.SenderAccountAddress, 'ZBC'),
-                    Recipient: util.getZBCAdress(res.RecipientAccountAddress, 'ZBC'),
+                    Sender: util.parseAddress(res.SenderAccountAddress),
+                    Recipient: util.parseAddress(res.RecipientAccountAddress),
                     Fee: res.Fee,
                     FeeConversion: res ? util.zoobitConversion(res.Fee) : 0,
                     Status: 'Approved',
@@ -262,8 +262,8 @@ module.exports = class Transactions extends BaseController {
         TransactionType: item.TransactionType,
         BlockID: item.BlockID,
         Height: item.Height,
-        Sender: util.getZBCAdress(item.SenderAccountAddress, 'ZBC'),
-        Recipient: util.getZBCAdress(item.RecipientAccountAddress, 'ZBC'),
+        Sender: util.parseAddress(item.SenderAccountAddress),
+        Recipient: util.parseAddress(item.RecipientAccountAddress),
         Fee: item.Fee,
         Status: status,
         FeeConversion: item ? util.zoobitConversion(item.Fee) : 0,
