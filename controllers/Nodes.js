@@ -75,7 +75,7 @@ module.exports = class Nodes extends BaseController {
                   NodeID: item.NodeID,
                   NodePublicKey: item.NodePublicKey,
                   NodePublicKeyFormatted: util.getZBCAdress(item.NodePublicKey, 'ZNK'),
-                  OwnerAddress: util.getZBCAdress(item.AccountAddress, 'ZBC'),
+                  OwnerAddress: util.parseAddress(item.AccountAddress),
                   RegisteredBlockHeight: item.RegistrationHeight,
                   LockedFunds: util.zoobitConversion(item.LockedBalance),
                   RegistrationStatus: item.RegistrationStatus,
