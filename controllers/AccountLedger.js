@@ -57,7 +57,8 @@ module.exports = class AccountLedgers extends BaseController {
                 TransactionHeight: res ? res.TransactionHeight : null,
                 TotalFeesPaid: res ? res.TotalFeesPaid : 0,
                 TotalFeesPaidConversion: res ? res.TotalFeesPaidConversion : 0,
-                AccountAddress: util.parseAddress(item.AccountAddress),
+                AccountAddress: item.AccountAddress,
+                AccountAddressFormatted: util.parseAddress(item.AccountAddress),
                 BalanceConversion: util.zoobitConversion(Balance),
                 SpendableBalance: res ? res.SpendableBalance : 0,
                 SpendableBalanceConversion: res ? res.SpendableBalanceConversion : 0,
@@ -87,14 +88,15 @@ module.exports = class AccountLedgers extends BaseController {
         const payloads = res.AccountLedgers.map(i => {
           return {
             ...i,
-            AccountAddress: util.parseAddress(i.AccountAddress),
+            AccountAddress: i.AccountAddress,
+            AccountAddressFormatted: util.parseAddress(i.AccountAddress),
             Timestamp: new Date(moment.unix(i.Timestamp).valueOf()),
             BalanceChange: parseInt(i.BalanceChange),
             BalanceChangeConversion: util.zoobitConversion(parseInt(i.BalanceChange)),
           }
         })
 
-        this.service.upserts(payloads, ['AccountAddress', 'BlockHeight', 'TransactionID'], (err, res) => {
+        this.service.upserts(payloads, ['AccountAddressFormatted', 'BlockHeight', 'TransactionID'], (err, res) => {
           /** send message telegram bot if avaiable */
           if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledger] Upsert - ${err}`))
           if (res && res.result.ok !== 1) return callback(response.setError('[Account Ledger] Upsert data failed'))

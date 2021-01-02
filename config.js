@@ -5,7 +5,7 @@ module.exports = {
   app: {
     limitData: 100,
     port: process.env.PORT || 3033,
-    scheduleEvent: 15 /** seconds */,
+    scheduleEvent: 10 /** seconds */,
     chatId: process.env.CHAT_ID || null,
     resetData: process.env.RESET_DATA || false,
     env: process.env.NODE_ENV || 'development',

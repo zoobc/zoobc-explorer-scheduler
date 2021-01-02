@@ -8,8 +8,10 @@ const schema = new mongoose.Schema(
     TransactionType: { type: Number },
     BlockID: { type: String },
     Height: { type: Number },
-    Sender: { type: String } /** SenderAccountAddress */,
-    Recipient: { type: String } /** RecipientAccountAddress */,
+    Sender: { type: Buffer } /** SenderAccountAddress */,
+    SenderFormatted: { type: String } /** update */,
+    Recipient: { type: Buffer } /** RecipientAccountAddress */,
+    RecipientFormatted: { type: String } /** update */,
     Fee: { type: Number },
     Status: { type: String },
     FeeConversion: { type: String },
@@ -22,6 +24,8 @@ const schema = new mongoose.Schema(
     MultisigChild: { type: Boolean } /** additional */,
     Signature: { type: Buffer } /** additional */,
     TransactionBody: { type: String },
+    Message: { type: Buffer },
+    MessageFormatted: { type: String } /** update */,
     /** convertion by transaction body */
     TransactionTypeName: { type: String },
     SendMoney: {
@@ -39,7 +43,8 @@ const schema = new mongoose.Schema(
     NodeRegistration: {
       NodePublicKey: { type: Buffer },
       NodePublicKeyFormatted: { type: String },
-      AccountAddress: { type: String },
+      AccountAddress: { type: Buffer },
+      AccountAddressFormatted: { type: String } /** update */,
       NodeAddress: {
         Address: { type: String },
         Port: { type: Number },
@@ -70,37 +75,38 @@ const schema = new mongoose.Schema(
       },
     },
     SetupAccount: {
-      SetterAccountAddress: { type: String },
-      RecipientAccountAddress: { type: String },
+      SetterAccountAddress: { type: Buffer },
+      SetterAccountAddressFormatted: { type: String } /** update */,
+      RecipientAccountAddress: { type: Buffer },
+      RecipientAccountAddressFormatted: { type: String } /** update */,
       Property: { type: String },
       Value: { type: String },
     },
     RemoveAccount: {
-      SetterAccountAddress: { type: String },
-      RecipientAccountAddress: { type: String },
+      SetterAccountAddress: { type: Buffer },
+      SetterAccountAddressFormatted: { type: String } /** update */,
+      RecipientAccountAddress: { type: Buffer },
+      RecipientAccountAddressFormatted: { type: String } /** update */,
       Property: { type: String },
       Value: { type: String },
     },
     MultiSignature: {
+      UnsignedTransactionBytes: { type: Buffer },
       MultiSignatureInfo: {
-        MultisigAddress: { type: String },
+        MultisigAddress: { type: Buffer },
+        MultisigAddressFormatted: { type: String } /** update */,
         BlockHeight: { type: Number },
         Nonce: { type: String },
         MinimumSignatures: { type: Number },
         Latest: { type: Boolean },
-        Addresses: {
-          type: [String],
-          default: undefined,
-        },
+        // Addresses: { type: [String], default: undefined },
+        Addresses: { type: [Buffer], default: undefined },
+        AddressesFormatted: { type: [String], default: undefined } /** update */,
       },
-      UnsignedTransactionBytes: { type: Buffer },
       SignatureInfo: {
         TransactionHash: { type: Buffer },
         TransactionHashFormatted: { type: String },
-        Signatures: {
-          type: Map,
-          of: Buffer,
-        },
+        Signatures: { type: Map, of: Buffer },
       },
     },
     ApprovalEscrow: {
@@ -109,9 +115,12 @@ const schema = new mongoose.Schema(
     },
     Escrow: {
       ID: { type: String },
-      SenderAddress: { type: String },
-      RecipientAddress: { type: String },
-      ApproverAddress: { type: String },
+      SenderAddress: { type: Buffer },
+      SenderAddressFormatted: { type: String } /** update */,
+      RecipientAddress: { type: Buffer },
+      RecipientAddressFormatted: { type: String } /** update */,
+      ApproverAddress: { type: Buffer },
+      ApproverAddressFormatted: { type: String } /** update */,
       Amount: { type: Number },
       AmountConversion: { type: String },
       Commission: { type: Number },
@@ -125,19 +134,20 @@ const schema = new mongoose.Schema(
     FeeVoteCommit: {
       VoteHash: { type: Buffer },
     },
-    FeeVoteRevealTransactionBody: {
+    FeeVoteReveal: {
       FeeVoteInfo: {
         RecentBlockHash: { type: Buffer },
-        RecentBlockHeight: { type: Buffer },
+        RecentBlockHeight: { type: Number } /** update */,
         FeeVote: { type: Number },
       },
       VoterSignature: { type: Buffer },
     },
-    LiquidPaymentTransactionBody: {
+    LiquidPayment: {
       Amount: { type: Number },
+      AmountConversion: { type: String } /** update */,
       CompleteMinutes: { type: Number },
     },
-    LiquidPaymentStopTransactionBody: {
+    LiquidPaymentStop: {
       TransactionID: { type: String } /** ID */,
     },
   },
