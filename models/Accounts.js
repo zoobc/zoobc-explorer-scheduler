@@ -3,7 +3,8 @@ const { upserts } = require('../utils')
 
 const schema = new mongoose.Schema(
   {
-    AccountAddress: { type: String },
+    AccountAddress: { type: Buffer },
+    AccountAddressFormatted: { type: String } /** update */,
     Balance: { type: Number },
     BalanceConversion: { type: String },
     SpendableBalance: { type: Number },

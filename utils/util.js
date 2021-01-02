@@ -120,7 +120,7 @@ const queryfy = obj => {
   return JSON.stringify(obj)
 }
 
-function getZBCAdress(publicKey, prefix) {
+function getZBCAddress(publicKey, prefix) {
   const bytes = Buffer.alloc(35)
   for (let i = 0; i < 32; i++) bytes[i] = publicKey[i]
   for (let i = 0; i < 3; i++) bytes[i + 32] = prefix.charCodeAt(i)
@@ -134,21 +134,23 @@ function getZBCAdress(publicKey, prefix) {
 }
 
 function parseAddress(account) {
-  if (account === '' || account === undefined) return ''
+  if (account === '' || account === undefined || !account) return null
 
   let accountBytes
   if (typeof account === 'string') accountBytes = Buffer.from(account.toString(), 'base64')
   else accountBytes = Buffer.from(account)
 
+  if (accountBytes.slice(0).toString() === '') return null
+
   const type = accountBytes.readInt32LE(0)
 
   switch (type) {
     case 0 /** ZBCACCOUNTTYPE */:
-      return getZBCAdress(accountBytes.slice(4, 36), 'ZBC')
+      return getZBCAddress(accountBytes.slice(4, 36), 'ZBC')
     case 1 /** BTCACCOUNTTYPE */:
-      return ''
+      return null
     default:
-      return ''
+      return null
   }
 }
 
@@ -171,7 +173,7 @@ module.exports = util = {
   logMutation,
   queryfy,
   hmacEncrypt,
-  getZBCAdress,
+  getZBCAddress,
   hashToInt64,
   parseAddress,
 }

@@ -45,11 +45,14 @@ module.exports = class Blocks extends BaseController {
         receiptsMapped = receipts.PublishedReceipts.map(i => {
           return {
             ...i,
-            IntermediateHashes: util.bufferStr(i.IntermediateHashes),
+            IntermediateHashes: i.IntermediateHashes,
+            IntermediateHashesFormatted: util.bufferStr(i.IntermediateHashes),
             Receipt: {
               ...i.Receipt,
-              SenderPublicKey: util.getZBCAdress(i.Receipt.SenderPublicKey, 'ZNK'),
-              RecipientPublicKey: util.getZBCAdress(i.Receipt.RecipientPublicKey, 'ZNK'),
+              SenderPublicKey: i.Receipt.SenderPublicKey,
+              SenderPublicKeyFormatted: util.getZBCAddress(i.Receipt.SenderPublicKey, 'ZNK'),
+              RecipientPublicKey: i.Receipt.RecipientPublicKey,
+              RecipientPublicKeyFormatted: util.getZBCAddress(i.Receipt.RecipientPublicKey, 'ZNK'),
             },
           }
         })
@@ -59,22 +62,26 @@ module.exports = class Blocks extends BaseController {
         skippedsMapped = skippeds.SkippedBlocksmiths.map(i => {
           return {
             ...i,
-            BlocksmithPublicKey: util.getZBCAdress(i.BlocksmithPublicKey, 'ZNK'),
+            BlocksmithPublicKey: i.BlocksmithPublicKey,
+            BlocksmithPublicKeyFormatted: util.getZBCAddress(i.BlocksmithPublicKey, 'ZNK'),
           }
         })
       }
 
       return {
         BlockID: item.ID,
-        BlockHash: util.getZBCAdress(item.BlockHash, 'ZBL'),
-        PreviousBlockID: util.getZBCAdress(item.PreviousBlockHash, 'ZBL'),
+        BlockHash: item.BlockHash,
+        BlockHashFormatted: util.getZBCAddress(item.BlockHash, 'ZBL'),
+        PreviousBlockID: item.PreviousBlockHash,
+        PreviousBlockIDFormatted: util.getZBCAddress(item.PreviousBlockHash, 'ZBL'),
         Height: item.Height,
         Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
         BlockSeed: item.BlockSeed,
         BlockSignature: item.BlockSignature,
         CumulativeDifficulty: item.CumulativeDifficulty,
         SmithScale: null,
-        BlocksmithID: util.getZBCAdress(item.BlocksmithPublicKey, 'ZNK'),
+        BlocksmithID: item.BlocksmithPublicKey,
+        BlocksmithIDFormatted: util.getZBCAddress(item.BlocksmithPublicKey, 'ZNK'),
         TotalAmount: item.TotalAmount,
         TotalAmountConversion: util.zoobitConversion(item.TotalAmount),
         TotalFee: item.TotalFee,
@@ -84,20 +91,24 @@ module.exports = class Blocks extends BaseController {
         Version: item.Version,
         PayloadLength: item.PayloadLength,
         PayloadHash: item.PayloadHash,
+        MerkleRoot: item.MerkleRoot,
+        MerkleTree: item.MerkleTree,
+        ReferenceBlockHeight: item.ReferenceBlockHeight,
+
         /** BlockExtendedInfo */
         TotalReceipts: null,
         PopChange: null,
         ReceiptValue: null,
         BlocksmithAddress: null,
+        BlocksmithAddressFormatted: null,
         SkippedBlocksmiths: skippedsMapped,
+
         /** Aggregate */
         TotalRewards,
         TotalRewardsConversion: util.zoobitConversion(TotalRewards),
+
         /** Relations */
         PublishedReceipts: receiptsMapped,
-        MerkleRoot: item.MerkleRoot,
-        MerkleTree: item.MerkleTree,
-        ReferenceBlockHeight: item.ReferenceBlockHeight,
       }
     })
 

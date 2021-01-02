@@ -18,6 +18,12 @@ module.exports = class Transactions extends BaseController {
           if (err) resolve(null)
           const escrow = res && {
             ...res,
+            SenderAddress: res.SenderAddress,
+            SenderAddressFormatted: util.parseAddress(res.SenderAddress),
+            RecipientAddress: res.RecipientAddress,
+            RecipientAddressFormatted: util.parseAddress(res.RecipientAddress),
+            ApproverAddress: res.ApproverAddress,
+            ApproverAddressFormatted: util.parseAddress(res.ApproverAddress),
             AmountConversion: res ? util.zoobitConversion(res.Amount) : 0,
             CommissionConversion: res ? util.zoobitConversion(res.Commission) : 0,
           }
@@ -36,6 +42,7 @@ module.exports = class Transactions extends BaseController {
     }
 
     const promises = transactions.map(async item => {
+      let transactionTypeName = ''
       let sendMoney = null
       let claimNodeRegistration = null
       let nodeRegistration = null
@@ -45,8 +52,11 @@ module.exports = class Transactions extends BaseController {
       let removeAccount = null
       let approvalEscrow = null
       let multiSignature = null
-      let transactionTypeName = ''
       let escrow = null
+      let feeVoteCommit = null
+      let feeVoteReveal = null
+      let liquidPayment = null
+      let liquidPaymentStop = null
       let status = item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Approved'
 
       switch (item.TransactionType) {
@@ -64,9 +74,10 @@ module.exports = class Transactions extends BaseController {
           nodeRegistration = {
             NodePublicKey: item.nodeRegistrationTransactionBody ? item.nodeRegistrationTransactionBody.NodePublicKey : null,
             NodePublicKeyFormatted: item.nodeRegistrationTransactionBody
-              ? util.getZBCAdress(item.nodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
+              ? util.getZBCAddress(item.nodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
-            AccountAddress: util.parseAddress(item.nodeRegistrationTransactionBody.AccountAddress),
+            AccountAddress: item.nodeRegistrationTransactionBody.AccountAddress,
+            AccountAddressFormatted: util.parseAddress(item.nodeRegistrationTransactionBody.AccountAddress),
             NodeAddress: item.nodeRegistrationTransactionBody.NodeAddress,
             LockedBalance: item.nodeRegistrationTransactionBody.LockedBalance,
             LockedBalanceConversion: item.nodeRegistrationTransactionBody
@@ -90,10 +101,27 @@ module.exports = class Transactions extends BaseController {
           break
         case 5:
           transactionTypeName = 'Multisignature'
+
           multiSignature = {
             ...item.multiSignatureTransactionBody,
             MultiSignatureInfo: {
+              MultisigAddress: null,
               ...item.multiSignatureTransactionBody.MultiSignatureInfo,
+              // MultisigAddress: item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
+              //   ? item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
+              //   : null,
+              // MultisigAddressFormatted: item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
+              //   ? util.parseAddress(item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress)
+              //   : null,
+              MultisigAddressFormatted: null,
+              AddressesFormatted:
+                item.multiSignatureTransactionBody.MultiSignatureInfo &&
+                item.multiSignatureTransactionBody.MultiSignatureInfo.Addresses &&
+                item.multiSignatureTransactionBody.MultiSignatureInfo.Addresses.length > 0
+                  ? item.multiSignatureTransactionBody.MultiSignatureInfo.Addresses.map(item => {
+                      return util.parseAddress(item)
+                    })
+                  : [],
             },
             SignatureInfo: {
               TransactionHash: null,
@@ -101,7 +129,7 @@ module.exports = class Transactions extends BaseController {
               TransactionHashFormatted:
                 item.multiSignatureTransactionBody.SignatureInfo &&
                 item.multiSignatureTransactionBody.SignatureInfo.TransactionHash &&
-                util.getZBCAdress(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash, 'ZTX'),
+                util.getZBCAddress(item.multiSignatureTransactionBody.SignatureInfo.TransactionHash, 'ZTX'),
             },
           }
 
@@ -131,14 +159,16 @@ module.exports = class Transactions extends BaseController {
                     TransactionType: res.TransactionType,
                     BlockID: res.BlockID,
                     Height: res.Height,
-                    Sender: util.parseAddress(res.SenderAccountAddress),
-                    Recipient: util.parseAddress(res.RecipientAccountAddress),
+                    Sender: res.SenderAccountAddress,
+                    SenderFormatted: util.parseAddress(res.SenderAccountAddress),
+                    Recipient: res.RecipientAccountAddress,
+                    RecipientFormatted: util.parseAddress(res.RecipientAccountAddress),
                     Fee: res.Fee,
                     FeeConversion: res ? util.zoobitConversion(res.Fee) : 0,
                     Status: 'Approved',
                     Version: res.Version,
                     TransactionHash: res.TransactionHash,
-                    TransactionHashFormatted: util.getZBCAdress(res.TransactionHash, 'ZTX'),
+                    TransactionHashFormatted: util.getZBCAddress(res.TransactionHash, 'ZTX'),
                     TransactionBodyLength: res.TransactionBodyLength,
                     TransactionBodyBytes: res.TransactionBodyBytes,
                     TransactionIndex: res.TransactionIndex,
@@ -192,9 +222,10 @@ module.exports = class Transactions extends BaseController {
           /** if signature is null so that get pending transaction by height to height + 1 and then update signature info */
           if (!item.multiSignatureTransactionBody.SignatureInfo) {
             const pendingTransaction = await getMultiSignature(item.Height)
+
             if (pendingTransaction) {
               multiSignature.SignatureInfo.TransactionHash = pendingTransaction.TransactionHash
-              multiSignature.SignatureInfo.TransactionHashFormatted = util.getZBCAdress(pendingTransaction.TransactionHash, 'ZTX')
+              multiSignature.SignatureInfo.TransactionHashFormatted = util.getZBCAddress(pendingTransaction.TransactionHash, 'ZTX')
             }
           } else {
             const pendingTransaction = await getMultiSignature(item.Height)
@@ -218,7 +249,7 @@ module.exports = class Transactions extends BaseController {
           updateNodeRegistration = {
             NodePublicKey: item.updateNodeRegistrationTransactionBody ? item.updateNodeRegistrationTransactionBody.NodePublicKey : null,
             NodePublicKeyFormatted: item.updateNodeRegistrationTransactionBody
-              ? util.getZBCAdress(item.updateNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
+              ? util.getZBCAddress(item.updateNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
             NodeAddress: item.updateNodeRegistrationTransactionBody.NodeAddress,
             LockedBalance: item.updateNodeRegistrationTransactionBody.LockedBalance,
@@ -237,7 +268,7 @@ module.exports = class Transactions extends BaseController {
           removeNodeRegistration = {
             NodePublicKey: item.removeNodeRegistrationTransactionBody ? item.removeNodeRegistrationTransactionBody.NodePublicKey : null,
             NodePublicKeyFormatted: item.removeNodeRegistrationTransactionBody
-              ? util.getZBCAdress(item.removeNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
+              ? util.getZBCAddress(item.removeNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
           }
           break
@@ -246,10 +277,26 @@ module.exports = class Transactions extends BaseController {
           claimNodeRegistration = {
             NodePublicKey: item.claimNodeRegistrationTransactionBody ? item.claimNodeRegistrationTransactionBody.NodePublicKey : null,
             NodePublicKeyFormatted: item.claimNodeRegistrationTransactionBody
-              ? util.getZBCAdress(item.claimNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
+              ? util.getZBCAddress(item.claimNodeRegistrationTransactionBody.NodePublicKey, 'ZNK')
               : null,
             ProofOfOwnership: item.claimNodeRegistrationTransactionBody.Poown,
           }
+          break
+        case 6:
+          transactionTypeName = 'Liquid'
+          liquidPayment = { ...item.liquidPaymentTransactionBody }
+          break
+        case 262:
+          transactionTypeName = 'Liquid Payment Stop'
+          liquidPaymentStop = { ...item.liquidPaymentStopTransactionBody }
+          break
+        case 7:
+          transactionTypeName = 'Fee Vote Commitment'
+          feeVoteCommit = { VoteHash: item.feeVoteCommitTransactionBody.VoteHash }
+          break
+        case 263:
+          transactionTypeName = 'Fee Vote Reveal'
+          feeVoteReveal = { ...item.feeVoteRevealTransactionBody }
           break
         default:
           transactionTypeName = 'Empty Transaction'
@@ -257,24 +304,31 @@ module.exports = class Transactions extends BaseController {
       }
 
       return {
+        Version: item.Version,
         TransactionID: item.ID,
-        Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
-        TransactionType: item.TransactionType,
         BlockID: item.BlockID,
         Height: item.Height,
-        Sender: util.parseAddress(item.SenderAccountAddress),
-        Recipient: util.parseAddress(item.RecipientAccountAddress),
+        Sender: item.SenderAccountAddress,
+        SenderFormatted: util.parseAddress(item.SenderAccountAddress),
+        Recipient: item.RecipientAccountAddress,
+        RecipientFormatted: util.parseAddress(item.RecipientAccountAddress),
+        TransactionType: item.TransactionType,
         Fee: item.Fee,
-        Status: status,
-        FeeConversion: item ? util.zoobitConversion(item.Fee) : 0,
-        Version: item.Version,
+        FeeConversion: item && item.Fee ? util.zoobitConversion(item.Fee) : 0,
+        Timestamp: new Date(moment.unix(item.Timestamp).valueOf()),
         TransactionHash: item.TransactionHash,
-        TransactionHashFormatted: util.getZBCAdress(item.TransactionHash, 'ZTX'),
+        TransactionHashFormatted: util.getZBCAddress(item.TransactionHash, 'ZTX'),
         TransactionBodyLength: item.TransactionBodyLength,
         TransactionBodyBytes: item.TransactionBodyBytes,
         TransactionIndex: item.TransactionIndex,
+        MultisigChild: item.MultisigChild,
         Signature: item.Signature,
+        Message: item.Message,
+        MessageFormatted: util.bufferStr(item.Message),
         TransactionBody: item.TransactionBody,
+        Escrow: escrow,
+        Status: status,
+        /** convertion by transaction body */
         TransactionTypeName: transactionTypeName,
         SendMoney: sendMoney,
         ClaimNodeRegistration: claimNodeRegistration,
@@ -285,8 +339,10 @@ module.exports = class Transactions extends BaseController {
         RemoveAccount: removeAccount,
         MultiSignature: multiSignature,
         ApprovalEscrow: approvalEscrow,
-        MultisigChild: item.MultisigChild,
-        Escrow: escrow,
+        FeeVoteCommit: feeVoteCommit,
+        FeeVoteReveal: feeVoteReveal,
+        LiquidPayment: liquidPayment,
+        LiquidPaymentStop: liquidPaymentStop,
       }
     })
     return await Promise.all(promises)
@@ -328,7 +384,6 @@ module.exports = class Transactions extends BaseController {
 
         /** update or insert data */
         const payloads = await this.mappingTransactions(res.Transactions)
-
         this.service.upserts(payloads, ['TransactionID', 'Height'], (err, res) => {
           /** send message telegram bot if available */
           if (err) return callback(response.sendBotMessage('Transactions', `[Transactions] Upsert - ${err}`))

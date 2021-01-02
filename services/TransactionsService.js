@@ -44,6 +44,7 @@ module.exports = class TransactionsService extends BaseService {
         Timestamp: i.Timestamp,
         Height: i.Height,
         Account: i.Sender,
+        AccountFormatted: i.SenderFormatted,
         Fee: i.Fee,
         Type: 'Sender',
       }
@@ -57,6 +58,7 @@ module.exports = class TransactionsService extends BaseService {
         Timestamp: i.Timestamp,
         Height: i.Height,
         Account: i.Recipient,
+        AccountFormatted: i.RecipientFormatted,
         Fee: i.Fee,
         Type: 'Recipient',
       }
@@ -93,17 +95,18 @@ module.exports = class TransactionsService extends BaseService {
   getSendersByHeights(heightStart, heightEnd, callback) {
     Transactions.find({
       Height: { $gte: heightStart, $lte: heightEnd },
-      TransactionType: 1,
+      // TransactionType: 1,
+      $or: [{ TransactionType: 1 }, { TransactionType: 2 }],
       Sender: { $ne: null },
     })
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Sender: { $ne: null } }, { Sender: { $ne: '' } }] })
-      .select('Sender Height Fee Timestamp SendMoney')
+      .select('Sender SenderFormatted Height Fee Timestamp SendMoney')
       .sort('Height')
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, [])
 
-        const results = _.uniqBy(res, 'Sender').filter(f => util.isNotNullAccountAddress(f.Sender))
+        const results = _.uniqBy(res, 'SenderFormatted').filter(f => util.isNotNullAccountAddress(f.Sender))
         return callback(null, results)
       })
   }
@@ -120,17 +123,18 @@ module.exports = class TransactionsService extends BaseService {
   getRecipientsByHeights(heightStart, heightEnd, callback) {
     Transactions.find({
       Height: { $gte: heightStart, $lte: heightEnd },
-      TransactionType: 1,
+      // TransactionType: 1,
+      $or: [{ TransactionType: 1 }, { TransactionType: 2 }],
       Recipient: { $ne: null },
     })
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Recipient: { $ne: null } }, { Recipient: { $ne: '' } }] })
-      .select('Recipient Height Fee Timestamp SendMoney')
+      .select('Recipient RecipientFormatted Height Fee Timestamp SendMoney')
       .sort('Height')
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, [])
 
-        const results = _.uniqBy(res, 'Recipient').filter(f => util.isNotNullAccountAddress(f.Recipient))
+        const results = _.uniqBy(res, 'RecipientFormatted').filter(f => util.isNotNullAccountAddress(f.Recipient))
         return callback(null, results)
       })
   }
