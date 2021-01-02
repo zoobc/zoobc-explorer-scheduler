@@ -34,13 +34,6 @@ const participationScores = new ParticipationScores()
 const event = config.app.scheduleEvent
 const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
   try {
-    /** reset all data */
-    const height = 0
-    const logResets = config.app.resetData === 'true' ? await reset.resetAllByHeight(height) : null
-    if (logResets && logResets.length > 0) {
-      logResets.forEach(log => util.log(log))
-    }
-
     blocks.update(async res => {
       util.log(res)
 
@@ -87,6 +80,14 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
   }
 })
 
+/** reset all data */
+async function resetData(height = 0) {
+  const logResets = config.app.resetData === 'true' ? await reset.resetAllByHeight(height) : null
+  if (logResets && logResets.length > 0) {
+    logResets.forEach(log => util.log(log))
+  }
+}
+
 /** init app */
 function initApp() {
   msg.green(`GRPC host connection ${config.proto.host}`)
@@ -125,6 +126,8 @@ function connectRedis() {
 
       /** running scheduler */
       if (event > 0) {
+        //last check height 16500
+        resetData()
         cronApp.start()
         msg.green(`Scheduler run every ${event} seconds`)
       }
