@@ -5,15 +5,18 @@ const schema = new mongoose.Schema(
   {
     /** Block */
     BlockID: { type: String } /** ID */,
-    BlockHash: { type: String },
-    PreviousBlockID: { type: String } /** PreviousBlockHash */,
+    BlockHash: { type: Buffer },
+    BlockHashFormatted: { type: String } /** update */,
+    PreviousBlockID: { type: Buffer } /** PreviousBlockHash */,
+    PreviousBlockIDFormatted: { type: String } /** update */,
     Height: { type: Number },
     Timestamp: { type: Date },
     BlockSeed: { type: Buffer },
     BlockSignature: { type: Buffer },
     CumulativeDifficulty: { type: String },
     SmithScale: { type: Number },
-    BlocksmithID: { type: String } /** BlocksmithPublicKey */,
+    BlocksmithID: { type: Buffer } /** BlocksmithPublicKey */,
+    BlocksmithIDFormatted: { type: String } /** update */,
     TotalAmount: { type: Number },
     TotalAmountConversion: { type: String },
     TotalFee: { type: Number },
@@ -31,33 +34,30 @@ const schema = new mongoose.Schema(
     TotalReceipts: { type: Number },
     ReceiptValue: { type: Number },
     PopChange: { type: String },
-    BlocksmithAddress: { type: String } /** BlocksmithAccountAddress */,
+    BlocksmithAddress: { type: Buffer } /** BlocksmithAccountAddress */,
+    BlocksmithAddressFormatted: { type: String } /** update */,
     SkippedBlocksmiths: [
       {
-        BlocksmithPublicKey: { type: String },
+        BlocksmithPublicKey: { type: Buffer },
+        BlocksmithPublicKeyFormatted: { type: String } /** update */,
         POPChange: { type: String },
         BlockHeight: { type: Number },
         BlocksmithIndex: { type: Number },
       },
     ],
 
-    /** Aggregate */
-    TotalRewards: { type: Number },
-    TotalRewardsConversion: { type: String },
-
-    /** Relations */
-    // Transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transactions' }],
-    // PublishedReceipts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Published_Receipts' }],
-
     PublishedReceipts: [
       {
-        IntermediateHashes: { type: String },
+        IntermediateHashes: { type: Buffer },
+        IntermediateHashesFormatted: { type: String } /** update */,
         BlockHeight: { type: Number },
         ReceiptIndex: { type: Number },
         PublishedIndex: { type: Number },
         Receipt: {
-          SenderPublicKey: { type: String },
-          RecipientPublicKey: { type: String },
+          SenderPublicKey: { type: Buffer },
+          SenderPublicKeyFormatted: { type: String } /** update */,
+          RecipientPublicKey: { type: Buffer },
+          RecipientPublicKeyFormatted: { type: String } /** update */,
           DatumType: { type: Number },
           DatumHash: { type: Buffer },
           ReferenceBlockHeight: { type: Number },
@@ -67,6 +67,10 @@ const schema = new mongoose.Schema(
         },
       },
     ],
+
+    /** Aggregate */
+    TotalRewards: { type: Number },
+    TotalRewardsConversion: { type: String },
   },
   {
     toJSON: { virtuals: true },

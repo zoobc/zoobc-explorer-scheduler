@@ -55,7 +55,8 @@ module.exports = class Accounts extends BaseController {
 
         /** mapping data transactions and account balances */
         const payloads = res.AccountBalances.map(i => {
-          const accounts = account.data.filter(o => o.Account === i.AccountAddress)
+          // filter accounts using address formatted
+          const accounts = account.data.filter(o => o.AccountFormatted === util.parseAddress(i.AccountAddress))
 
           /** get first active */
           const FirstActive = _.sortBy(accounts, ['Height'])[0].Timestamp
@@ -83,6 +84,7 @@ module.exports = class Accounts extends BaseController {
             TotalFeesPaid: parseInt(TotalFeesPaid),
             TotalFeesPaidConversion: util.zoobitConversion(parseInt(TotalFeesPaid)),
             AccountAddress: i.AccountAddress,
+            AccountAddressFormatted: util.parseAddress(i.AccountAddress),
             Balance: parseInt(i.Balance),
             BalanceConversion: util.zoobitConversion(parseInt(i.Balance)),
             SpendableBalance: parseInt(i.SpendableBalance),
