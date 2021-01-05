@@ -1,5 +1,5 @@
 const BaseController = require('./BaseController')
-const { store, util } = require('../utils')
+const { store } = require('../utils')
 const {
   NodesService,
   BlocksService,
@@ -146,11 +146,6 @@ module.exports = class ResetData extends BaseController {
       ResetData.resetter(this.generalsService, { Key: store.keyLastCheck }, (error, result) => {
         return resolve({ error, result })
       })
-
-      // this.generalsService.destroies({ Key: store.keyLastCheck }, (error, result) => {
-      //   console.log('==result', result)
-      //   return resolve({ error, result })
-      // })
     })
 
     return Promise.all([
