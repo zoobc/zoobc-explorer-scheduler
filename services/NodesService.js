@@ -8,16 +8,17 @@ module.exports = class NodesService extends BaseService {
   }
 
   getLastRegisteredHeight(callback) {
-    Nodes.findOne().select('RegisteredBlockHeight').sort('-RegisteredBlockHeight').exec(callback)
+    Nodes.findOne().select('RegisteredBlockHeight').sort('-RegisteredBlockHeight').lean().exec(callback)
   }
 
   getLastHeight(callback) {
-    Nodes.findOne().select('Height').sort('-Height').exec(callback)
+    Nodes.findOne().select('Height').sort('-Height').lean().exec(callback)
   }
 
   getNodeIds(callback) {
     Nodes.find({ IpAddress: { $eq: null } })
       .select('NodeID')
+      .lean()
       .exec(callback)
   }
 
@@ -25,6 +26,7 @@ module.exports = class NodesService extends BaseService {
     Nodes.find()
       .select('Height')
       .sort('Height')
+      .lean()
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, null)
@@ -62,6 +64,7 @@ module.exports = class NodesService extends BaseService {
   getLastScores(NodeId, callback) {
     Nodes.find({ NodeID: NodeId })
       .select('ParticipationScore')
+      .lean()
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, null)
@@ -71,6 +74,6 @@ module.exports = class NodesService extends BaseService {
   }
 
   getNodePKs(callback) {
-    Nodes.find().select('NodePublicKey').exec(callback)
+    Nodes.find().select('NodePublicKey').lean().exec(callback)
   }
 }
