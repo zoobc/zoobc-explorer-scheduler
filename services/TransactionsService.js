@@ -10,11 +10,11 @@ module.exports = class TransactionsService extends BaseService {
   }
 
   getLastHeight(callback) {
-    Transactions.findOne().select('Height').sort('-Height').exec(callback)
+    Transactions.findOne().select('Height').sort('-Height').lean().exec(callback)
   }
 
   getLastTimestamp(callback) {
-    Transactions.findOne().select('Timestamp Height').sort('-Timestamp').exec(callback)
+    Transactions.findOne().select('Timestamp Height').sort('-Timestamp').lean().exec(callback)
   }
 
   getNodePublicKeysByHeights(heightStart, heightEnd, callback) {
@@ -24,6 +24,7 @@ module.exports = class TransactionsService extends BaseService {
     })
       .select('NodeRegistration')
       .sort('-Height')
+      .lean()
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, null)
@@ -77,19 +78,23 @@ module.exports = class TransactionsService extends BaseService {
   }
 
   findAndUpdate(payload, callback) {
-    Transactions.findOneAndUpdate({ TransactionID: payload.TransactionID }, payload, { new: true, upsert: true }).exec((err, res) => {
-      if (err) return callback(err, null)
-      if (res && res.length < 1) return callback(null, null)
-      return callback(null, res)
-    })
+    Transactions.findOneAndUpdate({ TransactionID: payload.TransactionID }, payload, { new: true, upsert: true })
+      .lean()
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res && res.length < 1) return callback(null, null)
+        return callback(null, res)
+      })
   }
 
   findAndUpdateStatus(conditions, callback) {
-    Transactions.updateMany(conditions, { $set: { Status: 'Approved' } }, { created: false }).exec((err, res) => {
-      if (err) return callback(err, null)
-      if (res && res.length < 1) return callback(null, null)
-      return callback(null, res)
-    })
+    Transactions.updateMany(conditions, { $set: { Status: 'Approved' } }, { created: false })
+      .lean()
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res && res.length < 1) return callback(null, null)
+        return callback(null, res)
+      })
   }
 
   getSendersByHeights(heightStart, heightEnd, callback) {
@@ -102,6 +107,7 @@ module.exports = class TransactionsService extends BaseService {
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Sender: { $ne: null } }, { Sender: { $ne: '' } }] })
       .select('Sender SenderFormatted Height Fee Timestamp SendMoney')
       .sort('Height')
+      .lean()
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, [])
@@ -130,6 +136,7 @@ module.exports = class TransactionsService extends BaseService {
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Recipient: { $ne: null } }, { Recipient: { $ne: '' } }] })
       .select('Recipient RecipientFormatted Height Fee Timestamp SendMoney')
       .sort('Height')
+      .lean()
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, [])
