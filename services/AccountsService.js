@@ -7,8 +7,12 @@ module.exports = class AccountsService extends BaseService {
     this.name = 'AccountsService'
   }
 
+  getAccount(callback) {
+    Accounts.findOne().select().lean().limit(1).exec(callback)
+  }
+
   getLastHeight(callback) {
-    Accounts.findOne().select('TransactionHeight').sort('-TransactionHeight').exec(callback)
+    Accounts.findOne().select('TransactionHeight').sort('-TransactionHeight').lean().exec(callback)
   }
 
   asyncFirstActiveAccount(accountAddress) {
@@ -21,7 +25,7 @@ module.exports = class AccountsService extends BaseService {
   }
 
   getFirstActiveByAccountAddress(accountAddress, callback) {
-    Accounts.findOne({ AccountAddress: accountAddress }).select('FirstActive').exec(callback)
+    Accounts.findOne({ AccountAddress: accountAddress }).select('FirstActive').lean().exec(callback)
   }
 
   asyncTotalFeeAccount(accountAddress) {
@@ -34,7 +38,7 @@ module.exports = class AccountsService extends BaseService {
   }
 
   getTotalFeeByAccountAddress(accountAddress, callback) {
-    Accounts.findOne({ AccountAddress: accountAddress }).select('TotalFeesPaid').exec(callback)
+    Accounts.findOne({ AccountAddress: accountAddress }).select('TotalFeesPaid').lean().exec(callback)
   }
 
   findAndUpdate(payloads, callback) {
@@ -65,6 +69,6 @@ module.exports = class AccountsService extends BaseService {
   }
 
   getCurrentTotalRewardByAccountAddress(accountAddress, callback) {
-    Accounts.findOne({ AccountAddress: accountAddress }).exec(callback)
+    Accounts.findOne({ AccountAddress: accountAddress }).lean().exec(callback)
   }
 }

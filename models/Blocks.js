@@ -4,7 +4,7 @@ const { upserts } = require('../utils')
 const schema = new mongoose.Schema(
   {
     /** Block */
-    BlockID: { type: String } /** ID */,
+    BlockID: { type: String, index: true } /** ID */,
     BlockHash: { type: Buffer },
     BlockHashFormatted: { type: String } /** update */,
     PreviousBlockID: { type: Buffer } /** PreviousBlockHash */,

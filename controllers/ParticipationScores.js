@@ -58,7 +58,7 @@ module.exports = class ParticipationScores extends BaseController {
                 /** send message telegram bot if avaiable */
                 response.sendBotMessage(
                   'ParticipationScores',
-                  `[Participation Score] Proto Get Participation Scores - ${error}`,
+                  `[Participation Score] Participation Score Service - Get Last Score - ${error}`,
                   `- Params : <pre>${JSON.stringify(params)}</pre>`
                 )
               )
@@ -142,6 +142,18 @@ module.exports = class ParticipationScores extends BaseController {
             })
 
             this.service.upserts(toBeUpdated, ['NodeID', 'Height'], async (err, res) => {
+              if (err)
+                return callback(
+                  /** send message telegram bot if avaiable */
+                  response.sendBotMessage(
+                    'Participation Scores',
+                    `[Participation Scores] Participation Score Service - Upserts - ${err}`,
+                    `- Params : <pre>${JSON.stringify(params)}</pre>`
+                  )
+                )
+
+              if (!res) return callback(response.setResult(false, `[Participation Scores] No additional data`))
+
               const promises = payloads.map(i => {
                 return new Promise(resolve => {
                   const key = { NodeID: i.NodeID }

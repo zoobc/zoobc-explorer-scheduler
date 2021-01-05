@@ -82,9 +82,13 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
 
 /** reset all data */
 async function resetData(height = 0) {
-  const logResets = config.app.resetData === 'true' ? await reset.resetAllByHeight(height) : null
-  if (logResets && logResets.length > 0) {
-    logResets.forEach(log => util.log(log))
+  if (config.app.resetData === 'true') {
+    msg.green('Reseting Data')
+
+    const logResets = await reset.resetAllByHeight(height)
+    if (logResets && logResets.length > 0) {
+      logResets.forEach(log => util.log(log))
+    }
   }
 }
 

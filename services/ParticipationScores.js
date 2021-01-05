@@ -8,22 +8,23 @@ module.exports = class ParticipationScoresService extends BaseService {
   }
 
   getLastHeight(callback) {
-    ParticipationScores.findOne().select('Height').sort('-Height').exec(callback)
+    ParticipationScores.findOne().select('Height').sort('-Height').lean().exec(callback)
   }
 
   //To get the highest Height of every Participation Scores in DB to compare
   getLatestScore(callback) {
-    ParticipationScores.find({ Status: 'True' }).exec(callback)
+    ParticipationScores.find({ Status: 'True' }).lean().exec(callback)
   }
 
   findnearestScorebyHeight(NodeId, Height, callback) {
-    ParticipationScores.findOne({ NodeID: NodeId }).select('Score').where('Height').lt(Height).sort('-Height').exec(callback)
+    ParticipationScores.findOne({ NodeID: NodeId }).select('Score').where('Height').lt(Height).sort('-Height').lean().exec(callback)
   }
 
   getRangeHeight(callback) {
     Nodes.find()
       .select('Height')
       .sort('Height')
+      .lean()
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, null)

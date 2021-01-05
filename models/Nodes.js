@@ -3,7 +3,7 @@ const { upserts } = require('../utils')
 
 const schema = new mongoose.Schema(
   {
-    NodeID: { type: String },
+    NodeID: { type: String, index: true },
     NodePublicKey: { type: Buffer },
     NodePublicKeyFormatted: { type: String },
     OwnerAddress: { type: Buffer } /** AccountAddress */,

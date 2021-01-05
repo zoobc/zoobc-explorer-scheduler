@@ -3,7 +3,7 @@ const { upserts } = require('../utils')
 
 const schema = new mongoose.Schema(
   {
-    TransactionID: { type: String } /** ID */,
+    TransactionID: { type: String, index: true } /** ID */,
     Timestamp: { type: Date },
     TransactionType: { type: Number },
     BlockID: { type: String },
