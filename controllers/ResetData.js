@@ -1,5 +1,5 @@
 const BaseController = require('./BaseController')
-const { store } = require('../utils')
+const { store, util } = require('../utils')
 const {
   NodesService,
   BlocksService,
@@ -36,6 +36,8 @@ module.exports = class ResetData extends BaseController {
         return 'Reset Participation Scores'
       case 'AccountLedgersService':
         return 'Reset Account Ledgers'
+      case 'GeneralsService':
+        return 'Reset Generals'
       default:
         return 'Reset Unknow Service'
     }
@@ -119,9 +121,13 @@ module.exports = class ResetData extends BaseController {
     })
 
     const promiseAccounts = new Promise(resolve => {
-      ResetData.resetter(this.accountsService, { TransactionHeight: { $gte: height } }, (error, result) => {
-        return resolve({ error, result })
-      })
+      ResetData.resetter(
+        this.accountsService,
+        { $or: [{ BlockHeight: { $gte: height } }, { TransactionHeight: { $gte: height } }] },
+        (error, result) => {
+          return resolve({ error, result })
+        }
+      )
     })
 
     const promiseParticipationScores = new Promise(resolve => {
@@ -136,6 +142,17 @@ module.exports = class ResetData extends BaseController {
       })
     })
 
+    const promiseGeneral = new Promise(resolve => {
+      ResetData.resetter(this.generalsService, { Key: store.keyLastCheck }, (error, result) => {
+        return resolve({ error, result })
+      })
+
+      // this.generalsService.destroies({ Key: store.keyLastCheck }, (error, result) => {
+      //   console.log('==result', result)
+      //   return resolve({ error, result })
+      // })
+    })
+
     return Promise.all([
       promiseNodes,
       promiseBlocks,
@@ -143,6 +160,7 @@ module.exports = class ResetData extends BaseController {
       promiseTransactions,
       promiseAccountLedgers,
       promiseParticipationScores,
+      promiseGeneral,
     ])
   }
 

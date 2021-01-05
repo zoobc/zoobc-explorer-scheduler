@@ -3,9 +3,9 @@ const path = require('path')
 
 module.exports = {
   app: {
-    limitData: 100,
+    limitData: 200,
     port: process.env.PORT || 3033,
-    scheduleEvent: 15 /** seconds */,
+    scheduleEvent: 20 /** seconds */,
     chatId: process.env.CHAT_ID || null,
     resetData: process.env.RESET_DATA || false,
     env: process.env.NODE_ENV || 'development',

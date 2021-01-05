@@ -8,19 +8,19 @@ module.exports = class BlocksService extends BaseService {
   }
 
   getLastHeight(callback) {
-    Blocks.findOne().select('Height Timestamp').sort('-Height').exec(callback)
+    Blocks.findOne().select('Height Timestamp').sort('-Height').lean().exec(callback)
   }
 
   getFromHeight({ Limit, Height }, callback) {
-    Blocks.find().select('BlockID Height').where('Height').gte(Height).limit(Limit).sort('Height').exec(callback)
+    Blocks.find().select('BlockID Height').where('Height').gte(Height).limit(Limit).sort('Height').lean().exec(callback)
   }
 
   getLastTimestamp(callback) {
-    Blocks.findOne().select('Timestamp Height').sort('-Timestamp').exec(callback)
+    Blocks.findOne().select('Timestamp Height').sort('-Timestamp').lean().exec(callback)
   }
 
   getTimestampByHeight({ Height }, callback) {
-    Blocks.findOne().select('Timestamp').where('Height').equals(Height).exec(callback)
+    Blocks.findOne().select('Timestamp').where('Height').equals(Height).lean().exec(callback)
   }
 
   asyncTimeStampByHeight(Height) {

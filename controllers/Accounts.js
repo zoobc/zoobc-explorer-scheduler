@@ -73,9 +73,7 @@ module.exports = class Accounts extends BaseController {
 
           /** summary fee if sender */
           const feeSenders = accounts.filter(o => o.Type === 'Sender')
-          if (feeSenders.length > 0) {
-            TotalFeesPaid = _.sumBy(feeSenders, 'Fee')
-          }
+          if (feeSenders.length > 0) TotalFeesPaid = _.sumBy(feeSenders, 'Fee')
 
           return {
             FirstActive,

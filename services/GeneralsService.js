@@ -13,6 +13,7 @@ module.exports = class GeneralsService extends BaseService {
     return new Promise((resolve, reject) => {
       Generals.findOne({ Key: store.keyLastCheck })
         .select('Value')
+        .lean()
         .exec((err, res) => {
           if (err) return reject(err)
           if (res) return resolve(JSON.parse(res.Value))
@@ -21,6 +22,7 @@ module.exports = class GeneralsService extends BaseService {
             .select('Height Timestamp')
             .sort('Timestamp')
             .limit(1)
+            .lean()
             .exec(async (err, res) => {
               if (err) return reject(err)
               if (!res) return resolve(null)
@@ -38,6 +40,7 @@ module.exports = class GeneralsService extends BaseService {
     return new Promise((resolve, reject) => {
       Generals.findOne({ Key: store.keyLastCheckTimestamp })
         .select('Value')
+        .lean()
         .exec((err, res) => {
           if (err) return reject(err)
           if (res) return resolve(parseInt(res.Value))
@@ -46,6 +49,7 @@ module.exports = class GeneralsService extends BaseService {
             .select('Timestamp')
             .sort('Timestamp')
             .limit(1)
+            .lean()
             .exec(async (err, res) => {
               if (err) return reject(err)
               if (!res) return resolve(null)
@@ -60,6 +64,7 @@ module.exports = class GeneralsService extends BaseService {
     return new Promise((resolve, reject) => {
       Generals.findOne({ Key: key })
         .select('Value')
+        .lean()
         .exec((err, result) => {
           if (err) return reject({ err: err, res: null })
           return resolve({ err: null, res: result })
