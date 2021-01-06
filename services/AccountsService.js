@@ -43,7 +43,7 @@ module.exports = class AccountsService extends BaseService {
 
   findAndUpdate(payloads, callback) {
     Accounts.findOneAndUpdate(
-      { AccountAddress: payloads.AccountAddress },
+      { AccountAddressFormatted: payloads.AccountAddressFormatted },
       {
         FirstActive: payloads.FirstActive,
         LastActive: payloads.LastActive,
@@ -51,6 +51,7 @@ module.exports = class AccountsService extends BaseService {
         TotalFeesPaid: payloads.TotalFeesPaid,
         TotalFeesPaidConversion: payloads.TotalFeesPaid,
         AccountAddress: payloads.AccountAddress,
+        AccountAddressFormatted: payloads.AccountAddressFormatted,
         Balance: payloads.Balance,
         BalanceConversion: payloads.Balance,
         SpendableBalance: payloads.SpendableBalance,
