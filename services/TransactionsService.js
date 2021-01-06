@@ -107,7 +107,6 @@ module.exports = class TransactionsService extends BaseService {
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Sender: { $ne: null } }, { Sender: { $ne: '' } }] })
       .select('Sender SenderFormatted Height Fee Timestamp SendMoney')
       .sort('Height')
-      .lean()
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, [])
@@ -136,7 +135,6 @@ module.exports = class TransactionsService extends BaseService {
       // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Recipient: { $ne: null } }, { Recipient: { $ne: '' } }] })
       .select('Recipient RecipientFormatted Height Fee Timestamp SendMoney')
       .sort('Height')
-      .lean()
       .exec((err, res) => {
         if (err) return callback(err, null)
         if (res.length < 1) return callback(null, [])
