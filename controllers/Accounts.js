@@ -88,7 +88,7 @@ module.exports = class Accounts extends BaseController {
             /** send message telegram bot if avaiable */
             response.sendBotMessage(
               'Accounts',
-              `[Accounts] Proto Get Account Balances - ${err}`,
+              `[Accounts] API Core Get Account Balances - ${err}`,
               `- Params : <pre>${JSON.stringify(params)}</pre>`
             )
           )

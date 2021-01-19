@@ -96,7 +96,7 @@ module.exports = class Nodes extends BaseController {
             /** send message telegram bot if avaiable */
             response.sendBotMessage(
               'Nodes',
-              `[Nodes] Proto Get Node Registrations - ${err}`,
+              `[Nodes] API Core Get Node Registrations - ${err}`,
               `- Params : <pre>${JSON.stringify(params)}</pre>`
             )
           )

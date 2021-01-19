@@ -84,7 +84,7 @@ module.exports = class ParticipationScores extends BaseController {
               /** send message telegram bot if avaiable */
               response.sendBotMessage(
                 'ParticipationScores',
-                `[Participation Score] Proto Get Participation Scores - ${err}`,
+                `[Participation Score] API Core Get Participation Scores - ${err}`,
                 `- Params : <pre>${JSON.stringify(params)}</pre>`
               )
             )

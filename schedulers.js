@@ -54,6 +54,7 @@ const {
   Nodes,
   Blocks,
   Accounts,
+  Rollback,
   ResetData,
   NodeAddress,
   Transactions,
@@ -65,6 +66,7 @@ const {
 const nodes = new Nodes()
 const blocks = new Blocks()
 const reset = new ResetData()
+const rollback = new Rollback()
 const accounts = new Accounts()
 const nodeAddress = new NodeAddress()
 const transactions = new Transactions()
@@ -107,8 +109,12 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
                 participationScores.update(res => {
                   util.log(res)
 
-                  nodeStatuses.update(async res => {
+                  nodeStatuses.update(res => {
                     util.log(res)
+
+                    rollback.execute(res => {
+                      util.log(res)
+                    })
                   })
                 })
               })

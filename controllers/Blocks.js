@@ -186,7 +186,7 @@ module.exports = class Blocks extends BaseController {
         if (err)
           return callback(
             /** send message telegram bot if avaiable */
-            response.sendBotMessage('Blocks', `[Blocks] Proto Get Blocks - ${err}`, `- Params : <pre>${JSON.stringify(params)}</pre>`)
+            response.sendBotMessage('Blocks', `[Blocks] API Core Get Blocks - ${err}`, `- Params : <pre>${JSON.stringify(params)}</pre>`)
           )
 
         if (res && res.Blocks && res.Blocks.length < 1) return callback(response.setResult(false, '[Blocks] No additional data'))
