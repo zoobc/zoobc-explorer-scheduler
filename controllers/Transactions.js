@@ -418,7 +418,7 @@ module.exports = class Transactions extends BaseController {
             /** send message telegram bot if avaiable */
             response.sendBotMessage(
               'Transactions',
-              `[Transactions] Proto Get Transactions - ${err},- Params : <pre>${JSON.stringify(params)}</pre>`
+              `[Transactions] API Core Get Transactions - ${err},- Params : <pre>${JSON.stringify(params)}</pre>`
             )
           )
 

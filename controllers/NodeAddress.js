@@ -63,7 +63,7 @@ module.exports = class NodeAddress extends BaseController {
             /** send message telegram bot if avaiable */
             response.sendBotMessage(
               'NodeAddress',
-              `[Node Address] Proto Get Node Address Info - ${err}`,
+              `[Node Address] API Core Get Node Address Info - ${err}`,
               `- Params : <pre>${JSON.stringify(params)}</pre>`
             )
           )

@@ -43,7 +43,16 @@
 const BaseController = require('./BaseController')
 const config = require('../config')
 const { Block } = require('../protos')
-const { BlocksService, TransactionsService, NodesService, AccountsService } = require('../services')
+const { store, msg, response } = require('../utils')
+const {
+  NodesService,
+  BlocksService,
+  AccountsService,
+  GeneralsService,
+  TransactionsService,
+  AccountLedgerService,
+  ParticipationScoresService,
+} = require('../services')
 
 module.exports = class Rollback extends BaseController {
   constructor() {
@@ -51,59 +60,91 @@ module.exports = class Rollback extends BaseController {
     this.nodesService = new NodesService()
     this.blocksService = new BlocksService()
     this.accountsService = new AccountsService()
+    this.generalsService = new GeneralsService()
     this.transactionsService = new TransactionsService()
+    this.accountLedgerService = new AccountLedgerService()
+    this.participationScoresService = new ParticipationScoresService()
   }
 
-  checking(callback) {
-    this.blocksService.getLastHeight(async (err, result) => {
-      if (err) return callback(`[Rollback] Blocks Service - Get Last Height ${err}`, { success: false, message: null })
-      if (!result || !result.Height) return callback(null, { success: false, message: '[Rollback] No data rollback' })
+  execute(callback) {
+    this.blocksService.getLastHeight(async (err, res) => {
+      /** send message telegram bot if avaiable */
+      if (err) return callback(response.sendBotMessage('Rollback', `[Rollback] Block Service - Get Last Height ${err}`))
+      if (res && !res.Height) return callback(response.setResult(false, '[Rollback] No data to rollback'))
 
       const Limit = config.app.limitData * 2
-      const Height = parseInt(result.Height) - Limit < 1 ? 1 : parseInt(result.Height) - Limit
-      this.recursiveBlockHeight(Limit, Height, (err, result) => {
-        if (err) return callback(`[Rollback] Recursive Block Height ${err}`, { success: false, message: null })
-        if (!result) return callback(null, { success: false, message: '[Rollback] No data rollback' })
+      const Height = parseInt(res.Height) - Limit < 1 ? 1 : parseInt(res.Height) - Limit
+      this.recursiveBlockHeight(Limit, Height, async (err, res) => {
+        /** send message telegram bot if avaiable */
+        if (err) return callback(response.sendBotMessage('Rollback', `[Rollback] Recursive Block Height ${err}`))
+        if (!res) return callback(response.setResult(false, '[Rollback] No data to rollback'))
 
-        let blockHeight = result.Height
-        if (blockHeight < config.app.limitData) blockHeight = 0
+        const blockHeight = res.Height < config.app.limitData ? 0 : res.Height
 
-        this.blocksService.destroies({ Height: { $gte: blockHeight } }, (err, result) => {
-          if (err) return callback(`[Rollback] Blocks Service - Destroy Many ${err}`, { success: false, message: null })
-          if (result.ok < 1 || result.deletedCount < 1)
-            return callback(null, { success: false, message: '[Rollback - Blocks] No data rollback' })
-          return callback(null, { success: true, message: `[Rollback - Blocks] Delete ${result.deletedCount} data successfully` })
+        /** destroy participation scores */
+        this.participationScoresService.destroies({ Height: { $gte: blockHeight } }, (err, res) => {
+          if (err) {
+            msg.red(`[Rollback] Destroy Participation Scores ${err}`)
+          } else if (res && (res.ok < 1 || res.deletedCount < 1)) {
+            msg.yellow('[Rollback] No Destroy Participation Scores')
+          } else msg.green(`[Rollback] Destroy ${res.deletedCount} Participation Scores`)
         })
 
-        this.transactionsService.destroies({ Height: { $gte: blockHeight } }, (err, result) => {
-          if (err) return callback(`[Rollback] Transactions Service - Destroy Many ${err}`, { success: false, message: null })
-          if (result.ok < 1 || result.deletedCount < 1)
-            return callback(null, { success: false, message: '[Rollback - Transactions] No data rollback' })
-          return callback(null, { success: true, message: `[Rollback - Transactions] Delete ${result.deletedCount} data successfully` })
+        /** destroy account ledgers */
+        this.accountLedgerService.destroies({ BlockHeight: { $gte: blockHeight } }, (err, res) => {
+          if (err) {
+            msg.red(`[Rollback] Destroy Account Ledgers ${err}`)
+          } else if (res && (res.ok < 1 || res.deletedCount < 1)) {
+            msg.yellow('[Rollback] No Destroy Account Ledgers')
+          } else msg.green(`[Rollback] Destroy ${res.deletedCount} Account Ledgers`)
         })
 
-        this.nodesService.destroies({ Height: { $gte: blockHeight } }, (err, result) => {
-          if (err) return callback(`[Rollback] Nodes Service - Destroy Many ${err}`, { success: false, message: null })
-          if (result.ok < 1 || result.deletedCount < 1)
-            return callback(null, { success: false, message: '[Rollback - Nodes] No data rollback' })
-          return callback(null, { success: true, message: `[Rollback - Nodes] Delete ${result.deletedCount} data successfully` })
+        /** destroy accounts */
+        this.accountsService.destroies({ BlockHeight: { $gte: blockHeight } }, (err, res) => {
+          if (err) {
+            msg.red(`[Rollback] Destroy Accounts ${err}`)
+          } else if (res && (res.ok < 1 || res.deletedCount < 1)) {
+            msg.yellow('[Rollback] No Destroy Accounts')
+          } else msg.green(`[Rollback] Destroy ${res.deletedCount} Accounts`)
         })
 
-        this.accountsService.destroies({ BlockHeight: { $gte: blockHeight } }, (err, result) => {
-          if (err) return callback(`[Rollback] Accounts Service - Destroy Many ${err}`, { success: false, message: null })
-          if (result.ok < 1 || result.deletedCount < 1)
-            return callback(null, { success: false, message: '[Rollback - Accounts] No data rollback' })
-          return callback(null, { success: true, message: `[Rollback - Accounts] Delete ${result.deletedCount} data successfully` })
+        /** destroy nodes */
+        this.nodesService.destroies({ RegisteredBlockHeight: { $gte: blockHeight } }, (err, res) => {
+          if (err) {
+            msg.red(`[Rollback] Destroy Nodes ${err}`)
+          } else if (res && (res.ok < 1 || res.deletedCount < 1)) {
+            msg.yellow('[Rollback] No Destroy Nodes')
+          } else msg.green(`[Rollback] Destroy ${res.deletedCount} Nodes`)
         })
 
-        // this.accountTransactionsService.destroies({ BlockHeight: { $gte: blockHeight } }, (err, result) => {
-        //   if (err) return callback(`[Rollback] Accounts Service - Destroy Many ${err}`, { success: false, message: null })
-        //   if (result.ok < 1 || result.deletedCount < 1) return callback(null, { success: false, message: '[Rollback - Account Transactions] No data rollback' })
-        //   return callback(null, {
-        //     success: true,
-        //     message: `[Rollback - Account Transactions] Delete ${result.deletedCount} data successfully`,
-        //   })
-        // })
+        /** destroy transactions */
+        this.transactionsService.destroies({ Height: { $gte: blockHeight } }, (err, res) => {
+          if (err) {
+            msg.red(`[Rollback] Destroy Transactions ${err}`)
+          } else if (res && (res.ok < 1 || res.deletedCount < 1)) {
+            msg.yellow('[Rollback] No Destroy Transactions')
+          } else msg.green(`[Rollback] Destroy ${res.deletedCount} Transactions`)
+        })
+
+        /** destroy blocks */
+        this.blocksService.destroies({ Height: { $gte: blockHeight } }, (err, res) => {
+          if (err) {
+            msg.red(`[Rollback] Destroy Blocks ${err}`)
+          } else if (res && (res.ok < 1 || res.deletedCount < 1)) {
+            msg.yellow('[Rollback] No Destroy Blocks')
+          } else msg.green(`[Rollback] Destroy ${res.deletedCount} Blocks`)
+        })
+
+        /** update last check */
+        const lastCheck = await this.generalsService.getSetLastCheck()
+        const payloadLastCheck = JSON.stringify({
+          ...lastCheck,
+          Height: res.Height,
+          Timestamp: res.Timestamp,
+        })
+        this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
+
+        return callback(response.setResult(true, `[Rollback] Last Check Block Height ${blockHeight}`))
       })
     })
   }
@@ -111,30 +152,36 @@ module.exports = class Rollback extends BaseController {
   recursiveBlockHeight(limit, height, callback) {
     if (height < 1) return callback(null, null)
 
-    Block.GetBlocks({ Limit: limit, Height: height }, (err, result) => {
-      if (err) return callback(`[Rollback] Proto Block - Get Blocks ${err}`)
-      if (result && result.Blocks && result.Blocks.length < 1) {
+    Block.GetBlocks({ Limit: limit, Height: height }, (err, res) => {
+      /** send message telegram bot if avaiable */
+      if (err) return callback(response.sendBotMessage('Rollback', `[Rollback] API Core Get Blocks ${err}`))
+
+      if (res && res.Blocks && res.Blocks.length < 1) {
         const prevHeight = height - limit
         return this.recursiveBlockHeight(limit, prevHeight, callback)
       }
 
-      this.blocksService.getFromHeight({ Limit: limit, Height: height }, (err, results) => {
-        if (err) return callback(`[Rollback] Blocks Service - Get From Height ${err}`, null)
-        if (results && results.length < 1) {
+      const coreBlocks = res.Blocks.map(item => ({
+        BlockID: item.ID,
+        Height: item.Height,
+        Timestamp: item.Timestamp,
+      })).sort((a, b) => (a.Height > b.Height ? 1 : -1))
+
+      this.blocksService.getFromHeight({ Limit: limit, Height: height }, (err, res) => {
+        /** send message telegram bot if avaiable */
+        if (err) return callback(response.sendBotMessage('Rollback', `[Rollback] Blocks Service - Get From Height ${err}`))
+
+        if (res && res.length < 1) {
           const prevHeight = height - limit
           return this.recursiveBlockHeight(limit, prevHeight, callback)
         }
 
-        const resultsCore = result.Blocks.map(item => ({
-          BlockID: item.Block.ID,
-          Height: item.Block.Height,
-        })).sort((a, b) => (a.Height > b.Height ? 1 : -1))
-
-        const resultsExplorer = results
-          .map(item => ({ BlockID: item.BlockID, Height: item.Height }))
+        const explorerBlocks = res
+          .map(item => ({ BlockID: item.BlockID, Height: item.Height, Timestamp: item.Timestamp }))
           .sort((a, b) => (a.Height > b.Height ? 1 : -1))
 
-        const diffs = resultsCore.filter(({ BlockID: val1 }) => !resultsExplorer.some(({ BlockID: val2 }) => val2 === val1))
+        const diffs = coreBlocks.filter(({ BlockID: val1 }) => !explorerBlocks.some(({ BlockID: val2 }) => val2 === val1))
+
         if (diffs && diffs.length < 1) {
           const prevHeight = height - limit
           return this.recursiveBlockHeight(limit, prevHeight, callback)

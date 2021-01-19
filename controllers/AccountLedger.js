@@ -75,7 +75,7 @@ module.exports = class AccountLedgers extends BaseController {
               /** send message telegram bot if avaiable */
               response.sendBotMessage(
                 'AccountLedger',
-                `[Account Ledger] Proto Get Account Ledger - ${err}`,
+                `[Account Ledger] API Core Get Account Ledger - ${err}`,
                 `- Params : <pre>${JSON.stringify(params)}</pre>`
               )
             )
