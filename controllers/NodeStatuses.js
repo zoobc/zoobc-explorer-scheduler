@@ -41,16 +41,20 @@
 **/
 
 const BaseController = require('./BaseController')
-const { NodesService } = require('../services')
-const { NodeRegistration } = require('../protos')
 const { response } = require('../utils')
+const { NodeRegistration } = require('../protos')
+const { NodesService, GeneralsService } = require('../services')
 
 module.exports = class NodeStatuses extends BaseController {
   constructor() {
     super(new NodesService())
+    this.generalsService = new GeneralsService()
   }
 
   async update(callback) {
+    const rollback = await this.generalsService.getValueRollback()
+    if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
+
     this.service.getNodePKs((err, res) => {
       if (err)
         return callback(response.sendBotMessage('NodePendingStatus', `[Node Pending Status] Nodes Service - Get Pending Node PKs ${err}`))

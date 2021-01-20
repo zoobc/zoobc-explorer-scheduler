@@ -53,7 +53,10 @@ module.exports = class Nodes extends BaseController {
     this.generalsService = new GeneralsService()
   }
 
-  update(callback) {
+  async update(callback) {
+    const rollback = await this.generalsService.getValueRollback()
+    if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
+
     const getTotalNode = params => {
       return new Promise(resolve => {
         NodeRegistration.GetNodeRegistrations(params, async (err, res) => {

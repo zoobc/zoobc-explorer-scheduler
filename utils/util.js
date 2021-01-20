@@ -114,6 +114,7 @@ const zoobitConversion = curr => {
 }
 
 const log = obj => {
+  if (obj && !obj.error && !obj.result.message) return null
   if (obj.error) return msg.red(obj.error)
   return obj.result && obj.result.success ? msg.green(obj.result.message) : msg.yellow(obj.result.message)
 }

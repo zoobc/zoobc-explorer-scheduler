@@ -43,7 +43,7 @@
 const BaseController = require('./BaseController')
 const { response } = require('../utils')
 const { ParticipationScore } = require('../protos')
-const { BlocksService, NodesService, ParticipationScoresService } = require('../services')
+const { BlocksService, NodesService, ParticipationScoresService, GeneralsService } = require('../services')
 
 const billion = 10000000000000000
 
@@ -52,9 +52,13 @@ module.exports = class ParticipationScores extends BaseController {
     super(new ParticipationScoresService())
     this.nodesService = new NodesService()
     this.blocksService = new BlocksService()
+    this.generalsService = new GeneralsService()
   }
 
   async update(callback) {
+    const rollback = await this.generalsService.getValueRollback()
+    if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
+
     /** getting last height node */
     this.service.getLastHeight((err, result) => {
       if (err)
