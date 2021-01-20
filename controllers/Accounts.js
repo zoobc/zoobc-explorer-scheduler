@@ -53,7 +53,10 @@ module.exports = class Accounts extends BaseController {
     this.transactionsService = new TransactionsService()
   }
 
-  update(callback) {
+  async update(callback) {
+    const rollback = await this.generalsService.getValueRollback()
+    if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
+
     /** get last height account (local) */
     this.service.getLastHeight(async (err, res) => {
       /** send message telegram bot if avaiable */

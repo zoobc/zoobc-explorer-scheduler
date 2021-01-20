@@ -137,6 +137,32 @@ module.exports = class GeneralsService extends BaseService {
     })
   }
 
+  getValueRollback() {
+    return new Promise((resolve, reject) => {
+      Generals.findOne({ Key: store.keyRollback })
+        .select('Value')
+        .lean()
+        .exec((err, result) => {
+          if (err) return reject({ err: err, res: null })
+          return resolve({ err: null, res: result })
+        })
+    })
+  }
+
+  setOnRollback(isRunning) {
+    return new Promise((resolve, reject) => {
+      Generals.findOneAndUpdate(
+        { Key: store.keyRollback },
+        { Value: isRunning },
+        { upsert: true, new: true, setDefaultsOnInsert: true },
+        (err, res) => {
+          if (err) return reject(err)
+          return resolve(res)
+        }
+      )
+    })
+  }
+
   destroies() {
     return new Promise((resolve, reject) => {
       Generals.deleteMany({}, (err, res) => {
