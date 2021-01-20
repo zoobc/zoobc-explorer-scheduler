@@ -55,6 +55,9 @@ module.exports = class AccountLedgers extends BaseController {
   }
 
   async update(callback) {
+    const rollback = await this.generalsService.getValueRollback()
+    if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
+
     this.accountService.getAccount(async (err, res) => {
       /** send message telegram bot if avaiable */
       if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Account Service - Get Last Height ${err}`))

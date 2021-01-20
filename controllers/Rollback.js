@@ -68,16 +68,34 @@ module.exports = class Rollback extends BaseController {
 
   execute(callback) {
     this.blocksService.getLastHeight(async (err, res) => {
+      this.generalsService.setOnRollback(true)
+
       /** send message telegram bot if avaiable */
-      if (err) return callback(response.sendBotMessage('Rollback', `[Rollback] Block Service - Get Last Height ${err}`))
-      if (res && !res.Height) return callback(response.setResult(false, '[Rollback] No data to rollback'))
+      if (err) {
+        this.generalsService.setOnRollback(false)
+        return callback(response.sendBotMessage('Rollback', `[Rollback] Block Service - Get Last Height ${err}`))
+      }
+      if (!res) {
+        this.generalsService.setOnRollback(false)
+        return callback(response.setResult(false, '[Rollback] No data to rollback'))
+      }
+      if (res && !res.Height) {
+        this.generalsService.setOnRollback(false)
+        return callback(response.setResult(false, '[Rollback] No data to rollback'))
+      }
 
       const Limit = config.app.limitData * 2
-      const Height = parseInt(res.Height) - Limit < 1 ? 1 : parseInt(res.Height) - Limit
+      const Height = parseInt(res.Height) - Limit < 1 ? 0 : parseInt(res.Height) - Limit
       this.recursiveBlockHeight(Limit, Height, async (err, res) => {
         /** send message telegram bot if avaiable */
-        if (err) return callback(response.sendBotMessage('Rollback', `[Rollback] Recursive Block Height ${err}`))
-        if (!res) return callback(response.setResult(false, '[Rollback] No data to rollback'))
+        if (err) {
+          this.generalsService.setOnRollback(false)
+          return callback(response.sendBotMessage('Rollback', `[Rollback] Recursive Block Height ${err}`))
+        }
+        if (!res) {
+          this.generalsService.setOnRollback(false)
+          return callback(response.setResult(false, '[Rollback] No data to rollback'))
+        }
 
         const blockHeight = res.Height < config.app.limitData ? 0 : res.Height
 
@@ -137,12 +155,16 @@ module.exports = class Rollback extends BaseController {
 
         /** update last check */
         const lastCheck = await this.generalsService.getSetLastCheck()
-        const payloadLastCheck = JSON.stringify({
-          ...lastCheck,
-          Height: res.Height,
-          Timestamp: res.Timestamp,
-        })
-        this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
+        const payloadLastCheck = JSON.stringify(
+          blockHeight > 0
+            ? {
+                ...lastCheck,
+                Height: res.Height,
+                Timestamp: res.Timestamp,
+              }
+            : { Height: blockHeight }
+        )
+        await this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
 
         return callback(response.setResult(true, `[Rollback] Last Check Block Height ${blockHeight}`))
       })
@@ -154,7 +176,10 @@ module.exports = class Rollback extends BaseController {
 
     Block.GetBlocks({ Limit: limit, Height: height }, (err, res) => {
       /** send message telegram bot if avaiable */
-      if (err) return callback(response.sendBotMessage('Rollback', `[Rollback] API Core Get Blocks ${err}`))
+      if (err) {
+        this.generalsService.setOnRollback(false)
+        return callback(response.sendBotMessage('Rollback', `[Rollback] API Core Get Blocks ${err}`))
+      }
 
       if (res && res.Blocks && res.Blocks.length < 1) {
         const prevHeight = height - limit
@@ -169,7 +194,10 @@ module.exports = class Rollback extends BaseController {
 
       this.blocksService.getFromHeight({ Limit: limit, Height: height }, (err, res) => {
         /** send message telegram bot if avaiable */
-        if (err) return callback(response.sendBotMessage('Rollback', `[Rollback] Blocks Service - Get From Height ${err}`))
+        if (err) {
+          this.generalsService.setOnRollback(false)
+          return callback(response.sendBotMessage('Rollback', `[Rollback] Blocks Service - Get From Height ${err}`))
+        }
 
         if (res && res.length < 1) {
           const prevHeight = height - limit

@@ -41,16 +41,20 @@
 **/
 
 const BaseController = require('./BaseController')
-const { NodesService } = require('../services')
 const { NodeAddressInfo } = require('../protos')
 const { response, ipstack } = require('../utils')
+const { NodesService, GeneralsService } = require('../services')
 
 module.exports = class NodeAddress extends BaseController {
   constructor() {
     super(new NodesService())
+    this.generalsService = new GeneralsService()
   }
 
   async update(callback) {
+    const rollback = await this.generalsService.getValueRollback()
+    if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
+
     this.service.getNodeIds((err, res) => {
       /** send message telegram bot if avaiable */
       if (err) return callback(response.sendBotMessage('NodeAddress', `[Node Address] Nodes Service - Get Node IDs ${err}`))

@@ -157,7 +157,10 @@ module.exports = class Blocks extends BaseController {
     return await Promise.all(promises)
   }
 
-  update(callback) {
+  async update(callback) {
+    const rollback = await this.generalsService.getValueRollback()
+    if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
+
     /** get last height block (local) */
     this.service.getLastHeight(async (err, res) => {
       /** send message telegram bot if avaiable */
