@@ -394,7 +394,10 @@ module.exports = class Transactions extends BaseController {
     return await Promise.all(promises)
   }
 
-  update(callback) {
+  async update(callback) {
+    const rollback = await this.generalsService.getValueRollback()
+    if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
+
     this.blocksService.getLastTimestamp(async (err, res) => {
       /** send message telegram bot if avaiable */
       if (err) return callback(response.sendBotMessage('Transactions', `[Transactions] Blocks Service - Get Last Timestamp ${err}`))
@@ -409,7 +412,7 @@ module.exports = class Transactions extends BaseController {
         Timestamp: TimestampEnd,
       })
       /** return message if nothing */
-      if (!lastCheck) return callback(response.setResult(false, '[Accounts] No additional data'))
+      if (!lastCheck) return callback(response.setResult(false, '[Transactions] No additional data'))
 
       const params = { TimestampStart: lastCheck.Timestamp, TimestampEnd }
       Transaction.GetTransactions(params, async (err, res) => {
