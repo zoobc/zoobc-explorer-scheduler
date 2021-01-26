@@ -162,7 +162,7 @@ module.exports = class Rollback extends BaseController {
                 Height: res.Height,
                 Timestamp: res.Timestamp,
               }
-            : { Height: blockHeight }
+            : null
         )
         await this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
 
