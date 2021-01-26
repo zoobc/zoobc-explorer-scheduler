@@ -99,7 +99,7 @@ module.exports = class Transactions extends BaseController {
       let feeVoteReveal = null
       let liquidPayment = null
       let liquidPaymentStop = null
-      let status = item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Approved'
+      let status = item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Success'
 
       switch (item.TransactionType) {
         case 1:
@@ -109,7 +109,7 @@ module.exports = class Transactions extends BaseController {
             AmountConversion: item.sendMoneyTransactionBody ? util.zoobitConversion(item.sendMoneyTransactionBody.Amount) : null,
           }
           escrow = await getEscrow(item.ID)
-          status = escrow && escrow.Status ? escrow.Status : 'Approved'
+          status = escrow && escrow.Status ? escrow.Status : 'Success'
           break
         case 2:
           transactionTypeName = 'Node Registration'
@@ -146,15 +146,17 @@ module.exports = class Transactions extends BaseController {
           multiSignature = {
             ...item.multiSignatureTransactionBody,
             MultiSignatureInfo: {
-              MultisigAddress: null,
               ...item.multiSignatureTransactionBody.MultiSignatureInfo,
-              // MultisigAddress: item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
-              //   ? item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
-              //   : null,
-              // MultisigAddressFormatted: item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
-              //   ? util.parseAddress(item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress)
-              //   : null,
-              MultisigAddressFormatted: null,
+              MultisigAddress:
+                item.multiSignatureTransactionBody.MultiSignatureInfo &&
+                item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
+                  ? item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
+                  : null,
+              MultisigAddressFormatted:
+                item.multiSignatureTransactionBody.MultiSignatureInfo &&
+                item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress
+                  ? util.parseAddress(item.multiSignatureTransactionBody.MultiSignatureInfo.MultisigAddress)
+                  : null,
               AddressesFormatted:
                 item.multiSignatureTransactionBody.MultiSignatureInfo &&
                 item.multiSignatureTransactionBody.MultiSignatureInfo.Addresses &&
@@ -391,6 +393,7 @@ module.exports = class Transactions extends BaseController {
         LiquidPaymentStop: liquidPaymentStop,
       }
     })
+
     return await Promise.all(promises)
   }
 
@@ -403,16 +406,9 @@ module.exports = class Transactions extends BaseController {
       if (err) return callback(response.sendBotMessage('Transactions', `[Transactions] Blocks Service - Get Last Timestamp ${err}`))
       if (!res) return callback(response.setResult(false, '[Transactions] No additional data'))
 
+      const HeightEnd = res.Height
       const TimestampEnd = moment(res.Timestamp).unix()
-
       const lastCheck = await this.generalsService.getSetLastCheck()
-      const payloadLastCheck = JSON.stringify({
-        ...lastCheck,
-        Height: res.Height,
-        Timestamp: TimestampEnd,
-      })
-      /** return message if nothing */
-      if (!lastCheck) return callback(response.setResult(false, '[Transactions] No additional data'))
 
       const params = { TimestampStart: lastCheck.Timestamp, TimestampEnd }
       Transaction.GetTransactions(params, async (err, res) => {
@@ -426,12 +422,17 @@ module.exports = class Transactions extends BaseController {
           )
 
         /** update general last check timestamp transaction */
+        const payloadLastCheck = JSON.stringify({
+          ...lastCheck,
+          Height: HeightEnd,
+          Timestamp: TimestampEnd,
+        })
         this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
 
         if (res && res.Transactions && res.Transactions.length < 1)
           return callback(response.setResult(false, '[Transactions] No additional data'))
 
-        /** update or insert data */
+        /** update or insert from mapping data */
         const payloads = await this.mappingTransactions(res.Transactions)
         this.service.upserts(payloads, ['TransactionID', 'Height'], (err, res) => {
           /** send message telegram bot if available */
