@@ -99,7 +99,7 @@ module.exports = class Transactions extends BaseController {
       let feeVoteReveal = null
       let liquidPayment = null
       let liquidPaymentStop = null
-      let status = item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Success'
+      let status = item.TransactionType === 4 || item.TransactionType === 5 ? 'Pending' : 'Approved'
 
       switch (item.TransactionType) {
         case 1:
@@ -109,7 +109,7 @@ module.exports = class Transactions extends BaseController {
             AmountConversion: item.sendMoneyTransactionBody ? util.zoobitConversion(item.sendMoneyTransactionBody.Amount) : null,
           }
           escrow = await getEscrow(item.ID)
-          status = escrow && escrow.Status ? escrow.Status : 'Success'
+          status = escrow && escrow.Status ? escrow.Status : 'Approved'
           break
         case 2:
           transactionTypeName = 'Node Registration'
