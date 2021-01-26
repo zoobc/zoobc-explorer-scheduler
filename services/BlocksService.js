@@ -65,6 +65,28 @@ module.exports = class BlocksService extends BaseService {
     Blocks.findOne().select('Timestamp').where('Height').equals(Height).lean().exec(callback)
   }
 
+  getStartEndBlocksByTimestamp(callback) {
+    Blocks.findOne()
+      .select('Timestamp Height')
+      .sort('Timestamp')
+      .lean()
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        const start = res
+
+        Blocks.findOne()
+          .select('Timestamp Height')
+          .sort('-Timestamp')
+          .lean()
+          .exec((err, res) => {
+            if (err) return callback(err, null)
+            const end = res
+
+            return callback(null, { start, end })
+          })
+      })
+  }
+
   asyncTimeStampByHeight(Height) {
     return new Promise(resolve => {
       this.getTimestampByHeight({ Height }, (err, res) => {
