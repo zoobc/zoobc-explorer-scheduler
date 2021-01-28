@@ -178,7 +178,6 @@ function connectRedis() {
 
       /** running scheduler */
       if (event > 0) {
-        //last check height 16500
         resetData()
         cronApp.start()
         msg.green(`Scheduler run every ${event} seconds`)
