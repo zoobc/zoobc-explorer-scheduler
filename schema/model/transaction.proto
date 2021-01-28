@@ -203,6 +203,8 @@ message GetTransactionsRequest {
     int64 TimestampEnd = 4 [ jstype = JS_STRING ];
     uint32 TransactionType = 5;
     Pagination Pagination = 6;
+    uint32 FromBlock = 7;
+    uint32 ToBlock = 8;
 }
 
 message GetTransactionsResponse {
