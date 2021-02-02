@@ -65,6 +65,10 @@ module.exports = class BaseService {
     this.model.upserts(items, matchs, callback)
   }
 
+  destroy(payload, callback) {
+    this.model.deleteOne(payload, callback)
+  }
+
   destroies(payload, callback) {
     this.model.deleteMany(payload, callback)
   }
