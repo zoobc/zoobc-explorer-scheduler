@@ -153,18 +153,15 @@ module.exports = class Rollback extends BaseController {
           } else msg.green(`[Rollback] Destroy ${res.deletedCount} Blocks`)
         })
 
-        /** update last check */
-        const lastCheck = await this.generalsService.getSetLastCheck()
-        const payloadLastCheck = JSON.stringify(
-          blockHeight > 0
-            ? {
-                ...lastCheck,
-                Height: res.Height,
-                Timestamp: res.Timestamp,
-              }
-            : null
-        )
-        await this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
+        /** update last check or delete one */
+        if (blockHeight > 0) {
+          const lastCheck = await this.generalsService.getSetLastCheck()
+          const payloadLastCheck = { ...lastCheck, Height: res.Height, Timestamp: res.Timestamp }
+
+          await this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
+        } else {
+          await this.generalsService.destroy({ Key: store.keyLastCheck })
+        }
 
         return callback(response.setResult(true, `[Rollback] Last Check Block Height ${blockHeight}`))
       })
