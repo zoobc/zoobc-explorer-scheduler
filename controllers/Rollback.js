@@ -155,7 +155,7 @@ module.exports = class Rollback extends BaseController {
 
         /** update last check or delete one */
         if (blockHeight > 0) {
-          const lastCheck = await this.generalsService.getSetLastCheck()
+          const lastCheck = await this.generalsService.getLastCheck()
           const payloadLastCheck = { ...lastCheck, Height: res.Height, Timestamp: res.Timestamp }
 
           await this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)

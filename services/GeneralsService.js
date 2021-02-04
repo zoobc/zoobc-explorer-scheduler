@@ -51,6 +51,24 @@ module.exports = class GeneralsService extends BaseService {
     this.name = 'GeneralsService'
   }
 
+  getLastCheck() {
+    return new Promise((resolve, reject) => {
+      Generals.findOne({ Key: store.keyLastCheck })
+        .select('Value')
+        .lean()
+        .exec((err, res) => {
+          if (err) return reject(err)
+          if (res) return resolve(JSON.parse(res.Value))
+
+          return resolve({
+            Height: 0,
+            Timestamp: moment(1318781876406).unix(),
+            HeightBefore: 0,
+          })
+        })
+    })
+  }
+
   getSetLastCheck() {
     return new Promise((resolve, reject) => {
       Generals.findOne({ Key: store.keyLastCheck })
