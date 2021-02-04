@@ -409,7 +409,7 @@ module.exports = class Transactions extends BaseController {
       const HeightEnd = res.Height
       const TimestampEnd = moment(res.Timestamp).unix()
 
-      const lastCheck = await this.generalsService.getSetLastCheck()
+      const lastCheck = await this.generalsService.getLastCheck()
       const params = { FromBlock: lastCheck.Height, ToBlock: HeightEnd }
       Transaction.GetTransactions(params, async (err, res) => {
         if (err)
