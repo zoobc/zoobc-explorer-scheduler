@@ -45,6 +45,7 @@ const Admins = require('./Admins')
 const Blocks = require('./Blocks')
 const Accounts = require('./Accounts')
 const Generals = require('./Generals')
+const Keywords = require('./Keywords')
 const AdminLogs = require('./AdminLogs')
 const Transactions = require('./Transactions')
 const AccountLedgers = require('./AccountLedgers')
@@ -56,6 +57,7 @@ module.exports = {
   Blocks,
   Accounts,
   Generals,
+  Keywords,
   AdminLogs,
   Transactions,
   AccountLedgers,
