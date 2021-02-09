@@ -45,8 +45,7 @@ const { upserts } = require('../utils')
 
 const schema = new mongoose.Schema(
   {
-    Username: { type: String, index: true },
-    Email: { type: String },
+    Identifier: { type: String, index: true },
     Password: { type: String },
     Role: { type: String },
     Active: { type: Boolean },

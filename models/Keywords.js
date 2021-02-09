@@ -48,8 +48,8 @@ const schema = new mongoose.Schema(
     Keyword: { type: String, index: true },
     Content: { type: String },
     ExpiredAt: { type: Date },
-    CreatedBy: { type: String },
-    CreatedAt: { type: Date },
+    CreatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admins' },
+    CreatedAt: { type: Date, default: Date.now },
   },
   {
     toJSON: { virtuals: true },
