@@ -48,6 +48,7 @@ const schema = new mongoose.Schema(
     Keyword: { type: String, index: true },
     Content: { type: String },
     ExpiredAt: { type: Date },
+    Seen: { type: Number },
     CreatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admins' },
     CreatedAt: { type: Date, default: Date.now },
   },
