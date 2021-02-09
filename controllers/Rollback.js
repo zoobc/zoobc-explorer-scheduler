@@ -158,7 +158,7 @@ module.exports = class Rollback extends BaseController {
           const lastCheck = await this.generalsService.getLastCheck()
           const payloadLastCheck = { ...lastCheck, Height: res.Height, Timestamp: res.Timestamp }
 
-          await this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
+          await this.generalsService.setValueByKey(store.keyLastCheck, JSON.stringify(payloadLastCheck))
         } else {
           await this.generalsService.destroy({ Key: store.keyLastCheck })
         }
@@ -179,7 +179,8 @@ module.exports = class Rollback extends BaseController {
       }
 
       if (res && res.Blocks && res.Blocks.length < 1) {
-        const prevHeight = height - limit
+        const heightLimit = height - limit
+        const prevHeight = heightLimit < 0 ? 0 : heightLimit
         return this.recursiveBlockHeight(limit, prevHeight, callback)
       }
 
@@ -197,7 +198,8 @@ module.exports = class Rollback extends BaseController {
         }
 
         if (res && res.length < 1) {
-          const prevHeight = height - limit
+          const heightLimit = height - limit
+          const prevHeight = heightLimit < 0 ? 0 : heightLimit
           return this.recursiveBlockHeight(limit, prevHeight, callback)
         }
 

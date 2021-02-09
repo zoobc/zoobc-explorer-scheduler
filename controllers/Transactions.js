@@ -42,6 +42,7 @@
 
 const moment = require('moment')
 const BaseController = require('./BaseController')
+const config = require('../config')
 const { store, util, response } = require('../utils')
 const { Transaction, Escrow, MultiSignature } = require('../protos')
 const { BlocksService, TransactionsService, GeneralsService } = require('../services')
@@ -410,7 +411,9 @@ module.exports = class Transactions extends BaseController {
       const TimestampEnd = moment(res.Timestamp).unix()
 
       const lastCheck = await this.generalsService.getLastCheck()
-      const params = { FromBlock: lastCheck.Height, ToBlock: HeightEnd }
+      const HeightStart =
+        lastCheck.Height > HeightEnd ? (HeightEnd - config.app.limitData < 0 ? 0 : HeightEnd - config.app.limitData) : lastCheck.Height
+      const params = { FromBlock: HeightStart, ToBlock: HeightEnd }
       Transaction.GetTransactions(params, async (err, res) => {
         if (err)
           return callback(
