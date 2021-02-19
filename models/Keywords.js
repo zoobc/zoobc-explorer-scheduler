@@ -40,68 +40,23 @@
  * shall be included in all copies or substantial portions of the Software.
 **/
 
-const BaseService = require('./BaseService')
-const { Blocks } = require('../models')
+const mongoose = require('mongoose')
+const { upserts } = require('../utils')
 
-module.exports = class BlocksService extends BaseService {
-  constructor() {
-    super(Blocks)
-    this.name = 'BlocksService'
+const schema = new mongoose.Schema(
+  {
+    Keyword: { type: String, index: true },
+    Content: { type: String },
+    ExpiredAt: { type: Date },
+    Seen: { type: Number },
+    CreatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admins' },
+    CreatedAt: { type: Date, default: Date.now },
+  },
+  {
+    toJSON: { virtuals: true },
   }
+)
 
-  getLastHeight(callback) {
-    Blocks.findOne().select('Height Timestamp').sort('-Height').limit(1).lean().exec(callback)
-  }
+schema.plugin(upserts)
 
-  getFromHeight({ Limit, Height }, callback) {
-    Blocks.find().select('BlockID Height').where('Height').gte(Height).limit(Limit).sort('Height').lean().exec(callback)
-  }
-
-  getLastTimestamp(callback) {
-    Blocks.findOne().select('Timestamp Height').sort('-Timestamp').limit(1).lean().exec(callback)
-  }
-
-  getTimestampByHeight({ Height }, callback) {
-    Blocks.findOne().select('Timestamp').where('Height').equals(Height).lean().exec(callback)
-  }
-
-  getStartEndBlocksByTimestamp(callback) {
-    Blocks.findOne()
-      .select('Timestamp Height')
-      .sort('Timestamp')
-      .lean()
-      .exec((err, res) => {
-        if (err) return callback(err, null)
-        const start = res
-
-        Blocks.findOne()
-          .select('Timestamp Height')
-          .sort('-Timestamp')
-          .lean()
-          .exec((err, res) => {
-            if (err) return callback(err, null)
-            const end = res
-
-            return callback(null, { start, end })
-          })
-      })
-  }
-
-  asyncTimeStampByHeight(Height) {
-    return new Promise(resolve => {
-      this.getTimestampByHeight({ Height }, (err, res) => {
-        if (err) return resolve({ err, res: null })
-        return resolve({ err: null, res: res.Timestamp })
-      })
-
-      // Blocks.findOne()
-      //   .select('Timestamp')
-      //   .where('Height')
-      //   .equals(Height)
-      //   .exec((err, res) => {
-      //     if (err) return resolve({ err, res: null })
-      //     return resolve({ err: null, res: res.Timestamp })
-      //   })
-    })
-  }
-}
+module.exports = mongoose.model('Keywords', schema)

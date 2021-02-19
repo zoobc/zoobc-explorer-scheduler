@@ -42,6 +42,7 @@
 
 const moment = require('moment')
 const BaseController = require('./BaseController')
+const config = require('../config')
 const { store, util, response } = require('../utils')
 const { Transaction, Escrow, MultiSignature } = require('../protos')
 const { BlocksService, TransactionsService, GeneralsService } = require('../services')
@@ -401,16 +402,18 @@ module.exports = class Transactions extends BaseController {
     const rollback = await this.generalsService.getValueRollback()
     if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
 
-    this.blocksService.getLastTimestamp(async (err, res) => {
+    this.blocksService.getLastHeight(async (err, res) => {
       /** send message telegram bot if avaiable */
-      if (err) return callback(response.sendBotMessage('Transactions', `[Transactions] Blocks Service - Get Last Timestamp ${err}`))
+      if (err) return callback(response.sendBotMessage('Transactions', `[Transactions] Blocks Service - Get Last Height ${err}`))
       if (!res) return callback(response.setResult(false, '[Transactions] No additional data'))
 
       const HeightEnd = res.Height
       const TimestampEnd = moment(res.Timestamp).unix()
-      const lastCheck = await this.generalsService.getSetLastCheck()
 
-      const params = { TimestampStart: lastCheck.Timestamp, TimestampEnd }
+      const lastCheck = await this.generalsService.getLastCheck()
+      const HeightStart =
+        lastCheck.Height > HeightEnd ? (HeightEnd - config.app.limitData < 0 ? 0 : HeightEnd - config.app.limitData) : lastCheck.Height
+      const params = { FromBlock: HeightStart, ToBlock: HeightEnd }
       Transaction.GetTransactions(params, async (err, res) => {
         if (err)
           return callback(

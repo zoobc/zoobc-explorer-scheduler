@@ -153,18 +153,15 @@ module.exports = class Rollback extends BaseController {
           } else msg.green(`[Rollback] Destroy ${res.deletedCount} Blocks`)
         })
 
-        /** update last check */
-        const lastCheck = await this.generalsService.getSetLastCheck()
-        const payloadLastCheck = JSON.stringify(
-          blockHeight > 0
-            ? {
-                ...lastCheck,
-                Height: res.Height,
-                Timestamp: res.Timestamp,
-              }
-            : null
-        )
-        await this.generalsService.setValueByKey(store.keyLastCheck, payloadLastCheck)
+        /** update last check or delete one */
+        if (blockHeight > 0) {
+          const lastCheck = await this.generalsService.getLastCheck()
+          const payloadLastCheck = { ...lastCheck, Height: res.Height, Timestamp: res.Timestamp }
+
+          await this.generalsService.setValueByKey(store.keyLastCheck, JSON.stringify(payloadLastCheck))
+        } else {
+          await this.generalsService.destroy({ Key: store.keyLastCheck })
+        }
 
         return callback(response.setResult(true, `[Rollback] Last Check Block Height ${blockHeight}`))
       })
@@ -182,7 +179,8 @@ module.exports = class Rollback extends BaseController {
       }
 
       if (res && res.Blocks && res.Blocks.length < 1) {
-        const prevHeight = height - limit
+        const heightLimit = height - limit
+        const prevHeight = heightLimit < 0 ? 0 : heightLimit
         return this.recursiveBlockHeight(limit, prevHeight, callback)
       }
 
@@ -200,7 +198,8 @@ module.exports = class Rollback extends BaseController {
         }
 
         if (res && res.length < 1) {
-          const prevHeight = height - limit
+          const heightLimit = height - limit
+          const prevHeight = heightLimit < 0 ? 0 : heightLimit
           return this.recursiveBlockHeight(limit, prevHeight, callback)
         }
 
