@@ -1,0 +1,17 @@
+syntax="proto3";
+
+package service;
+
+option go_package = "github.com/zoobc/zoobc-core/common/service";
+
+import "model/liquidPayment.proto";
+import "google/api/annotations.proto";
+
+// LiquidPaymentService represent request on db liquid_payment_transaction
+service LiquidPaymentService {
+    rpc GetLiquidTransactions(model.GetLiquidTransactionsRequest) returns (model.GetLiquidTransactionsResponse) {
+        option (google.api.http) = {
+            get: "/v1/liquidPayment/GetLiquidTransactions"
+        };
+    }
+}

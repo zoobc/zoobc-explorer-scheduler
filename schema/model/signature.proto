@@ -38,6 +38,8 @@ enum SignatureType {
     MultisigSignature = 2;
     // in bytes: []byte{3,0,0,0} for estonian eID validation purpose only
     EstoniaEidSignature = 3;
+    // in bytes: []byte{4,0,0,0}, eth uses ECDSA signing algorithm
+    EthereumSignature = 4;
 }
 
 // BitcoinPrivateKeyBytesLength represent the length of private key that can use
