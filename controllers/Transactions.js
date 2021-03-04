@@ -376,7 +376,7 @@ module.exports = class Transactions extends BaseController {
         MultisigChild: item.MultisigChild,
         Signature: item.Signature,
         Message: item.Message,
-        MessageFormatted: util.bufferStr(item.Message),
+        MessageFormatted: util.buffStr(item.Message),
         TransactionBody: item.TransactionBody,
         Escrow: escrow,
         Status: status,
