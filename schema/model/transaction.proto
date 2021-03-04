@@ -55,7 +55,7 @@ message Transaction {
     // transactionbody
     oneof TransactionBody {
         EmptyTransactionBody emptyTransactionBody = 17;
-        SendMoneyTransactionBody sendMoneyTransactionBody = 18;
+        SendZBCTransactionBody sendZBCTransactionBody = 18;
         NodeRegistrationTransactionBody nodeRegistrationTransactionBody = 19;
         UpdateNodeRegistrationTransactionBody updateNodeRegistrationTransactionBody = 20;
         RemoveNodeRegistrationTransactionBody removeNodeRegistrationTransactionBody = 21;
@@ -79,7 +79,7 @@ enum TransactionType {
     // in bytes: []byte{0,0,0,0}
     EmptyTransaction = 0;
     // in bytes: []byte{1,0,0,0}
-    SendMoneyTransaction = 1;
+    SendZBCTransaction = 1;
     // in bytes: []byte{2,0,0,0}
     NodeRegistrationTransaction = 2;
     // in bytes: []byte{2,1,0,0}
@@ -109,7 +109,7 @@ enum TransactionType {
 
 message EmptyTransactionBody {}
 
-message SendMoneyTransactionBody {
+message SendZBCTransactionBody {
     int64 Amount = 1 [ jstype = JS_STRING ];
 }
 

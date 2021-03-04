@@ -38,7 +38,7 @@ message Escrow {
     int64 Amount = 5 [ jstype = JS_STRING ];
     int64 Commission = 6 [ jstype = JS_STRING ];
     // Timeout is BlockHeight gap 
-    uint64 Timeout = 7 [ jstype = JS_STRING ];
+    int64 Timeout = 7 [ jstype = JS_STRING ];
     EscrowStatus Status = 8;
     uint32 BlockHeight = 9;
     bool Latest = 10;
