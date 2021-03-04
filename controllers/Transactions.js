@@ -106,7 +106,7 @@ module.exports = class Transactions extends BaseController {
         case 1:
           transactionTypeName = 'ZBC Transfer'
           sendMoney = {
-            Amount: item.sendMoneyTransactionBody.Amount,
+            Amount: item.sendMoneyTransactionBody ? item.sendMoneyTransactionBody.Amount : null,
             AmountConversion: item.sendMoneyTransactionBody ? util.zoobitConversion(item.sendMoneyTransactionBody.Amount) : null,
           }
           escrow = await getEscrow(item.ID)
@@ -333,7 +333,10 @@ module.exports = class Transactions extends BaseController {
           break
         case 6:
           transactionTypeName = 'Liquid'
-          liquidPayment = { ...item.liquidPaymentTransactionBody }
+          liquidPayment = {
+            ...item.liquidPaymentTransactionBody,
+            AmountConversion: util.zoobitConversion(item.liquidPaymentTransactionBody.Amount),
+          }
           break
         case 262:
           transactionTypeName = 'Liquid Payment Stop'

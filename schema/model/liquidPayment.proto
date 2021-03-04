@@ -3,6 +3,8 @@ syntax = "proto3";
 package model;
 option go_package = "github.com/zoobc/zoobc-core/common/model";
 
+import "model/pagination.proto";
+
 message LiquidPayment {
     int64 ID = 1 [ jstype = JS_STRING ];
     bytes SenderAddress = 2;
@@ -17,4 +19,20 @@ message LiquidPayment {
 enum LiquidPaymentStatus {
     LiquidPaymentPending = 0;
     LiquidPaymentCompleted = 1;
+}
+
+// GetLiquidTransactions return GetLiquidTransactionsResponse
+message GetLiquidTransactionsRequest {
+    int64 ID = 1 [ jstype = JS_STRING ];
+    bytes SenderAddress = 2;
+    bytes RecipientAddress = 3;
+    LiquidPaymentStatus Status = 4;
+    Pagination Pagination = 5;
+}
+
+message GetLiquidTransactionsResponse {
+    // Number of transactions in total
+    uint64 Total = 1 [ jstype = JS_STRING ];
+    // Transaction transactions returned
+    repeated LiquidPayment LiquidTransactions = 2;
 }
