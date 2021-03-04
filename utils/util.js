@@ -95,6 +95,11 @@ const bufferStr = buff => {
   return result
 }
 
+const buffStr = buff => {
+  if (!buff) return null
+  return Buffer.from(buff.toString()).toString()
+}
+
 const hashToInt64 = buff => {
   const SlashBuffer = buff.slice(0, 8)
   const bigInt = new Int64LE(SlashBuffer) + ''
@@ -208,6 +213,7 @@ function hash(str, format) {
 module.exports = util = {
   encrypt,
   decrypt,
+  buffStr,
   bufferStr,
   zoobitConversion,
   log,
