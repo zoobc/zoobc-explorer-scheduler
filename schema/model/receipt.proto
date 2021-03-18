@@ -36,6 +36,6 @@ message Receipt {
     bytes DatumHash = 4;
     uint32 ReferenceBlockHeight = 5;
     bytes ReferenceBlockHash = 6;
-    bytes RMRLinked = 7;
+    bytes RMR = 7;
     bytes RecipientSignature = 8;
 }

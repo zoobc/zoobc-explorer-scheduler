@@ -32,7 +32,7 @@ import "model/receipt.proto";
 // BatchReceipt is a receipt that already includes RMR ready to publish
 message BatchReceipt {
     Receipt Receipt = 1;
-    bytes RMR = 2;
-    uint32 RMRIndex = 3;
+    bytes RMRBatch = 2;
+    uint32 RMRBatchIndex = 3;
 
 }

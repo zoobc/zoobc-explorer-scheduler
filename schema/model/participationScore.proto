@@ -48,4 +48,5 @@ message GetParticipationScoresResponse {
 
 message GetLatestParticipationScoreByNodeIDRequest {
     int64 NodeID = 1 [jstype = JS_STRING];
+    string NodeAddress = 2;
 }
