@@ -33,8 +33,9 @@ message PublishedReceipt {
     Receipt Receipt = 1;
     bytes IntermediateHashes = 2;
     uint32 BlockHeight = 3;
-    uint32 ReceiptIndex = 4;
-    uint32 PublishedIndex = 5;
+    uint32 PublishedIndex = 4;
+    bytes RMRLinked = 5;
+    uint32 RMRLinkedIndex = 6;
 }
 
 message GetPublishedReceiptsRequest {
