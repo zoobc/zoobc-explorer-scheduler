@@ -106,8 +106,8 @@ module.exports = class Transactions extends BaseController {
         case 1:
           transactionTypeName = 'ZBC Transfer'
           sendMoney = {
-            Amount: item.sendMoneyTransactionBody ? item.sendMoneyTransactionBody.Amount : null,
-            AmountConversion: item.sendMoneyTransactionBody ? util.zoobitConversion(item.sendMoneyTransactionBody.Amount) : null,
+            Amount: item.sendZBCTransactionBody ? item.sendZBCTransactionBody.Amount : null,
+            AmountConversion: item.sendZBCTransactionBody ? util.zoobitConversion(item.sendZBCTransactionBody.Amount) : null,
           }
           escrow = await getEscrow(item.ID)
           status = escrow && escrow.Status ? escrow.Status : 'Approved'
@@ -222,11 +222,10 @@ module.exports = class Transactions extends BaseController {
                     TransactionTypeName: 'ZBC Transfer',
                     MultisigChild: res.MultisigChild,
                     SendMoney: {
-                      Amount:
-                        res.sendMoneyTransactionBody && res.sendMoneyTransactionBody.Amount ? res.sendMoneyTransactionBody.Amount : null,
+                      Amount: res.sendZBCTransactionBody && res.sendZBCTransactionBody.Amount ? res.sendZBCTransactionBody.Amount : null,
                       AmountConversion:
-                        res.sendMoneyTransactionBody && res.sendMoneyTransactionBody.Amount
-                          ? util.zoobitConversion(res.sendMoneyTransactionBody.Amount)
+                        res.sendZBCTransactionBody && res.sendZBCTransactionBody.Amount
+                          ? util.zoobitConversion(res.sendZBCTransactionBody.Amount)
                           : null,
                     },
                   }
