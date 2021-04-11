@@ -59,12 +59,12 @@ module.exports = class AccountLedgers extends BaseController {
     if (rollback && rollback.res && rollback.res.Value === 'true') return callback(response.setResult(false, null))
 
     this.accountService.getAccount(async (err, res) => {
-      /** send message telegram bot if avaiable */
+      /** send message telegram bot if available */
       if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Account Service - Get Last Height ${err}`))
       if (!res) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
       this.blocksService.getLastTimestamp(async (err, res) => {
-        /** send message telegram bot if avaiable */
+        /** send message telegram bot if available */
         if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledgers] Blocks Service - Get Last Timestamp ${err}`))
         if (!res) return callback(response.setResult(false, '[Account Ledgers] No additional data'))
 
@@ -75,7 +75,7 @@ module.exports = class AccountLedgers extends BaseController {
         AccountLedger.GetAccountLedgers(params, async (err, res) => {
           if (err)
             return callback(
-              /** send message telegram bot if avaiable */
+              /** send message telegram bot if available */
               response.sendBotMessage(
                 'AccountLedger',
                 `[Account Ledger] API Core Get Account Ledger - ${err}`,
@@ -97,7 +97,8 @@ module.exports = class AccountLedgers extends BaseController {
 
                 const TotalRewards =
                   res && res.TotalRewards ? parseInt(res.TotalRewards) + parseInt(item.BalanceChange) : parseInt(item.BalanceChange)
-                const Balance = res && res.TotalRewards ? parseInt(res.Balance) : parseInt(item.BalanceChange)
+                // const Balance = res && res.TotalRewards ? parseInt(res.Balance) : parseInt(item.BalanceChange)
+                const Balance = res && parseInt(res.Balance)
 
                 const payloadAccount = {
                   Balance,
@@ -147,7 +148,7 @@ module.exports = class AccountLedgers extends BaseController {
           })
 
           this.service.upserts(payloads, ['AccountAddressFormatted', 'BlockHeight', 'TransactionID'], (err, res) => {
-            /** send message telegram bot if avaiable */
+            /** send message telegram bot if available */
             if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledger] Upsert - ${err}`))
             if (res && res.result.ok !== 1) return callback(response.setError('[Account Ledger] Upsert data failed'))
 
