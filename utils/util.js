@@ -108,14 +108,16 @@ const hashToInt64 = buff => {
 
 const zoobitConversion = curr => {
   if (!curr || curr === 0) return 0
-  const result = curr / Math.pow(10, 8)
+  const result = parseFloat(curr) / 1e8
+  return result
+  // const result = curr / Math.pow(10, 8)
 
-  if (result.toString().indexOf('e') > 0) {
-    const e = parseInt(result.toString().slice(-1))
-    return parseFloat(result).toFixed(e)
-  }
+  // if (result.toString().indexOf('e') > 0) {
+  //   const e = parseInt(result.toString().slice(-1))
+  //   return parseFloat(result).toFixed(e)
+  // }
 
-  return parseFloat(result)
+  // return parseFloat(result)
 }
 
 const log = obj => {
