@@ -60,6 +60,7 @@ const {
   Transactions,
   NodeStatuses,
   AccountLedgers,
+  AccountBalances,
   ParticipationScores,
 } = require('./controllers')
 
@@ -72,6 +73,7 @@ const nodeAddress = new NodeAddress()
 const transactions = new Transactions()
 const nodeStatuses = new NodeStatuses()
 const accountLedger = new AccountLedgers()
+const accountBalances = new AccountBalances()
 const participationScores = new ParticipationScores()
 
 /** cron job */
@@ -112,9 +114,13 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
                   nodeStatuses.update(res => {
                     util.log(res)
 
-                    // rollback.execute(res => {
-                    //   util.log(res)
-                    // })
+                    accountBalances.update(res => {
+                      util.log(res)
+
+                      rollback.execute(res => {
+                        util.log(res)
+                      })
+                    })
                   })
                 })
               })

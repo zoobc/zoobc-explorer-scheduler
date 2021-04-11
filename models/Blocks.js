@@ -47,12 +47,12 @@ const schema = new mongoose.Schema(
   {
     /** Block */
     BlockID: { type: String, index: true } /** ID */,
-    BlockHash: { type: Buffer },
-    BlockHashFormatted: { type: String } /** update */,
+    BlockHash: { type: Buffer, index: true },
+    BlockHashFormatted: { type: String, index: true } /** update */,
     PreviousBlockID: { type: Buffer } /** PreviousBlockHash */,
     PreviousBlockIDFormatted: { type: String } /** update */,
-    Height: { type: Number },
-    Timestamp: { type: Date },
+    Height: { type: Number, index: true },
+    Timestamp: { type: Date, index: true },
     BlockSeed: { type: Buffer },
     BlockSignature: { type: Buffer },
     CumulativeDifficulty: { type: String },
@@ -80,8 +80,8 @@ const schema = new mongoose.Schema(
     BlocksmithAddressFormatted: { type: String } /** update */,
     SkippedBlocksmiths: [
       {
-        BlocksmithPublicKey: { type: Buffer },
-        BlocksmithPublicKeyFormatted: { type: String } /** update */,
+        BlocksmithPublicKey: { type: Buffer, index: true },
+        BlocksmithPublicKeyFormatted: { type: String, index: true } /** update */,
         POPChange: { type: String },
         BlockHeight: { type: Number },
         BlocksmithIndex: { type: Number },
@@ -111,8 +111,8 @@ const schema = new mongoose.Schema(
     ],
 
     /** Aggregate */
-    TotalRewards: { type: Number },
-    TotalRewardsConversion: { type: String },
+    TotalRewards: { type: Number, index: true },
+    TotalRewardsConversion: { type: String, index: true },
   },
   {
     toJSON: { virtuals: true },

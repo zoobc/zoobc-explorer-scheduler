@@ -49,6 +49,10 @@ module.exports = class AccountsService extends BaseService {
     this.name = 'AccountsService'
   }
 
+  getAccounts(callback) {
+    Accounts.find().select().exec(callback)
+  }
+
   getAccount(callback) {
     Accounts.findOne().select().lean().limit(1).exec(callback)
   }
