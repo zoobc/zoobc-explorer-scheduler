@@ -112,9 +112,9 @@ const cronApp = new cron.CronJob(`*/${event} * * * * *`, async () => {
                   nodeStatuses.update(res => {
                     util.log(res)
 
-                    rollback.execute(res => {
-                      util.log(res)
-                    })
+                    // rollback.execute(res => {
+                    //   util.log(res)
+                    // })
                   })
                 })
               })
