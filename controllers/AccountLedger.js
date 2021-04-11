@@ -95,6 +95,8 @@ module.exports = class AccountLedgers extends BaseController {
                     res: null,
                   })
 
+                if (!res) return resolve({ err: null, res: null })
+
                 const TotalRewards =
                   res && res.TotalRewards ? parseInt(res.TotalRewards) + parseInt(item.BalanceChange) : parseInt(item.BalanceChange)
                 // const Balance = res && res.TotalRewards ? parseInt(res.Balance) : parseInt(item.BalanceChange)
@@ -135,25 +137,27 @@ module.exports = class AccountLedgers extends BaseController {
 
           if (errors && errors.length > 0) return callback(response.sendBotMessage('AccountLedger', errors[0]))
 
+          return callback(response.setResult(true, `[Account Ledger] Upsert ${updates.length} data successfully`))
+
           /** update or insert account ledger */
-          const payloads = res.AccountLedgers.map(i => {
-            return {
-              ...i,
-              AccountAddress: i.AccountAddress,
-              AccountAddressFormatted: util.parseAddress(i.AccountAddress),
-              Timestamp: new Date(moment.unix(i.Timestamp).valueOf()),
-              BalanceChange: parseInt(i.BalanceChange),
-              BalanceChangeConversion: util.zoobitConversion(parseInt(i.BalanceChange)),
-            }
-          })
+          // const payloads = res.AccountLedgers.map(i => {
+          //   return {
+          //     ...i,
+          //     AccountAddress: i.AccountAddress,
+          //     AccountAddressFormatted: util.parseAddress(i.AccountAddress),
+          //     Timestamp: new Date(moment.unix(i.Timestamp).valueOf()),
+          //     BalanceChange: parseInt(i.BalanceChange),
+          //     BalanceChangeConversion: util.zoobitConversion(parseInt(i.BalanceChange)),
+          //   }
+          // })
 
-          this.service.upserts(payloads, ['AccountAddressFormatted', 'BlockHeight', 'TransactionID'], (err, res) => {
-            /** send message telegram bot if available */
-            if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledger] Upsert - ${err}`))
-            if (res && res.result.ok !== 1) return callback(response.setError('[Account Ledger] Upsert data failed'))
+          // this.service.upserts(payloads, ['AccountAddressFormatted', 'BlockHeight', 'TransactionID'], (err, res) => {
+          //   /** send message telegram bot if available */
+          //   if (err) return callback(response.sendBotMessage('AccountLedger', `[Account Ledger] Upsert - ${err}`))
+          //   if (res && res.result.ok !== 1) return callback(response.setError('[Account Ledger] Upsert data failed'))
 
-            return callback(response.setResult(true, `[Account Ledger] Upsert ${payloads.length} data successfully`))
-          })
+          //   return callback(response.setResult(true, `[Account Ledger] Upsert ${payloads.length} data successfully`))
+          // })
         })
       })
     })
