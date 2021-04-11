@@ -49,6 +49,7 @@ const NodeAddress = require('./NodeAddress')
 const Transactions = require('./Transactions')
 const NodeStatuses = require('./NodeStatuses')
 const AccountLedgers = require('./AccountLedger')
+const AccountBalances = require('./AccountBalances')
 const ParticipationScores = require('./ParticipationScores')
 
 module.exports = {
@@ -61,5 +62,6 @@ module.exports = {
   Transactions,
   NodeStatuses,
   AccountLedgers,
+  AccountBalances,
   ParticipationScores,
 }
