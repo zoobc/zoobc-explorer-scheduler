@@ -59,7 +59,7 @@ module.exports = class Accounts extends BaseController {
 
     /** get last height account (local) */
     this.service.getLastHeight(async (err, res) => {
-      /** send message telegram bot if avaiable */
+      /** send message telegram bot if available */
       if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Accounts Service - Get Last Height ${err}`))
 
       /** set variable last height account */
@@ -88,7 +88,7 @@ module.exports = class Accounts extends BaseController {
       AccountBalance.GetAccountBalances(params, (err, res) => {
         if (err)
           return callback(
-            /** send message telegram bot if avaiable */
+            /** send message telegram bot if available */
             response.sendBotMessage(
               'Accounts',
               `[Accounts] API Core Get Account Balances - ${err}`,
@@ -140,7 +140,7 @@ module.exports = class Accounts extends BaseController {
         })
 
         this.service.upserts(payloads, ['AccountAddress'], (err, res) => {
-          /** send message telegram bot if avaiable */
+          /** send message telegram bot if available */
           if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Upsert - ${err}`))
           if (res && res.result.ok !== 1) return callback(response.setError(`[Accounts] Upsert data failed`))
 
