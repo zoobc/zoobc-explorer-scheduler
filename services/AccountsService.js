@@ -118,4 +118,8 @@ module.exports = class AccountsService extends BaseService {
   getCurrentTotalRewardByAccountAddress(accountAddress, callback) {
     Accounts.findOne({ AccountAddress: accountAddress }).lean().exec(callback)
   }
+
+  destroyAccountNull(callback) {
+    Accounts.remove({ AccountAddressFormatted: null }, callback)
+  }
 }
