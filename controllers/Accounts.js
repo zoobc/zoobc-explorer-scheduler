@@ -139,7 +139,7 @@ module.exports = class Accounts extends BaseController {
           }
         })
 
-        this.service.upserts(payloads, ['AccountAddress'], (err, res) => {
+        this.service.upserts(payloads, ['AccountAddressFormatted'], (err, res) => {
           /** send message telegram bot if available */
           if (err) return callback(response.sendBotMessage('Accounts', `[Accounts] Upsert - ${err}`))
           if (res && res.result.ok !== 1) return callback(response.setError(`[Accounts] Upsert data failed`))

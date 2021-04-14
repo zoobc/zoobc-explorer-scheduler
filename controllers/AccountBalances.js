@@ -62,28 +62,52 @@ module.exports = class AccountBalances extends BaseController {
 
       if (res.length < 1) return callback(response.setResult(false, '[Account Balances] No additional data'))
 
-      const accountBalances = res.map(account => {
-        return new Promise(resolve => {
-          const params = { AccountAddress: account.AccountAddress }
-          AccountBalance.GetAccountBalance(params, (err, res) => {
-            if (err) return resolve(null)
+      const accounts = res
+      const params = { AccountAddresses: accounts.map(i => i.AccountAddress) }
+      AccountBalance.GetAccountBalances(params, (err, res) => {
+        if (err)
+          return callback(
+            /** send message telegram bot if available */
+            response.sendBotMessage(
+              'Account Balances',
+              `[Account Balances] API Core Get Account Balances - ${err}`,
+              `- Params : <pre>${JSON.stringify(params)}</pre>`
+            )
+          )
 
-            const balance = res.AccountBalance.Balance
-            const result = { ...account, Balance: parseInt(balance), BalanceConversion: util.zoobitConversion(parseInt(balance)) }
-            return resolve(result)
-          })
+        if (res && res.AccountBalances.length < 1) return callback(response.setResult(false, `[Account Balances] No additional data`))
+
+        const accountBalances = res.AccountBalances
+        const payloads = accountBalances.map(item => {
+          const filterAccounts = accounts.filter(o => o.AccountAddressFormatted === util.parseAddress(item.AccountAddress))
+          const account = filterAccounts[0]
+
+          return {
+            FirstActive: account.FirstActive,
+            LastActive: account.LastActive,
+            TransactionHeight: account.TransactionHeight,
+            TotalFeesPaid: account.TotalFeesPaid,
+            TotalFeesPaidConversion: account.TotalFeesPaid,
+            AccountAddress: account.AccountAddress,
+            AccountAddressFormatted: account.AccountAddressFormatted,
+            Balance: parseInt(item.Balance),
+            BalanceConversion: util.zoobitConversion(parseInt(item.Balance)),
+            SpendableBalance: account.SpendableBalance,
+            SpendableBalanceConversion: account.SpendableBalance,
+            BlockHeight: account.BlockHeight,
+            PopRevenue: account.PopRevenue,
+            TotalRewards: account.TotalRewards,
+            TotalRewardsConversion: account.TotalFeesPaidConversion,
+          }
         })
-      })
 
-      const accountBalancePromises = await Promise.all(accountBalances)
-      const payloads = accountBalancePromises.filter(i => i !== null)
+        this.service.upserts(payloads, ['AccountAddressFormatted'], (err, res) => {
+          /** send message telegram bot if available */
+          if (err) return callback(response.sendBotMessage('Account Balances', `[Account Balances] Upsert - ${err}`))
+          if (res && res.result.ok !== 1) return callback(response.setError(`[Account Balances] Upsert data failed`))
 
-      this.service.upserts(payloads, ['AccountAddress'], (err, res) => {
-        /** send message telegram bot if available */
-        if (err) return callback(response.sendBotMessage('Account Balances', `[Account Balances] Upsert - ${err}`))
-        if (res && res.result.ok !== 1) return callback(response.setError(`[Account Balances] Upsert data failed`))
-
-        return callback(response.setResult(true, `[Account Balances] Upsert ${payloads.length} data successfully`))
+          return callback(response.setResult(true, `[Account Balances] Upsert ${payloads.length} data successfully`))
+        })
       })
     })
   }
