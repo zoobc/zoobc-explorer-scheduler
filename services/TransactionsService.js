@@ -185,4 +185,73 @@ module.exports = class TransactionsService extends BaseService {
         return callback(null, results)
       })
   }
+
+  getAccountAddressFromTransactions(callback) {
+    Transactions.find({ Sender: { $ne: null } })
+      // Transactions.find({ Height: { $gte: heightStart, $lte: heightEnd }, $or: [{ Sender: { $ne: null } }, { Sender: { $ne: '' } }] })
+      .select('Sender SenderFormatted Height Fee Timestamp SendMoney')
+      .sort('Height')
+      .lean()
+      .exec((err, res) => {
+        if (err) return callback(err, null)
+        if (res.length < 1) return callback(null, [])
+
+        const accountSenders = _.uniqBy(res, 'SenderFormatted')
+          .filter(f => util.isNotNullAccountAddress(f.Sender))
+          .map(i => {
+            return { ...i, Account: i.Sender, AccountFormatted: i.SenderFormatted, Type: 'Sender' }
+          })
+
+        Transactions.find({ Recipient: { $ne: null } })
+          .select('Recipient RecipientFormatted Height Fee Timestamp SendMoney')
+          .sort('Height')
+          .lean()
+          .exec((err, res) => {
+            if (err) return callback(err, null)
+            if (res.length < 1) return callback(null, [])
+
+            const accountRecipients = _.uniqBy(res, 'RecipientFormatted')
+              .filter(f => util.isNotNullAccountAddress(f.Recipient))
+              .map(i => {
+                return { ...i, Account: i.Recipient, AccountFormatted: i.RecipientFormatted, Type: 'Recipient' }
+              })
+
+            return callback(null, [...accountSenders, ...accountRecipients])
+          })
+      })
+  }
+
+  getAccountAddresses() {
+    return new Promise(resolve => {
+      Transactions.find({ Sender: { $ne: null } })
+        .select('Sender SenderFormatted Height')
+        .sort('Height')
+        .exec((err, res) => {
+          if (err) return resolve(null)
+          if (res.length < 1) return resolve(null)
+
+          const accountSenders = _.uniqBy(res, 'SenderFormatted')
+            .filter(f => util.isNotNullAccountAddress(f.Sender))
+            .map(i => {
+              return { ...i, Account: i.Sender }
+            })
+
+          Transactions.find({ Recipient: { $ne: null } })
+            .select('Recipient RecipientFormatted Height')
+            .sort('Height')
+            .exec((err, res) => {
+              if (err) return resolve(null)
+              if (res.length < 1) return resolve(null)
+
+              const accountRecipients = _.uniqBy(res, 'RecipientFormatted')
+                .filter(f => util.isNotNullAccountAddress(f.Recipient))
+                .map(i => {
+                  return { ...i, Account: i.Recipient }
+                })
+
+              return resolve([...accountSenders, ...accountRecipients])
+            })
+        })
+    })
+  }
 }
